@@ -130,14 +130,18 @@ PageBase {
             }
 
             content: Component {
-                ScrollView {
+                Flickable {
+                    id: addFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    contentWidth: width
+                    contentHeight: addCol.implicitHeight
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    boundsBehavior: Flickable.StopAtBounds
 
                     ColumnLayout {
-                        width: parent.width
+                        id: addCol
+                        width: addFlick.width
                         spacing: Tokens.spacing.medium
 
                         StyledText {
@@ -152,7 +156,7 @@ PageBase {
 
                             StyledTextField {
                                 Layout.fillWidth: true
-                                placeholderText: qsTr("Window Class regex (e.g. ^(zen|firefox)$)")
+                                placeholderText: qsTr("Window class regex (e.g. ^(zen|firefox)$)")
                                 text: addRuleBtn.matchClass
                                 onTextEdited: addRuleBtn.matchClass = text
                             }
@@ -171,28 +175,23 @@ PageBase {
 
                         StyledTextField {
                             Layout.fillWidth: true
-                            placeholderText: qsTr("Window Title regex (Optional, e.g. ^(Picture.*)$)")
+                            placeholderText: qsTr("Window title regex (Optional, e.g. ^(Picture.*)$)")
                             text: addRuleBtn.matchTitle
                             onTextEdited: addRuleBtn.matchTitle = text
                         }
 
-                        RowLayout {
+                        StyledTextField {
                             Layout.fillWidth: true
-                            spacing: Tokens.spacing.small
+                            placeholderText: qsTr("Initial class regex (Optional)")
+                            text: addRuleBtn.matchInitialClass
+                            onTextEdited: addRuleBtn.matchInitialClass = text
+                        }
 
-                            StyledTextField {
-                                Layout.fillWidth: true
-                                placeholderText: qsTr("Initial Class (Optional)")
-                                text: addRuleBtn.matchInitialClass
-                                onTextEdited: addRuleBtn.matchInitialClass = text
-                            }
-
-                            StyledTextField {
-                                Layout.fillWidth: true
-                                placeholderText: qsTr("Initial Title (Optional)")
-                                text: addRuleBtn.matchInitialTitle
-                                onTextEdited: addRuleBtn.matchInitialTitle = text
-                            }
+                        StyledTextField {
+                            Layout.fillWidth: true
+                            placeholderText: qsTr("Initial title regex (Optional)")
+                            text: addRuleBtn.matchInitialTitle
+                            onTextEdited: addRuleBtn.matchInitialTitle = text
                         }
 
                         StyledText {
@@ -527,14 +526,18 @@ PageBase {
                 }
 
                 content: Component {
-                    ScrollView {
+                    Flickable {
+                        id: editFlick
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        contentWidth: width
+                        contentHeight: editCol.implicitHeight
                         clip: true
-                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                        boundsBehavior: Flickable.StopAtBounds
 
                         ColumnLayout {
-                            width: parent.width
+                            id: editCol
+                            width: editFlick.width
                             spacing: Tokens.spacing.medium
 
                             StyledText {
@@ -549,7 +552,7 @@ PageBase {
 
                                 StyledTextField {
                                     Layout.fillWidth: true
-                                    placeholderText: qsTr("Window Class regex (e.g. ^(zen|firefox)$)")
+                                    placeholderText: qsTr("Window class regex (e.g. ^(zen|firefox)$)")
                                     text: editRuleRow.matchClass
                                     onTextEdited: editRuleRow.matchClass = text
                                 }
@@ -568,28 +571,23 @@ PageBase {
 
                             StyledTextField {
                                 Layout.fillWidth: true
-                                placeholderText: qsTr("Window Title regex (Optional, e.g. ^(Picture.*)$)")
+                                placeholderText: qsTr("Window title regex (Optional, e.g. ^(Picture.*)$)")
                                 text: editRuleRow.matchTitle
                                 onTextEdited: editRuleRow.matchTitle = text
                             }
 
-                            RowLayout {
+                            StyledTextField {
                                 Layout.fillWidth: true
-                                spacing: Tokens.spacing.small
+                                placeholderText: qsTr("Initial class regex (Optional)")
+                                text: editRuleRow.matchInitialClass
+                                onTextEdited: editRuleRow.matchInitialClass = text
+                            }
 
-                                StyledTextField {
-                                    Layout.fillWidth: true
-                                    placeholderText: qsTr("Initial Class (Optional)")
-                                    text: editRuleRow.matchInitialClass
-                                    onTextEdited: editRuleRow.matchInitialClass = text
-                                }
-
-                                StyledTextField {
-                                    Layout.fillWidth: true
-                                    placeholderText: qsTr("Initial Title (Optional)")
-                                    text: editRuleRow.matchInitialTitle
-                                    onTextEdited: editRuleRow.matchInitialTitle = text
-                                }
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Initial title regex (Optional)")
+                                text: editRuleRow.matchInitialTitle
+                                onTextEdited: editRuleRow.matchInitialTitle = text
                             }
 
                             StyledText {

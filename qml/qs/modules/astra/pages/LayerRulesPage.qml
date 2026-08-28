@@ -90,14 +90,18 @@ PageBase {
             }
 
             content: Component {
-                ScrollView {
+                Flickable {
+                    id: addLayerFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    contentWidth: width
+                    contentHeight: addLayerCol.implicitHeight
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    boundsBehavior: Flickable.StopAtBounds
 
                     ColumnLayout {
-                        width: parent.width
+                        id: addLayerCol
+                        width: addLayerFlick.width
                         spacing: Tokens.spacing.medium
 
                         StyledText {
@@ -358,16 +362,20 @@ PageBase {
                     }
                 }
 
-                content: Component {
-                    ScrollView {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            content: Component {
+                Flickable {
+                    id: editLayerFlick
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    contentWidth: width
+                    contentHeight: editLayerCol.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
 
-                        ColumnLayout {
-                            width: parent.width
-                            spacing: Tokens.spacing.medium
+                    ColumnLayout {
+                        id: editLayerCol
+                        width: editLayerFlick.width
+                        spacing: Tokens.spacing.medium
 
                             StyledText {
                                 text: qsTr("Layer Surface Namespace")
