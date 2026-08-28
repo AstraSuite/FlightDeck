@@ -135,13 +135,14 @@ PageBase {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     contentWidth: width
-                    contentHeight: addCol.implicitHeight
+                    contentHeight: addCol.implicitHeight + (Tokens.padding?.medium ?? 12)
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
 
                     ColumnLayout {
                         id: addCol
-                        width: addFlick.width
+                        width: addFlick.width - (Tokens.padding?.small ?? 8) * 2
+                        anchors.horizontalCenter: parent.horizontalCenter
                         spacing: Tokens.spacing.medium
 
                         StyledText {
@@ -163,10 +164,7 @@ PageBase {
 
                             ClientPickerPopup {
                                 Layout.alignment: Qt.AlignVCenter
-                                Layout.preferredWidth: 36
-                                Layout.preferredHeight: 36
-                                Layout.minimumWidth: 36
-                                Layout.maximumWidth: 36
+                                Layout.rightMargin: Tokens.padding?.extraSmall ?? 4
                                 rootParent: root.modalOverlay
                                 onClientSelected: (winClass, winTitle, initClass, initTitle) => {
                                     if (winClass) addRuleBtn.matchClass = "^(" + winClass + ")$";
@@ -535,13 +533,14 @@ PageBase {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         contentWidth: width
-                        contentHeight: editCol.implicitHeight
+                        contentHeight: editCol.implicitHeight + (Tokens.padding?.medium ?? 12)
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
 
                         ColumnLayout {
                             id: editCol
-                            width: editFlick.width
+                            width: editFlick.width - (Tokens.padding?.small ?? 8) * 2
+                            anchors.horizontalCenter: parent.horizontalCenter
                             spacing: Tokens.spacing.medium
 
                             StyledText {
@@ -563,10 +562,7 @@ PageBase {
 
                                 ClientPickerPopup {
                                     Layout.alignment: Qt.AlignVCenter
-                                    Layout.preferredWidth: 36
-                                    Layout.preferredHeight: 36
-                                    Layout.minimumWidth: 36
-                                    Layout.maximumWidth: 36
+                                    Layout.rightMargin: Tokens.padding?.extraSmall ?? 4
                                     rootParent: root.modalOverlay
                                     onClientSelected: (winClass, winTitle, initClass, initTitle) => {
                                         if (winClass) editRuleRow.matchClass = "^(" + winClass + ")$";
