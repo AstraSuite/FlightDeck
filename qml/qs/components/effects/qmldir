@@ -1,0 +1,3 @@
+module qs.components.effects
+Elevation 1.0 Elevation.qml
+Mask 1.0 Mask.qml

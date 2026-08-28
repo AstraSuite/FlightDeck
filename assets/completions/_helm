@@ -1,0 +1,41 @@
+#compdef helm
+
+_helm() {
+    local -a commands
+    commands=(
+        'get:Get a configuration variable'
+        'set:Set a configuration variable'
+        'reload:Reload Hyprland compositor'
+        'profile:Manage configuration profiles'
+    )
+
+    _arguments \
+        '(-g --gui)'{-g,--gui}'[Launch graphical interface]' \
+        '(-t --tray)'{-t,--tray}'[Launch minimized in system tray]' \
+        '(-h --help)'{-h,--help}'[Show help]' \
+        '(-v --version)'{-v,--version}'[Show version]' \
+        '1: :->command' \
+        '*:: :->args'
+
+    case $state in
+        command)
+            _describe 'command' commands
+            ;;
+        args)
+            case $words[1] in
+                profile)
+                    local -a profile_commands
+                    profile_commands=(
+                        'list:List all saved profiles'
+                        'create:Create a new profile snapshot'
+                        'restore:Restore a saved profile'
+                        'delete:Delete a saved profile'
+                    )
+                    _describe 'profile command' profile_commands
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_helm "$@"

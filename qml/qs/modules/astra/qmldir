@@ -1,0 +1,7 @@
+module qs.modules.astra
+Astra 1.0 Astra.qml
+AstraState 1.0 AstraState.qml
+Pages 1.0 Pages.qml
+NavPane 1.0 NavPane.qml
+singleton PageCompRegistry 1.0 PageCompRegistry.qml
+singleton PageRegistry 1.0 PageRegistry.qml

@@ -1,0 +1,5 @@
+module qs.components.containers
+StyledFlickable 1.0 StyledFlickable.qml
+VerticalFadeFlickable 1.0 VerticalFadeFlickable.qml
+StyledListView 1.0 StyledListView.qml
+VerticalFadeListView 1.0 VerticalFadeListView.qml

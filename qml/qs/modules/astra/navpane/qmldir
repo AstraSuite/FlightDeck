@@ -1,0 +1,4 @@
+module qs.modules.astra.navpane
+NavLocations 1.0 NavLocations.qml
+NavSearchResults 1.0 NavSearchResults.qml
+singleton SettingsSearchRegistry 1.0 SettingsSearchRegistry.qml

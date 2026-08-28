@@ -1,0 +1,19 @@
+module qs.modules.astra.common
+AnimatedLogo 1.0 AnimatedLogo.qml
+ButtonRow 1.0 ButtonRow.qml
+ConnectedRect 1.0 ConnectedRect.qml
+InfoRow 1.0 InfoRow.qml
+PageBase 1.0 PageBase.qml
+PerMonitorStatusChip 1.0 PerMonitorStatusChip.qml
+SectionHeader 1.0 SectionHeader.qml
+StackPage 1.0 StackPage.qml
+OptionRow 1.0 OptionRow.qml
+StepperRow 1.0 StepperRow.qml
+TextFieldRow 1.0 TextFieldRow.qml
+ToggleRow 1.0 ToggleRow.qml
+SliderRow 1.0 SliderRow.qml
+SelectRow 1.0 SelectRow.qml
+KeybindRow 1.0 KeybindRow.qml
+BlobPopup 1.0 BlobPopup.qml
+PopupRow 1.0 PopupRow.qml
+DialogRowButton 1.0 DialogRowButton.qml

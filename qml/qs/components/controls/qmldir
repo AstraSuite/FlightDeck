@@ -1,0 +1,17 @@
+module qs.components.controls
+ButtonBase 1.0 ButtonBase.qml
+CircularIndicator 1.0 CircularIndicator.qml
+CircularProgress 1.0 CircularProgress.qml
+IconButton 1.0 IconButton.qml
+IconTextButton 1.0 IconTextButton.qml
+LoadingIndicator 1.0 LoadingIndicator.qml
+Menu 1.0 Menu.qml
+MenuItem 1.0 MenuItem.qml
+SearchBar 1.0 SearchBar.qml
+SplitButton 1.0 SplitButton.qml
+StyledSpinBox 1.0 StyledSpinBox.qml
+StyledSwitch 1.0 StyledSwitch.qml
+StyledSlider 1.0 StyledSlider.qml
+StyledTextField 1.0 StyledTextField.qml
+TextButton 1.0 TextButton.qml
+TextFieldBase 1.0 TextFieldBase.qml

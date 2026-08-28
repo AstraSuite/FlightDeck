@@ -1,0 +1,15 @@
+module qs.modules.astra.pages
+
+AppearancePage 1.0 AppearancePage.qml
+AnimationsPage 1.0 AnimationsPage.qml
+CursorPage 1.0 CursorPage.qml
+BindsPage 1.0 BindsPage.qml
+InputPage 1.0 InputPage.qml
+MonitorsPage 1.0 MonitorsPage.qml
+WindowRulesPage 1.0 WindowRulesPage.qml
+LayerRulesPage 1.0 LayerRulesPage.qml
+AutostartPage 1.0 AutostartPage.qml
+ProfilesPage 1.0 ProfilesPage.qml
+PendingPage 1.0 PendingPage.qml
+HelmSettingsPage 1.0 HelmSettingsPage.qml
+AboutPage 1.0 AboutPage.qml

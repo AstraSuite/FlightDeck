@@ -1,0 +1,40 @@
+#pragma once
+
+#include <QtQuick/qquickitem.h>
+#include <qlist.h>
+#include <qobject.h>
+#include <qqmlintegration.h>
+
+namespace caelestia {
+
+class CUtils : public QObject {
+    Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
+
+    Q_PROPERTY(QString version READ version CONSTANT)
+
+public:
+
+    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path);
+    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect);
+    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, QJSValue onSaved);
+    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, QJSValue onSaved, QJSValue onFailed);
+    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, QJSValue onSaved);
+    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, QJSValue onSaved, QJSValue onFailed);
+
+    Q_INVOKABLE static QString toLocalFile(const QUrl& url);
+
+    Q_INVOKABLE static qreal clamp(qreal value, qreal min, qreal max);
+    Q_INVOKABLE static bool fileExists(const QString& path);
+    Q_INVOKABLE static QString readFile(const QString& path);
+    Q_INVOKABLE static bool writeFile(const QString& path, const QString& content);
+
+    Q_INVOKABLE static QQuickItem* findChild(QQuickItem* root, const QString& name);
+    Q_INVOKABLE static QList<QQuickItem*> findChildren(QQuickItem* root, const QString& name);
+    Q_INVOKABLE static QList<QQuickItem*> findChildrenMatching(QQuickItem* root, const QString& pattern);
+
+    [[nodiscard]] QString version() const;
+};
+
+}

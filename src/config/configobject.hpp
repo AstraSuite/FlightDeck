@@ -1,0 +1,131 @@
+#pragma once
+
+#include "confignode.hpp"
+
+#include <qjsonobject.h>
+#include <qqmlintegration.h>
+#include <qset.h>
+
+namespace caelestia::config {
+
+inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entries) {
+    QVariantMap map;
+    for (const auto& [key, value] : entries)
+        map.insert(std::move(key), std::move(value));
+    return map;
+}
+
+}
+
+#define CONFIG_PROPERTY(Type, name, ...)                                                                               \
+    Q_PROPERTY(Type name READ name WRITE set_##name NOTIFY name##Changed)                                              \
+                                                                                                                       \
+public:                                                                                                                \
+    [[nodiscard]] Type name() const {                                                                                  \
+        return m_##name;                                                                                               \
+    }                                                                                                                  \
+    void set_##name(const Type& val) {                                                                                 \
+        if (caelestia::config::ConfigObject::updateMember(m_##name, val)) {                                            \
+            markPropertyLoaded(QStringLiteral(#name));                                                                 \
+            Q_EMIT name##Changed();                                                                                    \
+            notifyPropertyChanged(QStringLiteral(#name), QVariant::fromValue(m_##name));                               \
+        }                                                                                                              \
+    }                                                                                                                  \
+    Q_SIGNAL void name##Changed();                                                                                     \
+                                                                                                                       \
+private:                                                                                                               \
+    Type m_##name __VA_OPT__(= __VA_ARGS__);
+
+#define CONFIG_SUBOBJECT(Type, name)                                                                                   \
+    Q_PROPERTY(caelestia::config::Type* name READ name CONSTANT)                                                       \
+                                                                                                                       \
+public:                                                                                                                \
+    [[nodiscard]] Type* name() const {                                                                                 \
+        return m_##name;                                                                                               \
+    }                                                                                                                  \
+                                                                                                                       \
+private:                                                                                                               \
+    Type* m_##name = nullptr;
+
+#define CONFIG_GLOBAL_PROPERTY(Type, name, ...)                                                                        \
+    Q_PROPERTY(Type name READ name WRITE set_##name NOTIFY name##Changed)                                              \
+                                                                                                                       \
+public:                                                                                                                \
+    [[nodiscard]] Type name() const {                                                                                  \
+        if (isOverlay())                                                                                               \
+            qCWarning(caelestia::config::lcConfig, "Reading global-only option '%s' on per-monitor overlay",           \
+                qUtf8Printable(propertyPath(QStringLiteral(#name))));                                                  \
+        return m_##name;                                                                                               \
+    }                                                                                                                  \
+    void set_##name(const Type& val) {                                                                                 \
+        if (isOverlay())                                                                                               \
+            qCWarning(caelestia::config::lcConfig, "Writing global-only option '%s' on per-monitor overlay",           \
+                qUtf8Printable(propertyPath(QStringLiteral(#name))));                                                  \
+        if (caelestia::config::ConfigObject::updateMember(m_##name, val)) {                                            \
+            markPropertyLoaded(QStringLiteral(#name));                                                                 \
+            Q_EMIT name##Changed();                                                                                    \
+            notifyPropertyChanged(QStringLiteral(#name), QVariant::fromValue(m_##name));                               \
+        }                                                                                                              \
+    }                                                                                                                  \
+    Q_SIGNAL void name##Changed();                                                                                     \
+                                                                                                                       \
+private:                                                                                                               \
+    Type m_##name __VA_OPT__(= __VA_ARGS__);                                                                           \
+    const bool m_##name##_go = [this] {                                                                                \
+        markGlobalOnly(QStringLiteral(#name));                                                                         \
+        return true;                                                                                                   \
+    }();
+
+namespace caelestia::config {
+
+class ConfigObject : public ConfigNode {
+    Q_OBJECT
+
+public:
+    explicit ConfigObject(QObject* parent = nullptr);
+
+    void loadFromJson(const QJsonValue& json) override;
+    [[nodiscard]] QJsonValue toJson() const override;
+    void clearLoadedKeys() override;
+    [[nodiscard]] QStringList unknownKeys() const override;
+    [[nodiscard]] QList<ConfigNode*> childNodes() const override;
+    void resyncFromGlobal() override;
+
+    [[nodiscard]] virtual QStringList identityKeys() const;
+
+    [[nodiscard]] Q_INVOKABLE bool isPropertyLoaded(const QString& name) const;
+
+    [[nodiscard]] bool isGlobalOnly(const QString& name) const;
+
+    [[nodiscard]] QStringList globalOnlyKeys() const;
+
+    Q_INVOKABLE void resetOption(const QString& name);
+    void markPropertyLoaded(const QString& name);
+
+    template <typename T> static bool updateMember(T& member, const T& value) {
+        if constexpr (std::is_floating_point_v<T>) {
+            if (qFuzzyCompare(member + 1.0, value + 1.0))
+                return false;
+        } else {
+            if (member == value)
+                return false;
+        }
+        member = value;
+        return true;
+    }
+
+protected:
+    void syncValuesFromGlobal() override;
+    void onGlobalPropertiesChanged(const QMap<QString, QVariant>& changed) override;
+    [[nodiscard]] QString childPath(const ConfigNode* child) const override;
+
+    void markGlobalOnly(const QString& name);
+
+private:
+    QSet<QString> m_loadedKeys;
+    QSet<QString> m_globalOnlyKeys;
+
+    QJsonObject m_extras;
+};
+
+}

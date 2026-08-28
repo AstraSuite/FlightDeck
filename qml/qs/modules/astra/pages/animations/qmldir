@@ -1,0 +1,4 @@
+module qs.modules.astra.pages.animations
+BezierCanvas 1.0 BezierCanvas.qml
+BezierPreview 1.0 BezierPreview.qml
+BezierEditorCard 1.0 BezierEditorCard.qml

@@ -1,0 +1,2 @@
+module qs.services
+singleton Colours 1.0 Colours.qml

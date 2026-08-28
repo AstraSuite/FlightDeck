@@ -1,0 +1,7 @@
+module qs.components
+Anim 1.0 Anim.qml
+CAnim 1.0 CAnim.qml
+MaterialIcon 1.0 MaterialIcon.qml
+StateLayer 1.0 StateLayer.qml
+StyledRect 1.0 StyledRect.qml
+StyledText 1.0 StyledText.qml

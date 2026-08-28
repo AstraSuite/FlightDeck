@@ -1,0 +1,16 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBraces: Attach
+ColumnLimit: 140
+DerivePointerAlignment: false
+IndentWidth: 4
+NamespaceIndentation: None
+PointerAlignment: Left
+SortIncludes: false
+SpaceAfterTemplateKeyword: false
+Standard: c++20
