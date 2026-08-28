@@ -253,49 +253,53 @@ Popup {
                 clip: true
                 model: AstraHelmWriter.activeHyprlandClients()
 
-                delegate: StateLayer {
+                delegate: Item {
+                    id: clientRow
                     required property var modelData
                     required property int index
 
-                    width: ListView.view.width
+                    width: ListView.view ? ListView.view.width : 320
                     implicitHeight: 48
-                    radius: Tokens.rounding.small
 
-                    onClicked: {
-                        root.matchKey = "class";
-                        root.matchValue = "^(" + (modelData.class || "") + ")$";
-                        clientPicker.close();
-                    }
+                    StateLayer {
+                        radius: Tokens.rounding.small
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: Tokens.padding.small
-                        spacing: Tokens.spacing.small
-
-                        MaterialIcon {
-                            text: "web_asset"
-                            color: Colours.palette.m3primary
-                            fontStyle: Tokens.font.icon.small
+                        onClicked: {
+                            root.matchKey = "class";
+                            root.matchValue = "^(" + (clientRow.modelData.class || "") + ")$";
+                            clientPicker.close();
                         }
 
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 0
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: Tokens.padding.small
+                            spacing: Tokens.spacing.small
 
-                            StyledText {
-                                text: modelData.class || qsTr("Unknown")
-                                font: Tokens.font.body.small
-                                color: Colours.palette.m3onSurface
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
+                            MaterialIcon {
+                                text: "web_asset"
+                                color: Colours.palette.m3primary
+                                fontStyle: Tokens.font.icon.small
                             }
 
-                            StyledText {
-                                text: modelData.title || ""
-                                font: Tokens.font.label.small
-                                color: Colours.palette.m3outline
-                                elide: Text.ElideRight
+                            ColumnLayout {
                                 Layout.fillWidth: true
+                                spacing: 0
+
+                                StyledText {
+                                    text: clientRow.modelData.class || qsTr("Unknown")
+                                    font: Tokens.font.body.small
+                                    color: Colours.palette.m3onSurface
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
+
+                                StyledText {
+                                    text: clientRow.modelData.title || ""
+                                    font: Tokens.font.label.small
+                                    color: Colours.palette.m3outline
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
                             }
                         }
                     }

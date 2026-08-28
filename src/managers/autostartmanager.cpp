@@ -15,6 +15,7 @@ AutostartManager* AutostartManager::instance() {
 }
 
 AutostartManager* AutostartManager::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 

@@ -24,6 +24,7 @@ CursorManager* CursorManager::instance() {
 }
 
 CursorManager* CursorManager::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 

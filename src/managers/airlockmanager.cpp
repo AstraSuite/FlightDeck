@@ -21,6 +21,7 @@ AirlockManager* AirlockManager::instance() {
 }
 
 AirlockManager* AirlockManager::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 

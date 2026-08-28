@@ -108,38 +108,41 @@ PageBase {
                         clip: true
                         model: addRuleBtn.clientsList
 
-                        delegate: StateLayer {
-                            id: clLayer
+                        delegate: Item {
+                            id: clRow
                             required property var modelData
                             required property int index
 
-                            width: parent ? parent.width : 320
+                            width: ListView.view ? ListView.view.width : 320
                             implicitHeight: 40
-                            radius: Tokens.rounding.small
 
-                            onClicked: {
-                                addRuleBtn.matchKey = "class";
-                                addRuleBtn.matchValue = "^(" + (modelData.class || "") + ")$";
-                                addRuleBtn.showClientPicker = false;
-                            }
+                            StateLayer {
+                                radius: Tokens.rounding.small
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: Tokens.padding.small
-                                spacing: Tokens.spacing.small
-
-                                MaterialIcon {
-                                    text: "web_asset"
-                                    color: Colours.palette.m3primary
-                                    fontStyle: Tokens.font.icon.small
+                                onClicked: {
+                                    addRuleBtn.matchKey = "class";
+                                    addRuleBtn.matchValue = "^(" + (clRow.modelData.class || "") + ")$";
+                                    addRuleBtn.showClientPicker = false;
                                 }
 
-                                StyledText {
-                                    text: clLayer.modelData.class || qsTr("Unknown")
-                                    font: Tokens.font.body.small
-                                    color: Colours.palette.m3onSurface
-                                    elide: Text.ElideRight
-                                    Layout.fillWidth: true
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: Tokens.padding.small
+                                    spacing: Tokens.spacing.small
+
+                                    MaterialIcon {
+                                        text: "web_asset"
+                                        color: Colours.palette.m3primary
+                                        fontStyle: Tokens.font.icon.small
+                                    }
+
+                                    StyledText {
+                                        text: clRow.modelData.class || qsTr("Unknown")
+                                        font: Tokens.font.body.small
+                                        color: Colours.palette.m3onSurface
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                    }
                                 }
                             }
                         }

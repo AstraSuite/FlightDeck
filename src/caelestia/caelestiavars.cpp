@@ -19,6 +19,7 @@ CaelestiaVars* CaelestiaVars::instance() {
 }
 
 CaelestiaVars* CaelestiaVars::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 

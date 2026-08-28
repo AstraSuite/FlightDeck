@@ -19,6 +19,7 @@ AstraHelmWriter* AstraHelmWriter::instance() {
 }
 
 AstraHelmWriter* AstraHelmWriter::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 
