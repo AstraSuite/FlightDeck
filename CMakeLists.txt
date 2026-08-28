@@ -58,11 +58,6 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
 
 qt_add_executable(flightdeck ${PROJECT_SOURCES})
 
-add_custom_command(TARGET flightdeck POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E create_symlink flightdeck ${CMAKE_CURRENT_BINARY_DIR}/helm
-    COMMENT "Creating helm symlink for flightdeck"
-)
-
 qt_add_shaders(flightdeck "blob_shaders"
     BATCHABLE
     OPTIMIZED
@@ -103,8 +98,7 @@ target_link_libraries(flightdeck PRIVATE
 qt_add_resources(flightdeck "resources"
     PREFIX "/"
     FILES
-        assets/icons/astra-helm.svg
-        assets/icons/helm.svg
+        assets/icons/flightdeck.svg
         assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
 )
 
@@ -126,7 +120,6 @@ install(FILES assets/flightdeck.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
 )
 
-install(FILES assets/icons/astra-helm.svg
+install(FILES assets/icons/flightdeck.svg
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
-    RENAME flightdeck.svg
 )

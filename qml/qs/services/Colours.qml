@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Caelestia
-import Helm.Config
-import Helm.Theme
+import FlightDeck.Config
+import FlightDeck.Theme
 
 QtObject {
     id: root

@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Helm.Config
+import FlightDeck.Config
 import qs.services
 
 Text {

@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Shapes
 import Caelestia.Components
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.services
 

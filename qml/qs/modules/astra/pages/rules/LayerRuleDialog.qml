@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.modules.astra.common
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 Popup {
     id: root
@@ -179,18 +179,19 @@ Popup {
                     }
 
                     if (root.editingIndex >= 0) {
-                        AstraHelmWriter.removeLayerRule(root.editingIndex);
+                        FlightDeckWriter.removeLayerRule(root.editingIndex);
                     }
-                    AstraHelmWriter.addLayerRule(ruleMap);
+                    FlightDeckWriter.addLayerRule(ruleMap);
+                    FlightDeckWriter.save();
                     root.close();
                 }
             }
         }
     }
 
-    // Active Layers Picker Modal
+    // Open Layer Client Picker Modal
     Popup {
-        id: nsPicker
+        id: layerPicker
         visible: root.showNamespacePicker
         onClosed: root.showNamespacePicker = false
         width: 340
@@ -212,7 +213,7 @@ Popup {
             spacing: Tokens.spacing.small
 
             StyledText {
-                text: qsTr("Active Layer Namespaces")
+                text: qsTr("Select Active Layer Surface")
                 font: Tokens.font.title.small
                 color: Colours.palette.m3onSurface
             }
@@ -221,7 +222,7 @@ Popup {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                model: AstraHelmWriter.activeHyprlandLayers()
+                model: FlightDeckWriter.activeHyprlandLayers()
 
                 delegate: Item {
                     id: nsRow

@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.modules.astra.common
-import Helm.Caelestia 1.0
-import Helm.Hyprland 1.0
+import FlightDeck.Caelestia 1.0
+import FlightDeck.Hyprland 1.0
 
 Popup {
     id: root
@@ -168,8 +168,8 @@ Popup {
                 text: qsTr("Add Shortcut")
                 onClicked: {
                     if (root.bindKey.trim() === "") return;
-                    AstraHelmWriter.addCustomBind(root.bindKey.trim(), root.dispatcher, root.args.trim(), true);
-                    AstraHelmWriter.save();
+                    FlightDeckWriter.addCustomBind(root.bindKey.trim(), root.dispatcher, root.args.trim(), true);
+                    FlightDeckWriter.save();
                     root.close();
                 }
             }

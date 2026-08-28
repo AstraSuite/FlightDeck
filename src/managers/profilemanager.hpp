@@ -6,7 +6,7 @@
 #include <QVariantList>
 #include <QQmlEngine>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 class ProfileManager : public QObject {
     Q_OBJECT
@@ -37,4 +37,4 @@ private:
     QStringList m_profiles;
 };
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

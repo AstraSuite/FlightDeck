@@ -5,7 +5,7 @@
 #include <QLocalSocket>
 #include <QDebug>
 
-namespace Helm::Hyprland {
+namespace FlightDeck::Hyprland {
 
 HyprlandEventListener::HyprlandEventListener(QObject* parent)
     : QThread(parent) {}
@@ -99,4 +99,4 @@ void HyprlandEvents::stop() {
     }
 }
 
-} // namespace Helm::Hyprland
+} // namespace FlightDeck::Hyprland

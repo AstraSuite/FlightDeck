@@ -1,11 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.services
 import qs.modules.astra.common
 import qs.components.controls
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 ConnectedRect {
     id: root
@@ -67,7 +67,7 @@ ConnectedRect {
                     icon: "restart_alt"
                     type: IconButton.Text
                     font: Tokens.font.icon.small
-                    visible: root.showReset || (root.varKey !== "" && CaelestiaVars.isOverridden(root.varKey))
+                    visible: root.showReset || (root.varKey !== "" && (root.varKey in CaelestiaVars.currentVars || root.varKey in CaelestiaVars.pendingVars))
                     onClicked: {
                         if (root.varKey !== "") {
                             CaelestiaVars.resetToDefault(root.varKey);

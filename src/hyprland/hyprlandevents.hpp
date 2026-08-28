@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QLocalSocket>
 
-namespace Helm::Hyprland {
+namespace FlightDeck::Hyprland {
 
 class HyprlandEventListener : public QThread {
     Q_OBJECT
@@ -50,4 +50,4 @@ private:
     HyprlandEventListener* m_listener = nullptr;
 };
 
-} // namespace Helm::Hyprland
+} // namespace FlightDeck::Hyprland

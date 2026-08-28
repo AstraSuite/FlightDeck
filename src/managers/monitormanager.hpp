@@ -6,7 +6,7 @@
 #include <QVariantMap>
 #include <QQmlEngine>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 class MonitorManager : public QObject {
     Q_OBJECT
@@ -33,4 +33,4 @@ signals:
     void monitorsChanged();
 };
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

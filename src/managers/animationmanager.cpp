@@ -7,7 +7,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 AnimationManager* AnimationManager::instance() {
     static AnimationManager inst;
@@ -153,4 +153,4 @@ void AnimationManager::scanPresets() {
     emit presetsChanged();
 }
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

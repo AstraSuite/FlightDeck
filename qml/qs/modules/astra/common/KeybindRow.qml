@@ -2,13 +2,13 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.modules.astra.common
-import Helm.Caelestia 1.0
-import Helm.Hyprland 1.0
+import FlightDeck.Caelestia 1.0
+import FlightDeck.Hyprland 1.0
 
 ConnectedRect {
     id: root
@@ -86,12 +86,37 @@ ConnectedRect {
                 }
 
                 IconButton {
+                    icon: "edit"
+                    type: IconButton.Text
+                    font: Tokens.font.icon.small
+                    onClicked: {
+                        root.recording = !root.recording;
+                        if (root.recording) {
+                            focusItem.forceActiveFocus();
+                            HyprlandState.dispatch("submap record");
+                        } else {
+                            HyprlandState.dispatch("submap reset");
+                        }
+                    }
+                }
+
+                IconButton {
                     icon: "restart_alt"
                     type: IconButton.Text
                     font: Tokens.font.icon.small
-                    visible: CaelestiaVars.isOverridden(root.varKey)
+                    visible: root.varKey !== "" && (root.varKey in CaelestiaVars.currentVars || root.varKey in CaelestiaVars.pendingVars)
                     onClicked: {
                         CaelestiaVars.resetToDefault(root.varKey);
+                    }
+                }
+
+                IconButton {
+                    icon: "delete"
+                    type: IconButton.Text
+                    font: Tokens.font.icon.small
+                    visible: root.varKey !== "" && (root.isModifier || (root.bindValue !== qsTr("Unbound") && root.bindValue !== ""))
+                    onClicked: {
+                        CaelestiaVars.set(root.varKey, "");
                     }
                 }
 

@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.services
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 StyledSwitch {
     id: root
@@ -26,6 +26,12 @@ StyledSwitch {
     readonly property alias stateLayer: stateLayer
 
     Layout.fillWidth: true
+
+    Binding on checked {
+        when: root.varKey !== ""
+        value: CaelestiaVars.pendingVars[root.varKey] ?? CaelestiaVars.currentVars[root.varKey] ?? CaelestiaVars.getDefault(root.varKey, false)
+        restoreMode: Binding.RestoreBinding
+    }
 
     horizontalPadding: Tokens.padding.largeIncreased
     verticalPadding: Tokens.padding.medium
@@ -84,10 +90,11 @@ StyledSwitch {
                     icon: "restart_alt"
                     type: IconButton.Text
                     font: Tokens.font.icon.small
-                    visible: root.showReset || (root.varKey !== "" && CaelestiaVars.isOverridden(root.varKey))
+                    visible: root.showReset || (root.varKey !== "" && (root.varKey in CaelestiaVars.currentVars || root.varKey in CaelestiaVars.pendingVars))
                     onClicked: {
                         if (root.varKey !== "") {
                             CaelestiaVars.resetToDefault(root.varKey);
+                            root.checked = CaelestiaVars.getDefault(root.varKey, false);
                         }
                         root.reset();
                     }

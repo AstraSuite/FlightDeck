@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Templates
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.services
 

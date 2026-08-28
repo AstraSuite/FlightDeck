@@ -3,7 +3,7 @@ import QtQuick.Window
 import QtQuick.Controls
 import qs.services
 import qs.modules.astra
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 ApplicationWindow {
     id: window

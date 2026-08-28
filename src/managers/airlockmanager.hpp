@@ -4,7 +4,7 @@
 #include <QString>
 #include <QQmlEngine>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 class AirlockManager : public QObject {
     Q_OBJECT
@@ -41,4 +41,4 @@ private:
     QString m_lastMessage;
 };
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

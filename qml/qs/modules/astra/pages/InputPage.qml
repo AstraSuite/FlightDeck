@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 PageBase {
     id: root

@@ -9,7 +9,7 @@ public:
 
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize) override {
         int targetSize = (requestedSize.width() > 0) ? requestedSize.width() : 48;
-        QImage img = Helm::Managers::CursorManager::loadCursorPreview(id, targetSize);
+        QImage img = FlightDeck::Managers::CursorManager::loadCursorPreview(id, targetSize);
         if (size) {
             *size = img.size();
         }

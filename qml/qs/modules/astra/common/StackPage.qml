@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.modules.astra
 

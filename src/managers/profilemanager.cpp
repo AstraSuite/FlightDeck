@@ -8,7 +8,7 @@
 #include <QStandardPaths>
 #include <QDateTime>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 ProfileManager* ProfileManager::instance() {
     static ProfileManager inst;
@@ -27,7 +27,12 @@ ProfileManager::ProfileManager(QObject* parent)
 
 QString ProfileManager::profilesDir() const {
     const QString base = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
-    return base + QStringLiteral("/astra-helm/profiles");
+    const QString flightdeckDir = base + QStringLiteral("/flightdeck/profiles");
+    const QString legacyDir = base + QStringLiteral("/astra-helm/profiles");
+    if (!QDir(flightdeckDir).exists() && QDir(legacyDir).exists()) {
+        return legacyDir;
+    }
+    return flightdeckDir;
 }
 
 QStringList ProfileManager::profiles() const {
@@ -53,7 +58,7 @@ bool ProfileManager::createProfile(const QString& name) {
         QFile::copy(varsPath, dirPath + QStringLiteral("/hypr-vars.lua"));
     }
 
-    const QString helmPath = Caelestia::AstraHelmWriter::astraHelmFilePath();
+    const QString helmPath = Caelestia::FlightDeckWriter::flightDeckFilePath();
     if (QFile::exists(helmPath)) {
         QFile::remove(dirPath + QStringLiteral("/astra-helm.lua"));
         QFile::copy(helmPath, dirPath + QStringLiteral("/astra-helm.lua"));
@@ -81,11 +86,11 @@ bool ProfileManager::restoreProfile(const QString& name) {
     }
 
     const QString savedHelm = dirPath + QStringLiteral("/astra-helm.lua");
-    const QString targetHelm = Caelestia::AstraHelmWriter::astraHelmFilePath();
+    const QString targetHelm = Caelestia::FlightDeckWriter::flightDeckFilePath();
     if (QFile::exists(savedHelm)) {
         QFile::remove(targetHelm);
         QFile::copy(savedHelm, targetHelm);
-        Caelestia::AstraHelmWriter::instance()->reload();
+        Caelestia::FlightDeckWriter::instance()->reload();
     }
 
     emit operationFinished(true, QStringLiteral("Profile '%1' restored successfully").arg(name));
@@ -113,4 +118,4 @@ void ProfileManager::refresh() {
     emit profilesChanged();
 }
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

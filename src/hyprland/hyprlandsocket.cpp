@@ -11,7 +11,7 @@
 #include <QDebug>
 #include <unistd.h>
 
-namespace Helm::Hyprland {
+namespace FlightDeck::Hyprland {
 
 HyprlandSocket::HyprlandSocket(QObject* parent)
     : QObject(parent) {}
@@ -169,4 +169,4 @@ QVariantMap HyprlandSocket::getOption(const QString& optionKey) const {
     return {};
 }
 
-} // namespace Helm::Hyprland
+} // namespace FlightDeck::Hyprland

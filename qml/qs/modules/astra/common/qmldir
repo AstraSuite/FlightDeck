@@ -21,3 +21,5 @@ DialogRowButton 1.0 DialogRowButton.qml
 DialogSelectButton 1.0 DialogSelectButton.qml
 AppPickerDialog 1.0 AppPickerDialog.qml
 ClientPickerDialog 1.0 ClientPickerDialog.qml
+AppPickerPopup 1.0 AppPickerPopup.qml
+ClientPickerPopup 1.0 ClientPickerPopup.qml

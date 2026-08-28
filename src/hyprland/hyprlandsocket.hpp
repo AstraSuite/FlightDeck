@@ -7,7 +7,7 @@
 #include <QVariant>
 #include <QPair>
 
-namespace Helm::Hyprland {
+namespace FlightDeck::Hyprland {
 
 class HyprlandSocket : public QObject {
     Q_OBJECT
@@ -40,4 +40,4 @@ signals:
     void commandFailed(const QString& command, const QString& error);
 };
 
-} // namespace Helm::Hyprland
+} // namespace FlightDeck::Hyprland

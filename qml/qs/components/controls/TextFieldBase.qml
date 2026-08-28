@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Templates
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.services
 

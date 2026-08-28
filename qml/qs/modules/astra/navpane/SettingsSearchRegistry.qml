@@ -401,7 +401,7 @@ QtObject {
             category: "Pending Changes",
             title: "Apply & Save to Disk",
             breadcrumb: "Pending Changes › Actions",
-            subtext: "Write all pending changes to hypr-vars.lua and astra-helm.lua",
+            subtext: "Write all pending changes to hypr-vars.lua and flightdeck.lua",
             icon: "save",
             type: "action"
         },

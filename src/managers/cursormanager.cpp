@@ -12,7 +12,7 @@
 #include <QPainter>
 #include <QDataStream>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 static CursorManager* s_instance = nullptr;
 
@@ -481,4 +481,4 @@ QImage CursorManager::loadCursorPreview(const QString& themeName, int targetSize
     return fallback;
 }
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

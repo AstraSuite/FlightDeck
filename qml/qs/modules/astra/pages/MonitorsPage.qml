@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
 import "monitors"
-import Helm.Managers 1.0
+import FlightDeck.Managers 1.0
 
 PageBase {
     id: root
@@ -76,28 +76,51 @@ PageBase {
                     }
                 }
 
-                OptionRow {
+                SelectRow {
                     last: true
-                    title: qsTr("Display Orientation")
+                    label: qsTr("Display Orientation")
                     subtext: qsTr("Rotation angle for %1").arg(monDelegate.modelData.name)
-                    options: [
-                        { label: qsTr("Normal (0°)"), value: 0 },
-                        { label: qsTr("90° Portrait"), value: 1 },
-                        { label: qsTr("180° Inverted"), value: 2 },
-                        { label: qsTr("270° Portrait (Flipped)"), value: 3 }
+                    menuItems: [
+                        MenuItem {
+                            text: qsTr("Normal (0°)")
+                            icon: "crop_portrait"
+                            onClicked: {
+                                var modeStr = monDelegate.modelData.width + "x" + monDelegate.modelData.height + "@" + monDelegate.modelData.refreshRate;
+                                var posStr = monDelegate.modelData.x + "x" + monDelegate.modelData.y;
+                                MonitorManager.applyMonitor(monDelegate.modelData.name, modeStr, posStr, monDelegate.modelData.scale, 0, monDelegate.modelData.disabled);
+                            }
+                        },
+                        MenuItem {
+                            text: qsTr("90° Portrait")
+                            icon: "crop_rotate"
+                            onClicked: {
+                                var modeStr = monDelegate.modelData.width + "x" + monDelegate.modelData.height + "@" + monDelegate.modelData.refreshRate;
+                                var posStr = monDelegate.modelData.x + "x" + monDelegate.modelData.y;
+                                MonitorManager.applyMonitor(monDelegate.modelData.name, modeStr, posStr, monDelegate.modelData.scale, 1, monDelegate.modelData.disabled);
+                            }
+                        },
+                        MenuItem {
+                            text: qsTr("180° Inverted")
+                            icon: "screen_rotation"
+                            onClicked: {
+                                var modeStr = monDelegate.modelData.width + "x" + monDelegate.modelData.height + "@" + monDelegate.modelData.refreshRate;
+                                var posStr = monDelegate.modelData.x + "x" + monDelegate.modelData.y;
+                                MonitorManager.applyMonitor(monDelegate.modelData.name, modeStr, posStr, monDelegate.modelData.scale, 2, monDelegate.modelData.disabled);
+                            }
+                        },
+                        MenuItem {
+                            text: qsTr("270° Portrait (Flipped)")
+                            icon: "crop_rotate"
+                            onClicked: {
+                                var modeStr = monDelegate.modelData.width + "x" + monDelegate.modelData.height + "@" + monDelegate.modelData.refreshRate;
+                                var posStr = monDelegate.modelData.x + "x" + monDelegate.modelData.y;
+                                MonitorManager.applyMonitor(monDelegate.modelData.name, modeStr, posStr, monDelegate.modelData.scale, 3, monDelegate.modelData.disabled);
+                            }
+                        }
                     ]
-                    currentIndex: monDelegate.modelData.transform ?? 0
-                    currentValue: {
+                    active: {
                         var t = monDelegate.modelData.transform ?? 0;
-                        if (t === 1) return qsTr("90° Portrait");
-                        if (t === 2) return qsTr("180° Inverted");
-                        if (t === 3) return qsTr("270° Portrait (Flipped)");
-                        return qsTr("Normal (0°)");
-                    }
-                    onOptionSelected: (val, lbl) => {
-                        var modeStr = monDelegate.modelData.width + "x" + monDelegate.modelData.height + "@" + monDelegate.modelData.refreshRate;
-                        var posStr = monDelegate.modelData.x + "x" + monDelegate.modelData.y;
-                        MonitorManager.applyMonitor(monDelegate.modelData.name, modeStr, posStr, monDelegate.modelData.scale, val, monDelegate.modelData.disabled);
+                        return (t >= 0 && t < menuItems.length) ? menuItems[t] : menuItems[0];
                     }
                 }
             }

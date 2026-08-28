@@ -10,7 +10,7 @@
 #define ASTRA_VERSION "1.0.0"
 #endif
 
-namespace Helm::Cli {
+namespace FlightDeck::Cli {
 
 int CliHandler::run(int argc, char* argv[]) {
     QCommandLineParser parser;
@@ -82,7 +82,7 @@ int CliHandler::run(int argc, char* argv[]) {
 
     if (cmd == QStringLiteral("profile")) {
         if (posArgs.size() < 2) {
-            std::cerr << "Usage: helm profile <list|create|restore|delete> [name]\n";
+            std::cerr << "Usage: flightdeck profile <list|create|restore|delete> [name]\n";
             return 1;
         }
         const QString sub = posArgs.at(1);
@@ -112,4 +112,4 @@ int CliHandler::run(int argc, char* argv[]) {
     return 1;
 }
 
-} // namespace Helm::Cli
+} // namespace FlightDeck::Cli

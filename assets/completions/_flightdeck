@@ -1,6 +1,6 @@
-#compdef helm
+#compdef flightdeck
 
-_helm() {
+_flightdeck() {
     local -a commands
     commands=(
         'get:Get a configuration variable'
@@ -38,4 +38,4 @@ _helm() {
     esac
 }
 
-_helm "$@"
+_flightdeck "$@"

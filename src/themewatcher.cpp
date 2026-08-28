@@ -23,7 +23,7 @@ ThemeWatcher* ThemeWatcher::create(QQmlEngine*, QJSEngine*) {
 
 ThemeWatcher::ThemeWatcher(QObject* parent)
     : QObject(parent) {
-    QSettings settings(QStringLiteral("astra-helm"), QStringLiteral("astra"));
+    QSettings settings(QStringLiteral("AstraSuite"), QStringLiteral("FlightDeck"));
     m_syncScheme = settings.value(QStringLiteral("theme/syncScheme"), true).toBool();
     m_syncTokens = settings.value(QStringLiteral("theme/syncTokens"), true).toBool();
 
@@ -63,7 +63,7 @@ ThemeWatcher::ThemeWatcher(QObject* parent)
 void ThemeWatcher::setSyncScheme(bool sync) {
     if (m_syncScheme != sync) {
         m_syncScheme = sync;
-        QSettings settings(QStringLiteral("astra-helm"), QStringLiteral("astra"));
+        QSettings settings(QStringLiteral("AstraSuite"), QStringLiteral("FlightDeck"));
         settings.setValue(QStringLiteral("theme/syncScheme"), sync);
         emit syncSchemeChanged();
         reload();
@@ -73,7 +73,7 @@ void ThemeWatcher::setSyncScheme(bool sync) {
 void ThemeWatcher::setSyncTokens(bool sync) {
     if (m_syncTokens != sync) {
         m_syncTokens = sync;
-        QSettings settings(QStringLiteral("astra-helm"), QStringLiteral("astra"));
+        QSettings settings(QStringLiteral("AstraSuite"), QStringLiteral("FlightDeck"));
         settings.setValue(QStringLiteral("theme/syncTokens"), sync);
         emit syncTokensChanged();
         applyTokensSync();
@@ -90,7 +90,7 @@ QString ThemeWatcher::getSchemeFilePath() const {
 }
 
 void ThemeWatcher::applyFallbackColours() {
-    m_name = QStringLiteral("astra-helm");
+    m_name = QStringLiteral("flightdeck");
     m_mode = QStringLiteral("dark");
     m_flavour = QStringLiteral("default");
     m_variant = QStringLiteral("content");

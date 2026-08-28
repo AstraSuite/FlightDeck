@@ -7,7 +7,7 @@
 #include <QVariantList>
 #include <QQmlEngine>
 
-namespace Helm::Caelestia {
+namespace FlightDeck::Caelestia {
 
 class CaelestiaVars : public QObject {
     Q_OBJECT
@@ -71,4 +71,4 @@ private:
     QVariantMap m_pendingVars;
 };
 
-} // namespace Helm::Caelestia
+} // namespace FlightDeck::Caelestia

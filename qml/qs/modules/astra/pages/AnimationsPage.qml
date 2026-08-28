@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
 import "animations"
-import Helm.Managers 1.0
+import FlightDeck.Managers 1.0
 
 PageBase {
     id: root

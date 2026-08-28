@@ -2,12 +2,12 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.modules.astra.common
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 ConnectedRect {
     id: root
@@ -38,6 +38,12 @@ ConnectedRect {
     Component.onDestruction: {
         if (value !== input.text)
             editingFinished(input.text);
+    }
+
+    Binding on value {
+        when: root.varKey !== ""
+        value: CaelestiaVars.pendingVars[root.varKey] ?? CaelestiaVars.currentVars[root.varKey] ?? CaelestiaVars.getDefault(root.varKey, "")
+        restoreMode: Binding.RestoreBinding
     }
 
     Layout.fillWidth: true
@@ -72,10 +78,11 @@ ConnectedRect {
                     icon: "restart_alt"
                     type: IconButton.Text
                     font: Tokens.font.icon.small
-                    visible: root.showReset || (root.varKey !== "" && CaelestiaVars.isOverridden(root.varKey))
+                    visible: root.showReset || (root.varKey !== "" && (root.varKey in CaelestiaVars.currentVars || root.varKey in CaelestiaVars.pendingVars))
                     onClicked: {
                         if (root.varKey !== "") {
                             CaelestiaVars.resetToDefault(root.varKey);
+                            root.value = CaelestiaVars.getDefault(root.varKey, "");
                         }
                         root.reset();
                     }

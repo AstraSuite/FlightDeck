@@ -6,7 +6,7 @@
 #include <QDebug>
 #include <QStack>
 
-namespace Helm::Caelestia {
+namespace FlightDeck::Caelestia {
 
 bool LuaValidator::validate(const QString& luaCode, QString* errorOut) {
     const QString luacPath = QStandardPaths::findExecutable(QStringLiteral("luac"));
@@ -138,4 +138,4 @@ bool LuaValidator::heuristicValidate(const QString& luaCode, QString* errorOut) 
     return true;
 }
 
-} // namespace Helm::Caelestia
+} // namespace FlightDeck::Caelestia

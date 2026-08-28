@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Shapes
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.services
 

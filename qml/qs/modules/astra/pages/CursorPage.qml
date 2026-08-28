@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
-import Helm.Managers 1.0
-import Helm.Caelestia 1.0
+import FlightDeck.Managers 1.0
+import FlightDeck.Caelestia 1.0
 
 PageBase {
     id: root
@@ -27,7 +27,7 @@ PageBase {
 
         DialogRowButton {
             id: themeRow
-            rootParent: root.flickable
+            rootParent: root.modalOverlay
             first: true
             last: false
             icon: "mouse"
@@ -157,9 +157,9 @@ PageBase {
             label: qsTr("Cursor Size")
             subtext: qsTr("Pointer size in pixels: %1px").arg(CursorManager.currentSize)
             value: CursorManager.currentSize
-            from: 16
-            to: 64
-            stepSize: 4
+            from: 1
+            to: 2147483647
+            stepSize: 1
             suffix: "px"
             onMoved: v => CursorManager.setCurrentSize(v)
             onReset: CursorManager.setCurrentSize(CaelestiaVars.getDefault("cursorSize", 24))

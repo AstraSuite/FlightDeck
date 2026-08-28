@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.modules.astra.common
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 Popup {
     id: root
@@ -208,10 +208,11 @@ Popup {
                     }
 
                     if (root.editingIndex >= 0) {
-                        AstraHelmWriter.updateWindowRule(root.editingIndex, ruleMap);
+                        FlightDeckWriter.updateWindowRule(root.editingIndex, ruleMap);
                     } else {
-                        AstraHelmWriter.addWindowRule(ruleMap);
+                        FlightDeckWriter.addWindowRule(ruleMap);
                     }
+                    FlightDeckWriter.save();
                     root.close();
                 }
             }
@@ -251,7 +252,7 @@ Popup {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                model: AstraHelmWriter.activeHyprlandClients()
+                model: FlightDeckWriter.activeHyprlandClients()
 
                 delegate: Item {
                     id: clientRow

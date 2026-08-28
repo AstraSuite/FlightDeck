@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QString>
 
-namespace Helm::Caelestia {
+namespace FlightDeck::Caelestia {
 
 class CaelestiaBootstrap : public QObject {
     Q_OBJECT
@@ -12,4 +12,4 @@ public:
     static void ensureAstraHelmSourced();
 };
 
-} // namespace Helm::Caelestia
+} // namespace FlightDeck::Caelestia

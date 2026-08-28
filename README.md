@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icons/astra-helm.svg" width="140" alt="FlightDeck Logo">
+  <img src="assets/icons/flightdeck.svg" width="140" alt="FlightDeck Logo">
 </p>
 
 <h1 align="center">FlightDeck</h1>
@@ -8,7 +8,7 @@
 
 ## Features
 
-- **Caelestia Dotfiles Integration**: Safe and non-destructive management of `~/.config/caelestia/hypr-vars.lua` and `~/.config/caelestia/astra-helm.lua`. Base `~/.config/hypr/` is completely untouched.
+- **Caelestia Dotfiles Integration**: Safe and non-destructive management of `~/.config/caelestia/hypr-vars.lua` and `~/.config/caelestia/flightdeck.lua` (or `astra-helm.lua`). Base `~/.config/hypr/` is completely untouched.
 - **Unified Astra Design Language**: Built on Astra Suite's modular QML architecture with GPU-accelerated blob shaders, Google Sans Flex variable typography, and Material 3 design tokens.
 - **Live Scheme Reloading**: Instant, seamless theme synchronization with `~/.local/state/caelestia/scheme.json`.
 - **Display & Monitor Layout Preview**: Interactive 2D canvas for visually arranging and snapping monitors, adjusting resolutions, refresh rates, scaling factors, rotation, and VRR with live Hyprland IPC sync.
@@ -65,7 +65,7 @@ cmake --build build
 sudo cmake --install build
 ```
 
-This installs the `flightdeck` binary to `/usr/bin/flightdeck` (with `helm` alias), desktop launcher to `/usr/share/applications/flightdeck.desktop`, and icons to `/usr/share/icons/hicolor/scalable/apps/flightdeck.svg`.
+This installs the `flightdeck` binary to `/usr/bin/flightdeck`, desktop launcher to `/usr/share/applications/flightdeck.desktop`, and icons to `/usr/share/icons/hicolor/scalable/apps/flightdeck.svg`.
 
 ## Running the GUI
 

@@ -6,7 +6,7 @@
 #include <QVariantMap>
 #include <QQmlEngine>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 class AutostartManager : public QObject {
     Q_OBJECT
@@ -39,4 +39,4 @@ private:
     QVariantList m_apps;
 };
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

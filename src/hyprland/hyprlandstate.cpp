@@ -6,7 +6,7 @@
 #include <QJsonArray>
 #include <QProcess>
 
-namespace Helm::Hyprland {
+namespace FlightDeck::Hyprland {
 
 HyprlandState* HyprlandState::instance() {
     static HyprlandState inst;
@@ -155,4 +155,4 @@ QVariantMap HyprlandState::getOption(const QString& key) const {
     return HyprlandSocket::instance()->getOption(key);
 }
 
-} // namespace Helm::Hyprland
+} // namespace FlightDeck::Hyprland

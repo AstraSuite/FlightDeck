@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
-import Helm.Hyprland 1.0
+import FlightDeck.Hyprland 1.0
 
 PageBase {
     id: root
@@ -81,7 +81,7 @@ PageBase {
         InfoRow {
             last: true
             label: qsTr("Configuration Target")
-            value: "hypr-vars.lua & astra-helm.lua"
+            value: "hypr-vars.lua & flightdeck.lua"
             icon: "folder"
         }
 

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
-import Helm.Config
+import FlightDeck.Config
 import qs.services
 
 MouseArea {

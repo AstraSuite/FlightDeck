@@ -1,95 +1,205 @@
 import QtQuick
-import QtQuick.Controls
-import Helm.Config
+import QtQuick.Layouts
+import FlightDeck.Blobs
+import FlightDeck.Config
 import qs.components
 import qs.services
 
 Item {
-    id: root
+    id: rootPlaceholder
 
-    property alias icon: icon.text
-    property color color: Colours.palette.m3surfaceContainerHighest
+    property string icon: ""
+    property alias color: blobGroup.color
     readonly property alias hovered: btn.containsMouse
-    property bool open: popup.visible
-    property bool pressOverride: false
-    property bool hoverOverride: false
-    default property Item content
+    property bool open
+    property int padding: Tokens.padding?.medium ?? 12
+    property int topMovement: Tokens.padding?.large ?? 16
+    property int bottomMovement: Tokens.padding?.large ?? 16
+    property bool pressOverride
+    property bool hoverOverride
+    property real animDriver
+    property Item rootParent: null
+    default required property Item content
+
+    readonly property bool expandingUp: popupItem.expandUp
+    readonly property bool expandingLeft: popupItem.expandLeft
 
     implicitWidth: 36
     implicitHeight: 36
 
-    // Button Background
-    StyledRect {
-        id: btnBg
-        anchors.fill: parent
-        radius: root.open ? root.Tokens.rounding.large : root.Tokens.rounding.medium
-        color: root.open || btn.containsMouse || root.hoverOverride ? Colours.palette.m3secondaryContainer : root.color
-
-        Behavior on color {
-            CAnim {}
-        }
-        Behavior on radius {
-            Anim {
-                type: Anim.DefaultEffects
-            }
+    onOpenChanged: {
+        if (open && rootParent) {
+            let pos = mapToItem(rootParent, 0, 0);
+            popupItem.expandLeft = pos.x > rootParent.width / 2;
+            popupItem.expandUp = pos.y > rootParent.height / 2;
         }
     }
 
     MouseArea {
-        id: btn
+        id: backdrop
+        parent: (rootPlaceholder.open && rootPlaceholder.rootParent) ? rootPlaceholder.rootParent : rootPlaceholder
         anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-        onClicked: {
-            if (popup.visible) popup.close();
-            else popup.open();
-        }
-
-        MaterialIcon {
-            id: icon
-            anchors.centerIn: parent
-            text: "view_apps"
-            color: Colours.palette.m3onSurfaceVariant
-            fontStyle: Tokens.font.icon.medium
-        }
+        enabled: rootPlaceholder.open
+        hoverEnabled: enabled
+        onClicked: rootPlaceholder.open = false
+        z: 99
     }
 
-    Popup {
-        id: popup
-        parent: root
-        x: -width + root.width
-        y: root.height + 6
-        width: 360
-        height: 280
+    Item {
+        id: popupItem
+        z: 100
+        
+        width: rootPlaceholder.width
+        height: rootPlaceholder.height
 
-        padding: root.Tokens.padding.small
-        modal: false
-        focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent | Popup.CloseOnPressOutside
+        property bool expandLeft: false
+        property bool expandUp: false
+        
+        function reparentPopup(): void {
+            const newParent = (rootPlaceholder.open && rootPlaceholder.rootParent) ? rootPlaceholder.rootParent : rootPlaceholder;
+            if (!newParent) return;
+            const pos = rootPlaceholder.mapToItem(newParent, 0, 0);
+            
+            expandLeft = pos.x > newParent.width / 2;
+            expandUp = pos.y > newParent.height / 2;
 
-        enter: Transition {
-            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 150; easing.type: Easing.OutQuad }
+            popupItem.parent = newParent;
+            popupItem.x = pos.x;
+            popupItem.y = pos.y;
         }
-        exit: Transition {
-            NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 120; easing.type: Easing.InQuad }
+        
+        onParentChanged: {
+            if (parent === rootPlaceholder) {
+                x = 0;
+                y = 0;
+            }
         }
 
-        background: StyledRect {
-            radius: root.Tokens.rounding.large
-            color: Colours.palette.m3surfaceContainerHigh
-            border.width: 1
-            border.color: Colours.palette.m3outlineVariant
+        states: State {
+            name: "open"
+            when: rootPlaceholder.open
+
+            PropertyChanges {
+                popupItem.x: rootPlaceholder.rootParent ? rootPlaceholder.mapToItem(rootPlaceholder.rootParent, 0, 0).x : 0
+                popupItem.y: rootPlaceholder.rootParent ? rootPlaceholder.mapToItem(rootPlaceholder.rootParent, 0, 0).y : 0
+            }
         }
 
-        contentItem: Item {
-            id: containerItem
-            anchors.fill: parent
-
-            Component.onCompleted: {
-                if (root.content) {
-                    root.content.parent = containerItem;
-                    root.content.anchors.fill = containerItem;
+        transitions: Transition {
+            SequentialAnimation {
+                ScriptAction {
+                    script: popupItem.reparentPopup()
                 }
+                Anim {
+                    properties: "x,y"
+                }
+            }
+        }
+
+        Binding {
+            target: rootPlaceholder.content
+            property: "opacity"
+            value: rootPlaceholder.animDriver
+        }
+
+        BlobGroup {
+            id: blobGroup
+
+            color: Colours.palette.m3surfaceContainerHighest
+            smoothing: Tokens.rounding?.medium ?? 12
+            cornerFill: false
+
+            Behavior on color {
+                CAnim {}
+            }
+        }
+
+        BlobRect {
+            id: btnRect
+
+            anchors.fill: parent
+            anchors.margins: (!(btn.pressed || rootPlaceholder.pressOverride) && (btn.containsMouse || rootPlaceholder.hoverOverride) ? -(Tokens.padding?.extraSmall ?? 4) : 0) + (rootPlaceholder.open ? -(Tokens.padding?.extraSmall ?? 4) : 0)
+            group: blobGroup
+            radius: rootPlaceholder.open ? (Tokens.rounding?.large ?? 16) : (Tokens.rounding?.medium ?? 12)
+
+            Behavior on anchors.margins {
+                Anim {}
+            }
+
+            Behavior on radius {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+        }
+
+        BlobRect {
+            id: rect
+            
+            x: 0
+            y: 0
+            width: parent.width
+            height: parent.height
+
+            group: blobGroup
+            radius: Tokens.rounding?.large ?? 16
+            deformScale: 0.00001
+
+            states: State {
+                name: "open"
+                when: rootPlaceholder.open
+
+                PropertyChanges {
+                    target: rect
+                    width: rootPlaceholder.content.implicitWidth + rootPlaceholder.padding * 2
+                    height: rootPlaceholder.content.implicitHeight + rootPlaceholder.padding * 2
+                    x: popupItem.expandLeft ? (Tokens.spacing?.small ?? 8) - width : popupItem.width - (Tokens.spacing?.small ?? 8)
+                    y: popupItem.expandUp ? popupItem.height + rootPlaceholder.bottomMovement - height : -rootPlaceholder.topMovement
+                }
+                PropertyChanges {
+                    target: rootPlaceholder
+                    animDriver: 1
+                }
+            }
+
+            transitions: Transition {
+                Anim {
+                    properties: "x,width"
+                }
+                Anim {
+                    properties: "y,height"
+                    easing: Tokens.anim?.expressiveFastSpatial ?? Easing.OutCubic
+                }
+                Anim {
+                    property: "animDriver"
+                    type: Anim.DefaultEffects
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                clip: true
+                children: [rootPlaceholder.content]
+            }
+        }
+
+        MouseArea {
+            id: btn
+
+            anchors.centerIn: parent
+            implicitWidth: 36
+            implicitHeight: 36
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onClicked: rootPlaceholder.open = !rootPlaceholder.open
+
+            MaterialIcon {
+                id: iconItem
+
+                anchors.centerIn: parent
+                text: rootPlaceholder.icon
+                color: Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font?.icon?.medium ?? null
             }
         }
     }

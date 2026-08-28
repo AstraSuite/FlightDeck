@@ -6,7 +6,7 @@
 #include <QVariantMap>
 #include <QQmlEngine>
 
-namespace Helm::Hyprland {
+namespace FlightDeck::Hyprland {
 
 class HyprlandState : public QObject {
     Q_OBJECT
@@ -63,4 +63,4 @@ private:
     bool m_hasTouchscreen = false;
 };
 
-} // namespace Helm::Hyprland
+} // namespace FlightDeck::Hyprland

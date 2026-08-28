@@ -1,5 +1,5 @@
-# bash completion for helm
-_helm() {
+# bash completion for flightdeck
+_flightdeck() {
     local cur prev words cword
     _init_completion || return
 
@@ -19,4 +19,4 @@ _helm() {
     esac
 }
 
-complete -F _helm helm
+complete -F _flightdeck flightdeck

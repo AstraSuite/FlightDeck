@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 PageBase {
     id: root
@@ -14,8 +14,9 @@ PageBase {
     title: qsTr("Layer Rules")
 
     ColumnLayout {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
+        id: mainCol
+        anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
+        anchors.top: parent ? parent.top : undefined
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
@@ -24,11 +25,12 @@ PageBase {
             text: qsTr("Layer Rule Management")
         }
 
+        // Add Layer Rule via DialogRowButton (always rounded with first: true, last: true)
         DialogRowButton {
             id: addLayerBtn
-            rootParent: root.flickable
+            rootParent: root.modalOverlay
             first: true
-            last: (AstraHelmWriter.layerRules || []).length === 0
+            last: true
             icon: "add_circle"
             label: qsTr("Add Layer Rule")
             header: qsTr("Add New Layer Rule")
@@ -38,7 +40,8 @@ PageBase {
             property bool isBlur: true
             property bool isDimAround: false
             property bool isIgnoreAlpha: false
-            property string targetAnimation: ""
+            property string animType: "None"
+            property int popinPercent: 80
 
             acceptAllowed: targetNamespace.trim() !== ""
 
@@ -50,19 +53,24 @@ PageBase {
                         "dimaround": isDimAround,
                         "ignorealpha": isIgnoreAlpha
                     };
-                    if (targetAnimation.trim() !== "") {
-                        ruleMap["animation"] = targetAnimation.trim();
+                    if (animType !== "None" && animType.trim() !== "") {
+                        if (animType === "popin") {
+                            ruleMap["animation"] = "popin " + popinPercent + "%";
+                        } else {
+                            ruleMap["animation"] = animType;
+                        }
                     }
-                    AstraHelmWriter.addLayerRule(ruleMap);
-                    AstraHelmWriter.save();
+                    FlightDeckWriter.addLayerRule(ruleMap);
+                    FlightDeckWriter.save();
                     targetNamespace = "";
-                    targetAnimation = "";
+                    animType = "None";
+                    popinPercent = 80;
                 }
             }
 
             content: Component {
                 ColumnLayout {
-                    spacing: Tokens.spacing.small
+                    spacing: Tokens.spacing.medium
 
                     StyledText {
                         text: qsTr("Layer Surface Namespace")
@@ -111,81 +119,241 @@ PageBase {
                         }
                     }
 
-                    StyledTextField {
-                        Layout.fillWidth: true
-                        placeholderText: qsTr("Animation Style (Optional, e.g. popin 80%)")
-                        text: addLayerBtn.targetAnimation
-                        onTextEdited: addLayerBtn.targetAnimation = text
+                    StyledText {
+                        text: qsTr("Animation Style")
+                        font: Tokens.font.body.small
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    SelectRow {
+                        first: true
+                        last: addLayerBtn.animType !== "popin"
+                        label: qsTr("Animation Type")
+                        subtext: qsTr("Layer entrance and exit motion effect")
+                        menuItems: [
+                            MenuItem { text: qsTr("None"); icon: "block"; onClicked: addLayerBtn.animType = "None" },
+                            MenuItem { text: qsTr("popin"); icon: "open_in_full"; onClicked: addLayerBtn.animType = "popin" },
+                            MenuItem { text: qsTr("fade"); icon: "gradient"; onClicked: addLayerBtn.animType = "fade" },
+                            MenuItem { text: qsTr("slide"); icon: "slideshow"; onClicked: addLayerBtn.animType = "slide" },
+                            MenuItem { text: qsTr("slide top"); icon: "arrow_upward"; onClicked: addLayerBtn.animType = "slide top" },
+                            MenuItem { text: qsTr("slide bottom"); icon: "arrow_downward"; onClicked: addLayerBtn.animType = "slide bottom" },
+                            MenuItem { text: qsTr("slide left"); icon: "arrow_back"; onClicked: addLayerBtn.animType = "slide left" },
+                            MenuItem { text: qsTr("slide right"); icon: "arrow_forward"; onClicked: addLayerBtn.animType = "slide right" }
+                        ]
+                        active: {
+                            for (var i = 0; i < menuItems.length; i++) {
+                                if (menuItems[i].text === addLayerBtn.animType) return menuItems[i];
+                            }
+                            return menuItems[0];
+                        }
+                    }
+
+                    SliderRow {
+                        visible: addLayerBtn.animType === "popin"
+                        last: true
+                        label: qsTr("Popin Percentage")
+                        subtext: qsTr("Initial starting scale ratio for popin animation")
+                        value: addLayerBtn.popinPercent
+                        valueLabel: addLayerBtn.popinPercent + "%"
+                        from: 0
+                        to: 100
+                        stepSize: 5
+                        onMoved: v => addLayerBtn.popinPercent = Math.round(v)
+                        onInteraction: v => addLayerBtn.popinPercent = Math.round(v)
                     }
                 }
             }
         }
 
         SectionHeader {
-            text: qsTr("Configured Layer Rules (%1)").arg(AstraHelmWriter.layerRules.length)
+            text: qsTr("Configured Layer Rules (%1)").arg(FlightDeckWriter.layerRules.length)
         }
 
+        // Each Configured Layer Rule is its own DialogRowButton so editing morphs the entire button row!
         Repeater {
-            model: AstraHelmWriter.layerRules
+            model: FlightDeckWriter.layerRules
 
-            delegate: ConnectedRect {
-                id: ruleRow
+            delegate: DialogRowButton {
+                id: editLayerRow
                 required property var modelData
                 required property int index
 
+                rootParent: root.modalOverlay
                 first: index === 0
-                last: index === AstraHelmWriter.layerRules.length - 1
-                Layout.fillWidth: true
-                implicitHeight: 54
+                last: index === FlightDeckWriter.layerRules.length - 1
+                icon: "layers"
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: Tokens.padding.medium
-                    anchors.leftMargin: Tokens.padding.largeIncreased
-                    anchors.rightMargin: Tokens.padding.largeIncreased
-                    spacing: Tokens.spacing.medium
+                label: editLayerRow.modelData.namespace ? ("Namespace: " + editLayerRow.modelData.namespace) : ("Layer Rule " + (editLayerRow.index + 1))
 
-                    MaterialIcon {
-                        text: "layers"
-                        color: Colours.palette.m3primary
-                        fontStyle: Tokens.font.icon.medium
+                subtext: {
+                    var props = [];
+                    if (editLayerRow.modelData.blur) props.push("blur");
+                    if (editLayerRow.modelData.dimaround) props.push("dimaround");
+                    if (editLayerRow.modelData.ignorealpha) props.push("ignorealpha");
+                    if (editLayerRow.modelData.animation) props.push("anim: " + editLayerRow.modelData.animation);
+                    return props.length > 0 ? props.join(" • ") : qsTr("Default layer behavior");
+                }
+
+                header: qsTr("Edit Layer Rule")
+                acceptLabel: qsTr("Save Changes")
+
+                property string targetNamespace: editLayerRow.modelData.namespace || ""
+                property bool isBlur: !!editLayerRow.modelData.blur
+                property bool isDimAround: !!editLayerRow.modelData.dimaround
+                property bool isIgnoreAlpha: !!editLayerRow.modelData.ignorealpha
+
+                property string animType: {
+                    var a = editLayerRow.modelData.animation || "";
+                    if (!a) return "None";
+                    if (a.startsWith("popin")) return "popin";
+                    return a;
+                }
+                property int popinPercent: {
+                    var a = editLayerRow.modelData.animation || "";
+                    if (a.startsWith("popin")) {
+                        var m = a.match(/\d+/);
+                        if (m) return parseInt(m[0]);
                     }
+                    return 80;
+                }
 
-                    ColumnLayout {
-                        Layout.fillWidth: true
+                acceptAllowed: targetNamespace.trim() !== ""
+
+                onAccepted: {
+                    if (targetNamespace.trim() !== "") {
+                        var ruleMap = {
+                            "namespace": targetNamespace.trim(),
+                            "blur": isBlur,
+                            "dimaround": isDimAround,
+                            "ignorealpha": isIgnoreAlpha
+                        };
+                        if (animType !== "None" && animType.trim() !== "") {
+                            if (animType === "popin") {
+                                ruleMap["animation"] = "popin " + popinPercent + "%";
+                            } else {
+                                ruleMap["animation"] = animType;
+                            }
+                        }
+                        FlightDeckWriter.updateLayerRule(editLayerRow.index, ruleMap);
+                        FlightDeckWriter.save();
+                    }
+                }
+
+                trailingActions: Component {
+                    RowLayout {
                         spacing: 0
 
-                        StyledText {
-                            text: ruleRow.modelData.namespace ? "Namespace: " + ruleRow.modelData.namespace : "Layer Rule " + (ruleRow.index + 1)
-                            font: Tokens.font.body.small
-                            color: Colours.palette.m3onSurface
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
+                        IconButton {
+                            icon: "edit"
+                            type: IconButton.Text
+                            font: Tokens.font.icon.small
+                            onClicked: editLayerRow.open = true
                         }
 
-                        StyledText {
-                            text: {
-                                var props = [];
-                                if (ruleRow.modelData.blur) props.push("blur");
-                                if (ruleRow.modelData.dimaround) props.push("dimaround");
-                                if (ruleRow.modelData.ignorealpha) props.push("ignorealpha");
-                                if (ruleRow.modelData.animation) props.push("anim: " + ruleRow.modelData.animation);
-                                return props.length > 0 ? props.join(" • ") : qsTr("Default layer behavior");
+                        IconButton {
+                            icon: "delete"
+                            type: IconButton.Text
+                            font: Tokens.font.icon.small
+                            onClicked: {
+                                FlightDeckWriter.removeLayerRule(editLayerRow.index);
+                                FlightDeckWriter.save();
                             }
-                            font: Tokens.font.label.small
-                            color: Colours.palette.m3outline
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
                         }
                     }
+                }
 
-                    IconButton {
-                        icon: "delete"
-                        type: IconButton.Text
-                        font: Tokens.font.icon.small
-                        onClicked: {
-                            AstraHelmWriter.removeLayerRule(ruleRow.index);
-                            AstraHelmWriter.save();
+                content: Component {
+                    ColumnLayout {
+                        spacing: Tokens.spacing.medium
+
+                        StyledText {
+                            text: qsTr("Layer Surface Namespace")
+                            font: Tokens.font.body.small
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
+
+                        StyledTextField {
+                            Layout.fillWidth: true
+                            placeholderText: qsTr("e.g. rofi, waybar, notifications, caelestia-.*")
+                            text: editLayerRow.targetNamespace
+                            onTextEdited: editLayerRow.targetNamespace = text
+                        }
+
+                        StyledText {
+                            text: qsTr("Layer Surface Effects")
+                            font: Tokens.font.body.small
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.extraSmall / 2
+
+                            ToggleRow {
+                                first: true
+                                text: qsTr("Blur Surface")
+                                subtext: qsTr("Apply Kawase background blur behind layer surface")
+                                checked: editLayerRow.isBlur
+                                onToggled: editLayerRow.isBlur = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Dim Around")
+                                subtext: qsTr("Darken remainder of the screen behind layer")
+                                checked: editLayerRow.isDimAround
+                                onToggled: editLayerRow.isDimAround = checked
+                            }
+
+                            ToggleRow {
+                                last: true
+                                text: qsTr("Ignore Alpha")
+                                subtext: qsTr("Treat transparent layer pixels as blurred")
+                                checked: editLayerRow.isIgnoreAlpha
+                                onToggled: editLayerRow.isIgnoreAlpha = checked
+                            }
+                        }
+
+                        StyledText {
+                            text: qsTr("Animation Style")
+                            font: Tokens.font.body.small
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
+
+                        SelectRow {
+                            first: true
+                            last: editLayerRow.animType !== "popin"
+                            label: qsTr("Animation Type")
+                            subtext: qsTr("Layer entrance and exit motion effect")
+                            menuItems: [
+                                MenuItem { text: qsTr("None"); icon: "block"; onClicked: editLayerRow.animType = "None" },
+                                MenuItem { text: qsTr("popin"); icon: "open_in_full"; onClicked: editLayerRow.animType = "popin" },
+                                MenuItem { text: qsTr("fade"); icon: "gradient"; onClicked: editLayerRow.animType = "fade" },
+                                MenuItem { text: qsTr("slide"); icon: "slideshow"; onClicked: editLayerRow.animType = "slide" },
+                                MenuItem { text: qsTr("slide top"); icon: "arrow_upward"; onClicked: editLayerRow.animType = "slide top" },
+                                MenuItem { text: qsTr("slide bottom"); icon: "arrow_downward"; onClicked: editLayerRow.animType = "slide bottom" },
+                                MenuItem { text: qsTr("slide left"); icon: "arrow_back"; onClicked: editLayerRow.animType = "slide left" },
+                                MenuItem { text: qsTr("slide right"); icon: "arrow_forward"; onClicked: editLayerRow.animType = "slide right" }
+                            ]
+                            active: {
+                                for (var i = 0; i < menuItems.length; i++) {
+                                    if (menuItems[i].text === editLayerRow.animType) return menuItems[i];
+                                }
+                                return menuItems[0];
+                            }
+                        }
+
+                        SliderRow {
+                            visible: editLayerRow.animType === "popin"
+                            last: true
+                            label: qsTr("Popin Percentage")
+                            subtext: qsTr("Initial starting scale ratio for popin animation")
+                            value: editLayerRow.popinPercent
+                            valueLabel: editLayerRow.popinPercent + "%"
+                            from: 0
+                            to: 100
+                            stepSize: 5
+                            onMoved: v => editLayerRow.popinPercent = Math.round(v)
+                            onInteraction: v => editLayerRow.popinPercent = Math.round(v)
                         }
                     }
                 }
@@ -193,7 +361,7 @@ PageBase {
         }
 
         Item {
-            visible: AstraHelmWriter.layerRules.length === 0
+            visible: FlightDeckWriter.layerRules.length === 0
             Layout.fillWidth: true
             Layout.preferredHeight: 80
 

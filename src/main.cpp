@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     qputenv("QT_NO_XDG_DESKTOP_PORTAL", "1");
 
     // Perform one-time check that astra-helm.lua is sourced in hypr-user.lua
-    Helm::Caelestia::CaelestiaBootstrap::ensureAstraHelmSourced();
+    FlightDeck::Caelestia::CaelestiaBootstrap::ensureAstraHelmSourced();
 
     bool isCliCommand = false;
     if (argc > 1) {
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
         app.setOrganizationName(QStringLiteral("AstraSuite"));
         app.setApplicationVersion(QStringLiteral(ASTRA_VERSION));
 
-        return Helm::Cli::CliHandler::run(argc, argv);
+        return FlightDeck::Cli::CliHandler::run(argc, argv);
     }
 
     const QString userName = qgetenv("USER").isEmpty() ? QStringLiteral("default") : QString::fromLocal8Bit(qgetenv("USER"));
@@ -97,11 +97,11 @@ int main(int argc, char* argv[]) {
     app.setApplicationVersion(QStringLiteral(ASTRA_VERSION));
     app.setQuitOnLastWindowClosed(true);
 
-    const QString iconPath = QStringLiteral(":/assets/icons/astra-helm.svg");
+    const QString iconPath = QStringLiteral(":/assets/icons/flightdeck.svg");
     if (QFile::exists(iconPath)) {
         app.setWindowIcon(QIcon(iconPath));
     } else {
-        app.setWindowIcon(QIcon(QStringLiteral("assets/icons/astra-helm.svg")));
+        app.setWindowIcon(QIcon(QStringLiteral("assets/icons/flightdeck.svg")));
     }
 
     const QString fontPath = QStringLiteral(":/assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf");
@@ -110,21 +110,34 @@ int main(int argc, char* argv[]) {
     }
 
     // Register Singletons and Types
-    qmlRegisterSingletonType<ThemeWatcher>("Helm.Theme", 1, 0, "ThemeWatcher", &ThemeWatcher::create);
-    qmlRegisterSingletonType<ThemeWatcher>("Foundry.Theme", 1, 0, "ThemeWatcher", &ThemeWatcher::create);
+    const char* themeUris[] = { "FlightDeck.Theme", "Helm.Theme", "Foundry.Theme" };
+    for (const char* uri : themeUris) {
+        qmlRegisterSingletonType<ThemeWatcher>(uri, 1, 0, "ThemeWatcher", &ThemeWatcher::create);
+    }
 
-    qmlRegisterSingletonType<Helm::Caelestia::CaelestiaVars>("Helm.Caelestia", 1, 0, "CaelestiaVars", &Helm::Caelestia::CaelestiaVars::create);
-    qmlRegisterSingletonType<Helm::Caelestia::AstraHelmWriter>("Helm.Caelestia", 1, 0, "AstraHelmWriter", &Helm::Caelestia::AstraHelmWriter::create);
-    qmlRegisterSingletonType<Helm::Hyprland::HyprlandState>("Helm.Hyprland", 1, 0, "HyprlandState", &Helm::Hyprland::HyprlandState::create);
+    const char* caelestiaUris[] = { "FlightDeck.Caelestia", "Helm.Caelestia" };
+    for (const char* uri : caelestiaUris) {
+        qmlRegisterSingletonType<FlightDeck::Caelestia::CaelestiaVars>(uri, 1, 0, "CaelestiaVars", &FlightDeck::Caelestia::CaelestiaVars::create);
+        qmlRegisterSingletonType<FlightDeck::Caelestia::FlightDeckWriter>(uri, 1, 0, "FlightDeckWriter", &FlightDeck::Caelestia::FlightDeckWriter::create);
+        qmlRegisterSingletonType<FlightDeck::Caelestia::FlightDeckWriter>(uri, 1, 0, "AstraHelmWriter", &FlightDeck::Caelestia::FlightDeckWriter::create);
+    }
 
-    qmlRegisterSingletonType<Helm::Managers::MonitorManager>("Helm.Managers", 1, 0, "MonitorManager", &Helm::Managers::MonitorManager::create);
-    qmlRegisterSingletonType<Helm::Managers::AnimationManager>("Helm.Managers", 1, 0, "AnimationManager", &Helm::Managers::AnimationManager::create);
-    qmlRegisterSingletonType<Helm::Managers::CursorManager>("Helm.Managers", 1, 0, "CursorManager", &Helm::Managers::CursorManager::create);
-    qmlRegisterSingletonType<Helm::Managers::AutostartManager>("Helm.Managers", 1, 0, "AutostartManager", &Helm::Managers::AutostartManager::create);
-    qmlRegisterSingletonType<Helm::Managers::ProfileManager>("Helm.Managers", 1, 0, "ProfileManager", &Helm::Managers::ProfileManager::create);
-    qmlRegisterSingletonType<Helm::Managers::AirlockManager>("Helm.Managers", 1, 0, "AirlockManager", &Helm::Managers::AirlockManager::create);
+    const char* hyprlandUris[] = { "FlightDeck.Hyprland", "Helm.Hyprland" };
+    for (const char* uri : hyprlandUris) {
+        qmlRegisterSingletonType<FlightDeck::Hyprland::HyprlandState>(uri, 1, 0, "HyprlandState", &FlightDeck::Hyprland::HyprlandState::create);
+    }
 
-    const char* configUris[] = { "Helm.Config", "Foundry.Config", "Caelestia.Config" };
+    const char* managerUris[] = { "FlightDeck.Managers", "Helm.Managers" };
+    for (const char* uri : managerUris) {
+        qmlRegisterSingletonType<FlightDeck::Managers::MonitorManager>(uri, 1, 0, "MonitorManager", &FlightDeck::Managers::MonitorManager::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::AnimationManager>(uri, 1, 0, "AnimationManager", &FlightDeck::Managers::AnimationManager::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::CursorManager>(uri, 1, 0, "CursorManager", &FlightDeck::Managers::CursorManager::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::AutostartManager>(uri, 1, 0, "AutostartManager", &FlightDeck::Managers::AutostartManager::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::ProfileManager>(uri, 1, 0, "ProfileManager", &FlightDeck::Managers::ProfileManager::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::AirlockManager>(uri, 1, 0, "AirlockManager", &FlightDeck::Managers::AirlockManager::create);
+    }
+
+    const char* configUris[] = { "FlightDeck.Config", "Helm.Config", "Foundry.Config", "Caelestia.Config" };
     for (const char* uri : configUris) {
         qmlRegisterSingletonType<caelestia::config::TokenConfig>(uri, 1, 0, "Tokens", &caelestia::config::TokenConfig::create);
         qmlRegisterSingletonType<caelestia::config::GlobalConfig>(uri, 1, 0, "GlobalConfig", &caelestia::config::GlobalConfig::create);
@@ -164,7 +177,7 @@ int main(int argc, char* argv[]) {
         qmlRegisterAnonymousType<caelestia::config::FontSizeTokens>(uri, 1);
     }
 
-    const char* blobUris[] = { "Helm.Blobs", "Foundry.Blobs", "Caelestia.Blobs" };
+    const char* blobUris[] = { "FlightDeck.Blobs", "Helm.Blobs", "Foundry.Blobs", "Caelestia.Blobs" };
     for (const char* uri : blobUris) {
         qmlRegisterType<BlobGroup>(uri, 1, 0, "BlobGroup");
         qmlRegisterType<BlobInvertedRect>(uri, 1, 0, "BlobInvertedRect");

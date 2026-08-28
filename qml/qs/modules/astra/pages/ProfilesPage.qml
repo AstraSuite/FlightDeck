@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
-import Helm.Managers 1.0
+import FlightDeck.Managers 1.0
 
 PageBase {
     id: root
@@ -39,7 +39,7 @@ PageBase {
             first: true
             last: true
             title: qsTr("Create Snapshot Backup")
-            subtext: qsTr("Save current hypr-vars.lua & astra-helm.lua to named profile")
+            subtext: qsTr("Save current hypr-vars.lua & flightdeck.lua to named profile")
             currentValue: qsTr("Create Profile")
             onClicked: {
                 var name = "Backup_" + Qt.formatDateTime(new Date(), "yyyyMMdd_hhmmss");
@@ -91,7 +91,7 @@ PageBase {
                         }
 
                         StyledText {
-                            text: qsTr("Stored snapshot in ~/.local/share/astra-helm/profiles")
+                            text: qsTr("Stored snapshot in ~/.local/share/flightdeck/profiles")
                             font: Tokens.font.label.small
                             color: Colours.palette.m3outline
                             elide: Text.ElideRight

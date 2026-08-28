@@ -11,7 +11,7 @@
 #include <QJsonObject>
 #include <QDebug>
 
-namespace Helm::Caelestia {
+namespace FlightDeck::Caelestia {
 
 CaelestiaVars* CaelestiaVars::instance() {
     static CaelestiaVars inst;
@@ -251,7 +251,6 @@ void CaelestiaVars::loadFromFile() {
     }
 
     m_pendingVars.clear();
-    syncFromHyprland();
     emit varsChanged();
     emit pendingChanged();
     emit dirtyChanged();
@@ -333,35 +332,35 @@ void CaelestiaVars::applyKeywordToHyprland(const QString& key, const QVariant& v
     if (!socket) return;
 
     if (key == QStringLiteral("windowBorderSize")) {
-        socket->send(QStringLiteral("keyword general:border_size %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword general:border_size %1").arg(value.toInt()));
     } else if (key == QStringLiteral("windowRounding")) {
-        socket->send(QStringLiteral("keyword decoration:rounding %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword decoration:rounding %1").arg(value.toInt()));
     } else if (key == QStringLiteral("windowGapsIn")) {
-        socket->send(QStringLiteral("keyword general:gaps_in %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword general:gaps_in %1").arg(value.toInt()));
     } else if (key == QStringLiteral("windowGapsOut")) {
-        socket->send(QStringLiteral("keyword general:gaps_out %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword general:gaps_out %1").arg(value.toInt()));
     } else if (key == QStringLiteral("windowOpacity")) {
-        socket->send(QStringLiteral("keyword decoration:active_opacity %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword decoration:active_opacity %1").arg(QString::number(value.toDouble(), 'f', 2)));
     } else if (key == QStringLiteral("blurEnabled")) {
         socket->send(QStringLiteral("keyword decoration:blur:enabled %1").arg(value.toBool() ? 1 : 0));
     } else if (key == QStringLiteral("blurSize")) {
-        socket->send(QStringLiteral("keyword decoration:blur:size %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword decoration:blur:size %1").arg(value.toInt()));
     } else if (key == QStringLiteral("blurPasses")) {
-        socket->send(QStringLiteral("keyword decoration:blur:passes %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword decoration:blur:passes %1").arg(value.toInt()));
     } else if (key == QStringLiteral("blurXray")) {
         socket->send(QStringLiteral("keyword decoration:blur:xray %1").arg(value.toBool() ? 1 : 0));
     } else if (key == QStringLiteral("shadowEnabled")) {
         socket->send(QStringLiteral("keyword decoration:shadow:enabled %1").arg(value.toBool() ? 1 : 0));
     } else if (key == QStringLiteral("shadowRange")) {
-        socket->send(QStringLiteral("keyword decoration:shadow:range %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword decoration:shadow:range %1").arg(value.toInt()));
     } else if (key == QStringLiteral("shadowRenderPower")) {
-        socket->send(QStringLiteral("keyword decoration:shadow:render_power %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword decoration:shadow:render_power %1").arg(value.toInt()));
     } else if (key == QStringLiteral("touchpadDisableTyping")) {
         socket->send(QStringLiteral("keyword input:touchpad:disable_while_typing %1").arg(value.toBool() ? 1 : 0));
     } else if (key == QStringLiteral("touchpadScrollFactor")) {
-        socket->send(QStringLiteral("keyword input:touchpad:scroll_factor %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword input:touchpad:scroll_factor %1").arg(value.toDouble()));
     } else if (key == QStringLiteral("workspaceSwipeFingers")) {
-        socket->send(QStringLiteral("keyword gestures:workspace_swipe_fingers %1").arg(value.toString()));
+        socket->send(QStringLiteral("keyword gestures:workspace_swipe_fingers %1").arg(value.toInt()));
     } else if (key == QStringLiteral("cursorTheme") || key == QStringLiteral("cursorSize")) {
         QString theme = m_savedVars.value(QStringLiteral("cursorTheme"), m_defaults.value(QStringLiteral("cursorTheme"))).toString();
         int size = m_savedVars.value(QStringLiteral("cursorSize"), m_defaults.value(QStringLiteral("cursorSize"))).toInt();
@@ -509,9 +508,17 @@ QString CaelestiaVars::formatLua() const {
                     items.append(QStringLiteral("\"") + s + QStringLiteral("\""));
                 }
                 valStr = QStringLiteral("{ ") + items.join(QStringLiteral(", ")) + QStringLiteral(" }");
-            } else if (val.typeId() == QMetaType::Double) {
+            } else if (key == QStringLiteral("windowOpacity")) {
                 valStr = QString::number(val.toDouble(), 'f', 2);
-            } else if (val.typeId() == QMetaType::Int || val.typeId() == QMetaType::LongLong) {
+            } else if (key == QStringLiteral("touchpadScrollFactor")) {
+                valStr = QString::number(val.toDouble(), 'g', 4);
+            } else if (val.typeId() == QMetaType::Double || val.typeId() == QMetaType::Float) {
+                if (val.toDouble() == std::floor(val.toDouble())) {
+                    valStr = QString::number(static_cast<qint64>(std::round(val.toDouble())));
+                } else {
+                    valStr = QString::number(val.toDouble(), 'g', 6);
+                }
+            } else if (val.typeId() == QMetaType::Int || val.typeId() == QMetaType::LongLong || val.typeId() == QMetaType::UInt || val.typeId() == QMetaType::ULongLong) {
                 valStr = QString::number(val.toLongLong());
             } else {
                 const QString s = val.toString();
@@ -622,4 +629,4 @@ void CaelestiaVars::reload() {
     loadFromFile();
 }
 
-} // namespace Helm::Caelestia
+} // namespace FlightDeck::Caelestia

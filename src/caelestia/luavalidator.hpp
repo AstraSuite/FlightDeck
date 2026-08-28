@@ -3,7 +3,7 @@
 #include <QString>
 #include <QObject>
 
-namespace Helm::Caelestia {
+namespace FlightDeck::Caelestia {
 
 class LuaValidator {
 public:
@@ -14,4 +14,4 @@ private:
     static bool heuristicValidate(const QString& luaCode, QString* errorOut = nullptr);
 };
 
-} // namespace Helm::Caelestia
+} // namespace FlightDeck::Caelestia

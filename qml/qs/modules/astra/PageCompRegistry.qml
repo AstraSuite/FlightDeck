@@ -2,7 +2,7 @@ pragma Singleton
 
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.services
 import qs.modules.astra.common
@@ -115,7 +115,7 @@ QtObject {
         Component {
             StackPage {
                 Component {
-                    HelmSettingsPage {}
+                    FlightDeckSettingsPage {}
                 }
             }
         },

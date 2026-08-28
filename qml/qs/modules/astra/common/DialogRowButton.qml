@@ -2,8 +2,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Helm.Blobs
-import Helm.Config
+import FlightDeck.Blobs
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -19,21 +19,24 @@ Item {
     required property string header
     required property Component content
     required property string acceptLabel
+    property string subtext: ""
+    property Component trailingActions: null
     property bool first: false
     property bool last: true
     property bool acceptAllowed: true
     property bool separateContent
     property int horizontalContentMargin
 
-    property real openWidth: Math.min(rootParent.width * 0.8, Tokens.sizes.astra.maxDialogWidth)
-    property real openHeight: Math.min(rootParent.height * 0.8, Tokens.sizes.astra.maxDialogHeight)
+    property real openWidth: Math.min((rootParent ? rootParent.width : 600) * 0.9, Tokens.sizes?.astra?.maxDialogWidth ?? 580)
+    property real openHeight: Math.min((rootParent ? rootParent.height : 600) * 0.9, Tokens.sizes?.astra?.maxDialogHeight ?? 650)
     property bool open
 
     signal accepted
     signal cancelled
 
     function reparentWrapper(): void {
-        const newParent = open ? rootParent : root;
+        const newParent = (open && rootParent) ? rootParent : root;
+        if (!newParent || !dialogWrapper) return;
         const pos = dialogWrapper.mapToItem(newParent, 0, 0);
         dialogWrapper.parent = newParent;
         dialogWrapper.x = pos.x;
@@ -58,7 +61,7 @@ Item {
         id: backdrop
 
         anchors.fill: parent
-        parent: root.open ? root.rootParent : root
+        parent: (root.open && root.rootParent) ? root.rootParent : root
         enabled: false
         hoverEnabled: enabled
         onClicked: root.open = false
@@ -80,13 +83,13 @@ Item {
                 elevation.opacity: 1
                 openButton.opacity: 0
                 dialogContent.opacity: 1
-                dialogBg.radius: root.Tokens.rounding.extraLargeIncreased
-                dialogBg.topLeftRadius: root.Tokens.rounding.extraLargeIncreased
-                dialogBg.topRightRadius: root.Tokens.rounding.extraLargeIncreased
-                dialogBg.bottomLeftRadius: root.Tokens.rounding.extraLargeIncreased
-                dialogBg.bottomRightRadius: root.Tokens.rounding.extraLargeIncreased
-                dialogWrapper.x: (root.rootParent.width - root.openWidth) / 2
-                dialogWrapper.y: (root.rootParent.height - root.openHeight) / 2
+                dialogBg.radius: Tokens.rounding?.extraLargeIncreased ?? 32
+                dialogBg.topLeftRadius: Tokens.rounding?.extraLargeIncreased ?? 32
+                dialogBg.topRightRadius: Tokens.rounding?.extraLargeIncreased ?? 32
+                dialogBg.bottomLeftRadius: Tokens.rounding?.extraLargeIncreased ?? 32
+                dialogBg.bottomRightRadius: Tokens.rounding?.extraLargeIncreased ?? 32
+                dialogWrapper.x: root.rootParent ? (root.rootParent.width - root.openWidth) / 2 : 0
+                dialogWrapper.y: root.rootParent ? (root.rootParent.height - root.openHeight) / 2 : 0
                 dialogWrapper.width: root.openWidth
                 dialogWrapper.height: root.openHeight
             }
@@ -141,11 +144,11 @@ Item {
             group: blobGroup
             opacity: blobGroup.color.a
 
-            radius: Tokens.rounding.extraSmall
-            topLeftRadius: root.first ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
-            topRightRadius: root.first ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
-            bottomLeftRadius: root.last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
-            bottomRightRadius: root.last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+            radius: Tokens.rounding?.extraSmall ?? 4
+            topLeftRadius: root.first ? (Tokens.rounding?.extraLarge ?? 28) : (Tokens.rounding?.extraSmall ?? 4)
+            topRightRadius: root.first ? (Tokens.rounding?.extraLarge ?? 28) : (Tokens.rounding?.extraSmall ?? 4)
+            bottomLeftRadius: root.last ? (Tokens.rounding?.extraLarge ?? 28) : (Tokens.rounding?.extraSmall ?? 4)
+            bottomRightRadius: root.last ? (Tokens.rounding?.extraLarge ?? 28) : (Tokens.rounding?.extraSmall ?? 4)
         }
 
         RowButton {
@@ -164,7 +167,18 @@ Item {
             last: root.last
             icon: root.icon
             text: root.label
+            subtext: root.subtext
             onClicked: root.open = true
+
+            Loader {
+                id: trailingLoader
+                anchors.right: parent.right
+                anchors.rightMargin: Tokens.padding?.largeIncreased ?? 20
+                anchors.verticalCenter: parent.verticalCenter
+                z: 5
+                active: !!root.trailingActions
+                sourceComponent: root.trailingActions
+            }
         }
 
         Loader {
@@ -185,8 +199,8 @@ Item {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: Tokens.padding.extraLarge
-                    anchors.bottomMargin: Tokens.padding.largeIncreased
+                    anchors.margins: Tokens.padding?.extraLarge ?? 28
+                    anchors.bottomMargin: Tokens.padding?.largeIncreased ?? 20
                     spacing: 0
 
                     StyledText {
@@ -195,7 +209,7 @@ Item {
                     }
 
                     Loader {
-                        Layout.topMargin: Tokens.spacing.medium
+                        Layout.topMargin: Tokens.spacing?.medium ?? 12
                         Layout.fillWidth: true
                         active: root.separateContent
                         sourceComponent: StyledRect {
@@ -213,7 +227,7 @@ Item {
                     }
 
                     Loader {
-                        Layout.bottomMargin: Tokens.spacing.medium
+                        Layout.bottomMargin: Tokens.spacing?.medium ?? 12
                         Layout.fillWidth: true
                         active: root.separateContent
                         sourceComponent: StyledRect {
@@ -224,13 +238,13 @@ Item {
 
                     RowLayout {
                         Layout.alignment: Qt.AlignRight
-                        spacing: Tokens.spacing.extraSmall
+                        spacing: Tokens.spacing?.extraSmall ?? 4
 
                         TextButton {
                             type: TextButton.Text
                             isRound: true
-                            horizontalPadding: Tokens.padding.largeIncreased
-                            verticalPadding: Tokens.padding.medium
+                            horizontalPadding: Tokens.padding?.largeIncreased ?? 20
+                            verticalPadding: Tokens.padding?.medium ?? 12
                             text: qsTr("Cancel")
                             onClicked: {
                                 root.cancelled();
@@ -241,8 +255,8 @@ Item {
                         TextButton {
                             type: TextButton.Text
                             isRound: true
-                            horizontalPadding: Tokens.padding.largeIncreased
-                            verticalPadding: Tokens.padding.medium
+                            horizontalPadding: Tokens.padding?.largeIncreased ?? 20
+                            verticalPadding: Tokens.padding?.medium ?? 12
                             disabled: !root.acceptAllowed
                             text: root.acceptLabel
                             onClicked: {

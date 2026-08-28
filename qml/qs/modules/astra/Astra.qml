@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Helm.Blobs
-import Helm.Config
+import FlightDeck.Blobs
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.services

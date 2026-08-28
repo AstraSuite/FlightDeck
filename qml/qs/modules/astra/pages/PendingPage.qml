@@ -1,13 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
-import Helm.Caelestia 1.0
-import Helm.Hyprland 1.0
+import FlightDeck.Caelestia 1.0
+import FlightDeck.Hyprland 1.0
 
 PageBase {
     id: root
@@ -29,11 +29,11 @@ PageBase {
             first: true
             icon: "save"
             title: qsTr("Apply & Save to Disk")
-            subtext: qsTr("Write all pending changes to hypr-vars.lua and astra-helm.lua")
-            actionLabel: (CaelestiaVars.isDirty || AstraHelmWriter.isDirty) ? qsTr("Save Now") : qsTr("Up to Date")
+            subtext: qsTr("Write all pending changes to hypr-vars.lua and flightdeck.lua")
+            actionLabel: (CaelestiaVars.isDirty || FlightDeckWriter.isDirty) ? qsTr("Save Now") : qsTr("Up to Date")
             onClicked: {
                 CaelestiaVars.save();
-                AstraHelmWriter.save();
+                FlightDeckWriter.save();
                 HyprlandState.reloadCompositor();
             }
         }
@@ -55,15 +55,15 @@ PageBase {
             icon: "delete_sweep"
             title: qsTr("Discard Changes")
             subtext: qsTr("Revert all pending unsaved modifications")
-            actionLabel: (CaelestiaVars.isDirty || AstraHelmWriter.isDirty) ? qsTr("Revert") : qsTr("Clean")
+            actionLabel: (CaelestiaVars.isDirty || FlightDeckWriter.isDirty) ? qsTr("Revert") : qsTr("Clean")
             onClicked: {
                 CaelestiaVars.discardAll();
-                AstraHelmWriter.discard();
+                FlightDeckWriter.discard();
             }
         }
 
         SectionHeader {
-            text: qsTr("Pending Modifications (%1)").arg(CaelestiaVars.dirtyCount + AstraHelmWriter.dirtyCount)
+            text: qsTr("Pending Modifications (%1)").arg(CaelestiaVars.dirtyCount + FlightDeckWriter.dirtyCount)
         }
 
         Repeater {
@@ -83,7 +83,7 @@ PageBase {
         }
 
         Item {
-            visible: CaelestiaVars.dirtyCount === 0 && AstraHelmWriter.dirtyCount === 0
+            visible: CaelestiaVars.dirtyCount === 0 && FlightDeckWriter.dirtyCount === 0
             Layout.fillWidth: true
             Layout.preferredHeight: 80
 

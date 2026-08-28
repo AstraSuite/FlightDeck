@@ -1,5 +1,5 @@
 #include "autostartmanager.hpp"
-#include "../caelestia/astrahelmwriter.hpp"
+#include "../caelestia/flightdeckwriter.hpp"
 
 #include <QDir>
 #include <QFile>
@@ -7,7 +7,7 @@
 #include <QSettings>
 #include <QSet>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 AutostartManager* AutostartManager::instance() {
     static AutostartManager inst;
@@ -22,7 +22,7 @@ AutostartManager* AutostartManager::create(QQmlEngine*, QJSEngine*) {
 AutostartManager::AutostartManager(QObject* parent)
     : QObject(parent) {
     scanApps();
-    connect(Caelestia::AstraHelmWriter::instance(), &Caelestia::AstraHelmWriter::autostartChanged, this, &AutostartManager::activeCommandsChanged);
+    connect(Caelestia::FlightDeckWriter::instance(), &Caelestia::FlightDeckWriter::autostartChanged, this, &AutostartManager::activeCommandsChanged);
 }
 
 QVariantList AutostartManager::availableApps() const {
@@ -30,36 +30,60 @@ QVariantList AutostartManager::availableApps() const {
 }
 
 QStringList AutostartManager::activeCommands() const {
-    return Caelestia::AstraHelmWriter::instance()->autostartCommands();
+    return Caelestia::FlightDeckWriter::instance()->autostartCommands();
 }
 
 void AutostartManager::toggleApp(const QString& execCmd, bool enabled) {
     if (enabled) {
-        Caelestia::AstraHelmWriter::instance()->addAutostart(execCmd);
+        Caelestia::FlightDeckWriter::instance()->addAutostart(execCmd);
     } else {
         QStringList list = activeCommands();
         int idx = list.indexOf(execCmd);
         if (idx >= 0) {
-            Caelestia::AstraHelmWriter::instance()->removeAutostart(idx);
+            Caelestia::FlightDeckWriter::instance()->removeAutostart(idx);
         }
     }
 }
 
 void AutostartManager::addCustomCommand(const QString& cmd) {
-    Caelestia::AstraHelmWriter::instance()->addAutostart(cmd);
+    Caelestia::FlightDeckWriter::instance()->addAutostart(cmd);
 }
 
 void AutostartManager::updateCommand(int index, const QString& cmd) {
-    Caelestia::AstraHelmWriter::instance()->updateAutostart(index, cmd);
+    Caelestia::FlightDeckWriter::instance()->updateAutostart(index, cmd);
 }
 
 void AutostartManager::removeCommand(int index) {
-    Caelestia::AstraHelmWriter::instance()->removeAutostart(index);
+    Caelestia::FlightDeckWriter::instance()->removeAutostart(index);
 }
 
 void AutostartManager::scanApps() {
     m_apps.clear();
     QSet<QString> seen;
+
+    // 1. Also scan XDG autostart entries in ~/.config/autostart
+    const QString xdgAutostartDir = QDir::homePath() + QStringLiteral("/.config/autostart");
+    QDir autostartDir(xdgAutostartDir);
+    if (autostartDir.exists()) {
+        const QStringList xdgEntries = autostartDir.entryList({ QStringLiteral("*.desktop") }, QDir::Files);
+        for (const QString& f : xdgEntries) {
+            const QString fullPath = autostartDir.absoluteFilePath(f);
+            QSettings desktop(fullPath, QSettings::IniFormat);
+            desktop.beginGroup(QStringLiteral("Desktop Entry"));
+            if (desktop.value(QStringLiteral("Hidden"), false).toBool() || desktop.value(QStringLiteral("X-GNOME-Autostart-enabled"), true).toBool() == false) {
+                continue;
+            }
+            QString exec = desktop.value(QStringLiteral("Exec")).toString();
+            exec.remove(QStringLiteral("%u"));
+            exec.remove(QStringLiteral("%U"));
+            exec.remove(QStringLiteral("%f"));
+            exec.remove(QStringLiteral("%F"));
+            exec = exec.trimmed();
+            if (!exec.isEmpty()) {
+                Caelestia::FlightDeckWriter::instance()->addAutostart(exec);
+            }
+        }
+    }
 
     const QStringList appDirs = {
         QDir::homePath() + QStringLiteral("/.local/share/applications"),
@@ -107,4 +131,4 @@ void AutostartManager::scanApps() {
     emit appsChanged();
 }
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

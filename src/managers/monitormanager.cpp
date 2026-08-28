@@ -1,9 +1,9 @@
 #include "monitormanager.hpp"
 #include "../hyprland/hyprlandstate.hpp"
 #include "../hyprland/hyprlandsocket.hpp"
-#include "../caelestia/astrahelmwriter.hpp"
+#include "../caelestia/flightdeckwriter.hpp"
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 MonitorManager* MonitorManager::instance() {
     static MonitorManager inst;
@@ -25,12 +25,12 @@ QVariantList MonitorManager::liveMonitors() const {
 }
 
 QVariantList MonitorManager::configuredMonitors() const {
-    return Caelestia::AstraHelmWriter::instance()->monitors();
+    return Caelestia::FlightDeckWriter::instance()->monitors();
 }
 
 void MonitorManager::applyMonitor(const QString& name, const QString& mode, const QString& pos, qreal scale, int transform, bool disabled) {
-    // 1. Update in AstraHelmWriter
-    Caelestia::AstraHelmWriter::instance()->setMonitorConfig(name, mode, pos, scale, transform, disabled);
+    // 1. Update in FlightDeckWriter
+    Caelestia::FlightDeckWriter::instance()->setMonitorConfig(name, mode, pos, scale, transform, disabled);
 
     // 2. Dispatch keyword to running Hyprland for live preview
     if (!disabled) {
@@ -45,7 +45,7 @@ void MonitorManager::applyMonitor(const QString& name, const QString& mode, cons
 }
 
 void MonitorManager::saveMonitors() {
-    Caelestia::AstraHelmWriter::instance()->save();
+    Caelestia::FlightDeckWriter::instance()->save();
 }
 
 void MonitorManager::refresh() {
@@ -53,4 +53,4 @@ void MonitorManager::refresh() {
     emit monitorsChanged();
 }
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

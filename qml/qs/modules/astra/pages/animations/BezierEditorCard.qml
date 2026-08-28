@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.modules.astra.common
-import Helm.Managers 1.0
+import FlightDeck.Managers 1.0
 
 ConnectedRect {
     id: root

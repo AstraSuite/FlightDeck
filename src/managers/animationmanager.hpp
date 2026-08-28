@@ -6,7 +6,7 @@
 #include <QVariantMap>
 #include <QQmlEngine>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 class AnimationManager : public QObject {
     Q_OBJECT
@@ -51,4 +51,4 @@ private:
     QVariantList m_targets;
 };
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

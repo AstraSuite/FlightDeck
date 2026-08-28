@@ -8,7 +8,7 @@
 #include <QImage>
 #include <QQmlEngine>
 
-namespace Helm::Managers {
+namespace FlightDeck::Managers {
 
 class CursorManager : public QObject {
     Q_OBJECT
@@ -58,4 +58,4 @@ private:
     QVariantList m_themes;
 };
 
-} // namespace Helm::Managers
+} // namespace FlightDeck::Managers

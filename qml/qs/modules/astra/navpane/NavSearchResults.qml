@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Helm.Config
+import FlightDeck.Config
 import qs.components
 import qs.components.controls
 import qs.components.containers
@@ -11,7 +11,7 @@ import qs.modules.astra
 import qs.modules.astra.common
 import qs.modules.astra.navpane
 import "."
-import Helm.Caelestia 1.0
+import FlightDeck.Caelestia 1.0
 
 VerticalFadeFlickable {
     id: root

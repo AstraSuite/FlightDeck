@@ -1,5 +1,5 @@
 import QtQuick
-import Helm.Config
+import FlightDeck.Config
 import qs.services
 
 StyledText {
