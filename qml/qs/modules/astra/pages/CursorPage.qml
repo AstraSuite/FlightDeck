@@ -55,66 +55,69 @@ PageBase {
 
                         model: CursorManager.availableThemes
 
-                        delegate: StateLayer {
-                            id: itemLayer
+                        delegate: Item {
+                            id: itemRow
                             required property var modelData
                             required property int index
 
-                            width: parent ? parent.width : 320
+                            width: ListView.view ? ListView.view.width : 320
                             implicitHeight: 52
-                            radius: Tokens.rounding.small
 
-                            readonly property bool selected: themeRow.selectedTheme === (itemLayer.modelData ? itemLayer.modelData.name : "")
+                            readonly property bool selected: themeRow.selectedTheme === (itemRow.modelData ? itemRow.modelData.name : "")
 
-                            onClicked: {
-                                if (itemLayer.modelData) {
-                                    themeRow.selectedTheme = itemLayer.modelData.name;
-                                }
-                            }
+                            StateLayer {
+                                radius: Tokens.rounding.small
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: Tokens.padding.medium
-                                spacing: Tokens.spacing.medium
-
-                                Image {
-                                    id: cursorImg
-                                    source: (itemLayer.modelData && itemLayer.modelData.name) ? "image://cursor/" + itemLayer.modelData.name : ""
-                                    sourceSize.width: 32
-                                    sourceSize.height: 32
-                                    Layout.preferredWidth: 32
-                                    Layout.preferredHeight: 32
-                                    fillMode: Image.PreserveAspectFit
-                                    smooth: true
-                                    asynchronous: true
-                                }
-
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 0
-
-                                    StyledText {
-                                        text: itemLayer.modelData ? itemLayer.modelData.name : ""
-                                        font: Tokens.font.body.small
-                                        color: itemLayer.selected ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
-                                    }
-
-                                    StyledText {
-                                        text: itemLayer.modelData ? (itemLayer.modelData.isHyprcursor ? qsTr("Hyprcursor") : qsTr("XCursor")) : ""
-                                        font: Tokens.font.label.small
-                                        color: Colours.palette.m3outline
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
+                                onClicked: {
+                                    if (itemRow.modelData) {
+                                        themeRow.selectedTheme = itemRow.modelData.name;
                                     }
                                 }
 
-                                MaterialIcon {
-                                    visible: itemLayer.selected || (itemLayer.modelData && CursorManager.currentTheme === itemLayer.modelData.name)
-                                    text: "check"
-                                    color: Colours.palette.m3primary
-                                    fontStyle: Tokens.font.icon.small
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: Tokens.padding.medium
+                                    spacing: Tokens.spacing.medium
+
+                                    Image {
+                                        id: cursorImg
+                                        source: (itemRow.modelData && itemRow.modelData.name) ? "image://cursor/" + itemRow.modelData.name : ""
+                                        sourceSize.width: 32
+                                        sourceSize.height: 32
+                                        Layout.preferredWidth: 32
+                                        Layout.preferredHeight: 32
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                        asynchronous: true
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 0
+
+                                        StyledText {
+                                            text: itemRow.modelData ? itemRow.modelData.name : ""
+                                            font: Tokens.font.body.small
+                                            color: itemRow.selected ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+
+                                        StyledText {
+                                            text: itemRow.modelData ? (itemRow.modelData.isHyprcursor ? qsTr("Hyprcursor") : qsTr("XCursor")) : ""
+                                            font: Tokens.font.label.small
+                                            color: Colours.palette.m3outline
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+
+                                    MaterialIcon {
+                                        visible: itemRow.selected || (itemRow.modelData && CursorManager.currentTheme === itemRow.modelData.name)
+                                        text: "check"
+                                        color: Colours.palette.m3primary
+                                        fontStyle: Tokens.font.icon.small
+                                    }
                                 }
                             }
                         }

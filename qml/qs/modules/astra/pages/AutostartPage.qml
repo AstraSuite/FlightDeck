@@ -89,74 +89,77 @@ PageBase {
                             });
                         }
 
-                        delegate: StateLayer {
-                            id: itemLayer
+                        delegate: Item {
+                            id: itemRow
                             required property var modelData
                             required property int index
 
-                            width: parent ? parent.width : 320
+                            width: ListView.view ? ListView.view.width : 320
                             implicitHeight: 52
-                            radius: Tokens.rounding.small
 
-                            readonly property bool selected: addAppBtn.selectedExec === (itemLayer.modelData ? itemLayer.modelData.exec : "")
+                            readonly property bool selected: addAppBtn.selectedExec === (itemRow.modelData ? itemRow.modelData.exec : "")
 
-                            onClicked: {
-                                if (itemLayer.modelData) {
-                                    addAppBtn.selectedExec = itemLayer.modelData.exec;
-                                    addAppBtn.customCmd = "";
-                                }
-                            }
+                            StateLayer {
+                                radius: Tokens.rounding.small
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: Tokens.padding.medium
-                                spacing: Tokens.spacing.medium
-
-                                Image {
-                                    source: (itemLayer.modelData && itemLayer.modelData.icon) ? "image://icon/" + itemLayer.modelData.icon : ""
-                                    sourceSize.width: 32
-                                    sourceSize.height: 32
-                                    Layout.preferredWidth: 32
-                                    Layout.preferredHeight: 32
-                                    fillMode: Image.PreserveAspectFit
-                                    smooth: true
-                                    asynchronous: true
-                                    visible: itemLayer.modelData && itemLayer.modelData.icon !== ""
-                                }
-
-                                MaterialIcon {
-                                    visible: !itemLayer.modelData || !itemLayer.modelData.icon
-                                    text: "apps"
-                                    fontStyle: Tokens.font.icon.medium
-                                    color: Colours.palette.m3onSurfaceVariant
-                                }
-
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 0
-
-                                    StyledText {
-                                        text: itemLayer.modelData ? itemLayer.modelData.name : ""
-                                        font: Tokens.font.body.small
-                                        color: itemLayer.selected ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
-                                    }
-
-                                    StyledText {
-                                        text: itemLayer.modelData ? (itemLayer.modelData.comment ? itemLayer.modelData.comment : itemLayer.modelData.exec) : ""
-                                        font: Tokens.font.label.small
-                                        color: Colours.palette.m3outline
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
+                                onClicked: {
+                                    if (itemRow.modelData) {
+                                        addAppBtn.selectedExec = itemRow.modelData.exec;
+                                        addAppBtn.customCmd = "";
                                     }
                                 }
 
-                                MaterialIcon {
-                                    visible: itemLayer.selected || (itemLayer.modelData && AutostartManager.activeCommands.indexOf(itemLayer.modelData.exec) >= 0)
-                                    text: "check"
-                                    color: Colours.palette.m3primary
-                                    fontStyle: Tokens.font.icon.small
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: Tokens.padding.medium
+                                    spacing: Tokens.spacing.medium
+
+                                    Image {
+                                        source: (itemRow.modelData && itemRow.modelData.icon) ? "image://icon/" + itemRow.modelData.icon : ""
+                                        sourceSize.width: 32
+                                        sourceSize.height: 32
+                                        Layout.preferredWidth: 32
+                                        Layout.preferredHeight: 32
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                        asynchronous: true
+                                        visible: itemRow.modelData && itemRow.modelData.icon !== ""
+                                    }
+
+                                    MaterialIcon {
+                                        visible: !itemRow.modelData || !itemRow.modelData.icon
+                                        text: "apps"
+                                        fontStyle: Tokens.font.icon.medium
+                                        color: Colours.palette.m3onSurfaceVariant
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 0
+
+                                        StyledText {
+                                            text: itemRow.modelData ? itemRow.modelData.name : ""
+                                            font: Tokens.font.body.small
+                                            color: itemRow.selected ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+
+                                        StyledText {
+                                            text: itemRow.modelData ? (itemRow.modelData.comment ? itemRow.modelData.comment : itemRow.modelData.exec) : ""
+                                            font: Tokens.font.label.small
+                                            color: Colours.palette.m3outline
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+
+                                    MaterialIcon {
+                                        visible: itemRow.selected || (itemRow.modelData && AutostartManager.activeCommands.indexOf(itemRow.modelData.exec) >= 0)
+                                        text: "check"
+                                        color: Colours.palette.m3primary
+                                        fontStyle: Tokens.font.icon.small
+                                    }
                                 }
                             }
                         }

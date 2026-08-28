@@ -223,36 +223,40 @@ Popup {
                 clip: true
                 model: AstraHelmWriter.activeHyprlandLayers()
 
-                delegate: StateLayer {
+                delegate: Item {
+                    id: nsRow
                     required property string modelData
                     required property int index
 
-                    width: ListView.view.width
+                    width: ListView.view ? ListView.view.width : 320
                     implicitHeight: 44
-                    radius: Tokens.rounding.small
 
-                    onClicked: {
-                        root.targetNamespace = modelData;
-                        nsPicker.close();
-                    }
+                    StateLayer {
+                        radius: Tokens.rounding.small
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: Tokens.padding.small
-                        spacing: Tokens.spacing.small
-
-                        MaterialIcon {
-                            text: "layers"
-                            color: Colours.palette.m3primary
-                            fontStyle: Tokens.font.icon.small
+                        onClicked: {
+                            root.targetNamespace = nsRow.modelData;
+                            nsPicker.close();
                         }
 
-                        StyledText {
-                            text: modelData
-                            font: Tokens.font.body.small
-                            color: Colours.palette.m3onSurface
-                            elide: Text.ElideRight
-                            Layout.fillWidth: true
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: Tokens.padding.small
+                            spacing: Tokens.spacing.small
+
+                            MaterialIcon {
+                                text: "layers"
+                                color: Colours.palette.m3primary
+                                fontStyle: Tokens.font.icon.small
+                            }
+
+                            StyledText {
+                                text: nsRow.modelData
+                                font: Tokens.font.body.small
+                                color: Colours.palette.m3onSurface
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
                         }
                     }
                 }
