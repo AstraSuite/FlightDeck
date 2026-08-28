@@ -23,6 +23,10 @@ BlobPopup {
     bottomMovement: Tokens.padding?.large ?? 16
     implicitWidth: 36
     implicitHeight: 36
+    Layout.preferredWidth: 36
+    Layout.preferredHeight: 36
+    Layout.minimumWidth: 36
+    Layout.maximumWidth: 36
     color: open || hovered ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
     onOpenChanged: {
@@ -92,12 +96,11 @@ BlobPopup {
                         onClicked: {
                             root.open = false;
                             if (clientItem.modelData) {
-                                root.clientSelected(
-                                    clientItem.modelData.class || "",
-                                    clientItem.modelData.title || "",
-                                    clientItem.modelData.initialClass || "",
-                                    clientItem.modelData.initialTitle || ""
-                                );
+                                var winClass = clientItem.modelData.class || "";
+                                var winTitle = clientItem.modelData.title || "";
+                                var initClass = clientItem.modelData.initialClass || winClass;
+                                var initTitle = clientItem.modelData.initialTitle || winTitle;
+                                root.clientSelected(winClass, winTitle, initClass, initTitle);
                             }
                         }
 
@@ -108,7 +111,26 @@ BlobPopup {
                             anchors.margins: Tokens.padding?.medium ?? 12
                             spacing: Tokens.spacing?.medium ?? 12
 
+                            Image {
+                                id: appIconImg
+                                source: {
+                                    var c = clientItem.modelData;
+                                    if (!c) return "";
+                                    var iconName = c.initialClass || c.class || "";
+                                    return iconName ? ("image://icon/" + iconName) : "";
+                                }
+                                sourceSize.width: Math.round((Tokens.font?.icon?.large?.pointSize ?? 18) * 1.8)
+                                sourceSize.height: Math.round((Tokens.font?.icon?.large?.pointSize ?? 18) * 1.8)
+                                Layout.preferredWidth: Math.round((Tokens.font?.icon?.large?.pointSize ?? 18) * 1.8)
+                                Layout.preferredHeight: Math.round((Tokens.font?.icon?.large?.pointSize ?? 18) * 1.8)
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                asynchronous: true
+                                visible: status === Image.Ready
+                            }
+
                             MaterialIcon {
+                                visible: !appIconImg.visible
                                 text: "web_asset"
                                 fontStyle: Tokens.font?.icon?.medium ?? null
                                 color: Colours.palette.m3onSurfaceVariant
@@ -127,7 +149,7 @@ BlobPopup {
 
                                 StyledText {
                                     Layout.fillWidth: true
-                                    visible: text
+                                    visible: text !== ""
                                     text: clientItem.modelData ? (clientItem.modelData.title || "") : ""
                                     color: Colours.palette.m3outline
                                     font: Tokens.font?.label?.small ?? null

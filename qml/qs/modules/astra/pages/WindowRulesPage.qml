@@ -163,12 +163,16 @@ PageBase {
 
                             ClientPickerPopup {
                                 Layout.alignment: Qt.AlignVCenter
+                                Layout.preferredWidth: 36
+                                Layout.preferredHeight: 36
+                                Layout.minimumWidth: 36
+                                Layout.maximumWidth: 36
                                 rootParent: root.modalOverlay
-                                onClientSelected: (winClass, winTitle) => {
-                                    addRuleBtn.matchClass = "^(" + winClass + ")$";
-                                    if (winTitle && addRuleBtn.matchTitle === "") {
-                                        addRuleBtn.matchTitle = "^(" + winTitle + ")$";
-                                    }
+                                onClientSelected: (winClass, winTitle, initClass, initTitle) => {
+                                    if (winClass) addRuleBtn.matchClass = "^(" + winClass + ")$";
+                                    if (winTitle) addRuleBtn.matchTitle = "^(" + winTitle + ")$";
+                                    if (initClass) addRuleBtn.matchInitialClass = "^(" + initClass + ")$";
+                                    if (initTitle) addRuleBtn.matchInitialTitle = "^(" + initTitle + ")$";
                                 }
                             }
                         }
@@ -559,12 +563,16 @@ PageBase {
 
                                 ClientPickerPopup {
                                     Layout.alignment: Qt.AlignVCenter
+                                    Layout.preferredWidth: 36
+                                    Layout.preferredHeight: 36
+                                    Layout.minimumWidth: 36
+                                    Layout.maximumWidth: 36
                                     rootParent: root.modalOverlay
-                                    onClientSelected: (winClass, winTitle) => {
-                                        editRuleRow.matchClass = "^(" + winClass + ")$";
-                                        if (winTitle && editRuleRow.matchTitle === "") {
-                                            editRuleRow.matchTitle = "^(" + winTitle + ")$";
-                                        }
+                                    onClientSelected: (winClass, winTitle, initClass, initTitle) => {
+                                        if (winClass) editRuleRow.matchClass = "^(" + winClass + ")$";
+                                        if (winTitle) editRuleRow.matchTitle = "^(" + winTitle + ")$";
+                                        if (initClass) editRuleRow.matchInitialClass = "^(" + initClass + ")$";
+                                        if (initTitle) editRuleRow.matchInitialTitle = "^(" + initTitle + ")$";
                                     }
                                 }
                             }

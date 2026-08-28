@@ -145,12 +145,11 @@ Item {
                             anchors.fill: parent
                             onClicked: {
                                 if (itemRow.modelData) {
-                                    root.clientSelected(
-                                        itemRow.modelData.class || "",
-                                        itemRow.modelData.title || "",
-                                        itemRow.modelData.initialClass || "",
-                                        itemRow.modelData.initialTitle || ""
-                                    );
+                                    var winClass = itemRow.modelData.class || "";
+                                    var winTitle = itemRow.modelData.title || "";
+                                    var initClass = itemRow.modelData.initialClass || winClass;
+                                    var initTitle = itemRow.modelData.initialTitle || winTitle;
+                                    root.clientSelected(winClass, winTitle, initClass, initTitle);
                                     root.close();
                                 }
                             }
@@ -163,7 +162,26 @@ Item {
                             anchors.rightMargin: Tokens.padding.largeIncreased
                             spacing: Tokens.spacing.medium
 
+                            Image {
+                                id: dialogAppIconImg
+                                source: {
+                                    var c = itemRow.modelData;
+                                    if (!c) return "";
+                                    var iconName = c.initialClass || c.class || "";
+                                    return iconName ? ("image://icon/" + iconName) : "";
+                                }
+                                sourceSize.width: Math.round(Tokens.font.icon.medium.pointSize * 1.6)
+                                sourceSize.height: Math.round(Tokens.font.icon.medium.pointSize * 1.6)
+                                Layout.preferredWidth: Math.round(Tokens.font.icon.medium.pointSize * 1.6)
+                                Layout.preferredHeight: Math.round(Tokens.font.icon.medium.pointSize * 1.6)
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                asynchronous: true
+                                visible: status === Image.Ready
+                            }
+
                             MaterialIcon {
+                                visible: !dialogAppIconImg.visible
                                 text: "web_asset"
                                 fontStyle: Tokens.font.icon.medium
                                 color: Colours.palette.m3primary

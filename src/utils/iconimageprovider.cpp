@@ -4,8 +4,10 @@
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
+#include <QIcon>
 #include <QMutexLocker>
 #include <QPainter>
+#include <QPixmap>
 #include <QSvgRenderer>
 #include <QUrl>
 
@@ -91,6 +93,23 @@ QImage IconImageProvider::requestImage(const QString& id, QSize* size, const QSi
         }
     }
 
+    const QIcon themeIcon = QIcon::fromTheme(name);
+    if (!themeIcon.isNull()) {
+        const QPixmap pix = themeIcon.pixmap(targetSize);
+        if (!pix.isNull()) {
+            if (size) *size = pix.size();
+            return pix.toImage();
+        }
+    }
+    const QIcon themeLowerIcon = QIcon::fromTheme(name.toLower());
+    if (!themeLowerIcon.isNull()) {
+        const QPixmap pix = themeLowerIcon.pixmap(targetSize);
+        if (!pix.isNull()) {
+            if (size) *size = pix.size();
+            return pix.toImage();
+        }
+    }
+
     const QString resolved = resolvePath(name);
     if (!resolved.isEmpty()) {
         const QImage img = loadImage(resolved, targetSize);
@@ -122,9 +141,13 @@ QString IconImageProvider::resolvePath(const QString& name) {
         return m_iconMap.value(lower);
     }
     if (lower.contains(QLatin1Char('.'))) {
-        const QString noExt = lower.section(QLatin1Char('.'), 0, 0);
-        if (m_iconMap.contains(noExt)) {
-            return m_iconMap.value(noExt);
+        const QString lastPart = lower.section(QLatin1Char('.'), -1);
+        if (m_iconMap.contains(lastPart)) {
+            return m_iconMap.value(lastPart);
+        }
+        const QString firstPart = lower.section(QLatin1Char('.'), 0, 0);
+        if (m_iconMap.contains(firstPart)) {
+            return m_iconMap.value(firstPart);
         }
     }
     return QString();
