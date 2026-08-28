@@ -60,8 +60,9 @@ bool ProfileManager::createProfile(const QString& name) {
 
     const QString helmPath = Caelestia::FlightDeckWriter::flightDeckFilePath();
     if (QFile::exists(helmPath)) {
-        QFile::remove(dirPath + QStringLiteral("/astra-helm.lua"));
-        QFile::copy(helmPath, dirPath + QStringLiteral("/astra-helm.lua"));
+        const QString fileName = QFileInfo(helmPath).fileName();
+        QFile::remove(dirPath + QStringLiteral("/") + fileName);
+        QFile::copy(helmPath, dirPath + QStringLiteral("/") + fileName);
     }
 
     refresh();
@@ -85,8 +86,12 @@ bool ProfileManager::restoreProfile(const QString& name) {
         Caelestia::CaelestiaVars::instance()->reload();
     }
 
-    const QString savedHelm = dirPath + QStringLiteral("/astra-helm.lua");
     const QString targetHelm = Caelestia::FlightDeckWriter::flightDeckFilePath();
+    const QString targetFileName = QFileInfo(targetHelm).fileName();
+    QString savedHelm = dirPath + QStringLiteral("/") + targetFileName;
+    if (!QFile::exists(savedHelm)) {
+        savedHelm = dirPath + QStringLiteral("/astra-helm.lua");
+    }
     if (QFile::exists(savedHelm)) {
         QFile::remove(targetHelm);
         QFile::copy(savedHelm, targetHelm);

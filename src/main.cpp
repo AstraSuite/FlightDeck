@@ -45,8 +45,8 @@ int main(int argc, char* argv[]) {
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
     qputenv("QT_NO_XDG_DESKTOP_PORTAL", "1");
 
-    // Perform one-time check that astra-helm.lua is sourced in hypr-user.lua
-    FlightDeck::Caelestia::CaelestiaBootstrap::ensureAstraHelmSourced();
+    // Perform one-time check that astra-flightdeck.lua is sourced in hypr-user.lua
+    FlightDeck::Caelestia::CaelestiaBootstrap::ensureFlightDeckSourced();
 
     bool isCliCommand = false;
     if (argc > 1) {

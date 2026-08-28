@@ -24,6 +24,8 @@ Item {
     property bool first: false
     property bool last: true
     property bool acceptAllowed: true
+    property bool openAllowed: true
+    property bool rowDisabled: false
     property bool separateContent
     property int horizontalContentMargin
 
@@ -168,7 +170,12 @@ Item {
             icon: root.icon
             text: root.label
             subtext: root.subtext
-            onClicked: root.open = true
+            disabled: root.rowDisabled
+            onClicked: {
+                if (root.openAllowed) {
+                    root.open = true;
+                }
+            }
 
             Loader {
                 id: trailingLoader
@@ -195,6 +202,9 @@ Item {
             asynchronous: true
 
             sourceComponent: MouseArea {
+                id: contentMouseArea
+                property var host: root
+
                 onWheel: event => event.accepted = true
 
                 ColumnLayout {
@@ -204,14 +214,14 @@ Item {
                     spacing: 0
 
                     StyledText {
-                        text: root.header
+                        text: contentMouseArea.host.header
                         font: Tokens.font.title.builders.large.weight(Font.Normal).build()
                     }
 
                     Loader {
                         Layout.topMargin: Tokens.spacing?.medium ?? 12
                         Layout.fillWidth: true
-                        active: root.separateContent
+                        active: contentMouseArea.host.separateContent
                         sourceComponent: StyledRect {
                             implicitHeight: 1
                             color: Colours.palette.m3outline
@@ -221,15 +231,15 @@ Item {
                     Loader {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.leftMargin: root.horizontalContentMargin
-                        Layout.rightMargin: root.horizontalContentMargin
-                        sourceComponent: root.content
+                        Layout.leftMargin: contentMouseArea.host.horizontalContentMargin
+                        Layout.rightMargin: contentMouseArea.host.horizontalContentMargin
+                        sourceComponent: contentMouseArea.host.content
                     }
 
                     Loader {
                         Layout.bottomMargin: Tokens.spacing?.medium ?? 12
                         Layout.fillWidth: true
-                        active: root.separateContent
+                        active: contentMouseArea.host.separateContent
                         sourceComponent: StyledRect {
                             implicitHeight: 1
                             color: Colours.palette.m3outline
@@ -247,8 +257,8 @@ Item {
                             verticalPadding: Tokens.padding?.medium ?? 12
                             text: qsTr("Cancel")
                             onClicked: {
-                                root.cancelled();
-                                root.open = false;
+                                contentMouseArea.host.cancelled();
+                                contentMouseArea.host.open = false;
                             }
                         }
 
@@ -257,11 +267,11 @@ Item {
                             isRound: true
                             horizontalPadding: Tokens.padding?.largeIncreased ?? 20
                             verticalPadding: Tokens.padding?.medium ?? 12
-                            disabled: !root.acceptAllowed
-                            text: root.acceptLabel
+                            disabled: !contentMouseArea.host.acceptAllowed
+                            text: contentMouseArea.host.acceptLabel
                             onClicked: {
-                                root.accepted();
-                                root.open = false;
+                                contentMouseArea.host.accepted();
+                                contentMouseArea.host.open = false;
                             }
                         }
                     }

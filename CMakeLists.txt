@@ -109,6 +109,26 @@ qt_add_resources(flightdeck "qml_resources"
     FILES ${QML_FILES}
 )
 
+# Tests
+add_executable(test_autostart
+    tests/test_autostart.cpp
+    src/managers/autostartmanager.cpp
+    src/caelestia/flightdeckwriter.cpp
+    src/caelestia/luavalidator.cpp
+    src/hyprland/hyprlandsocket.cpp
+)
+target_include_directories(test_autostart PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/managers
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/caelestia
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hyprland
+)
+target_link_libraries(test_autostart PRIVATE
+    Qt6::Core
+    Qt6::Qml
+    Qt6::Network
+)
+
 # Installation
 include(GNUInstallDirs)
 

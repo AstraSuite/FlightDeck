@@ -27,7 +27,7 @@ PageBase {
             text: qsTr("Window Rules")
         }
 
-        // Add Window Rule via DialogRowButton (always rounded with first: true, last: true)
+        // Add Window Rule via DialogRowButton
         DialogRowButton {
             id: addRuleBtn
             rootParent: root.modalOverlay
@@ -38,143 +38,312 @@ PageBase {
             header: qsTr("Add New Window Rule")
             acceptLabel: qsTr("Save Rule")
 
-            property string matchKey: "class"
-            property string matchValue: ""
+            openWidth: Math.min((rootParent ? rootParent.width : 560) * 0.95, 540)
+            openHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
+
+            property string matchClass: ""
+            property string matchTitle: ""
+            property string matchInitialClass: ""
+            property string matchInitialTitle: ""
+            property string matchWorkspace: ""
+            property string matchTag: ""
+            property bool matchXWayland: false
+            property bool matchModal: false
+            property bool matchFloating: false
+            property bool matchFullscreen: false
+            property bool matchPinned: false
+
             property bool isFloat: true
             property bool isPin: false
-            property bool isOpaque: false
             property bool isCenter: false
+            property bool isOpaque: false
             property bool isNoBlur: false
+            property bool isFullscreen: false
             property string targetWorkspace: ""
+            property string targetSize: ""
+            property string targetMove: ""
+            property string targetOpacity: ""
+            property string targetRounding: ""
 
-            acceptAllowed: matchValue.trim() !== ""
+            acceptAllowed: matchClass.trim() !== "" || matchTitle.trim() !== "" || matchInitialClass.trim() !== "" || matchInitialTitle.trim() !== "" || matchWorkspace.trim() !== "" || matchTag.trim() !== "" || matchXWayland || matchModal || matchFloating || matchPinned
+
+            function resetFields() {
+                matchClass = "";
+                matchTitle = "";
+                matchInitialClass = "";
+                matchInitialTitle = "";
+                matchWorkspace = "";
+                matchTag = "";
+                matchXWayland = false;
+                matchModal = false;
+                matchFloating = false;
+                matchFullscreen = false;
+                matchPinned = false;
+
+                isFloat = true;
+                isPin = false;
+                isCenter = false;
+                isOpaque = false;
+                isNoBlur = false;
+                isFullscreen = false;
+                targetWorkspace = "";
+                targetSize = "";
+                targetMove = "";
+                targetOpacity = "";
+                targetRounding = "";
+            }
 
             onAccepted: {
-                if (matchValue.trim() !== "") {
-                    var ruleMap = {
-                        "match": {
-                            [matchKey]: matchValue.trim()
-                        },
-                        "float": isFloat,
-                        "pin": isPin,
-                        "center": isCenter,
-                        "opaque": isOpaque
-                    };
-                    if (isNoBlur) ruleMap["noblur"] = true;
-                    if (targetWorkspace.trim() !== "") {
-                        ruleMap["workspace"] = targetWorkspace.trim();
-                    }
-                    FlightDeckWriter.addWindowRule(ruleMap);
-                    FlightDeckWriter.save();
-                    matchValue = "";
-                    targetWorkspace = "";
+                var ruleMap = {
+                    "match": {}
+                };
+                if (matchClass.trim() !== "") ruleMap.match["class"] = matchClass.trim();
+                if (matchTitle.trim() !== "") ruleMap.match["title"] = matchTitle.trim();
+                if (matchInitialClass.trim() !== "") ruleMap.match["initial_class"] = matchInitialClass.trim();
+                if (matchInitialTitle.trim() !== "") ruleMap.match["initial_title"] = matchInitialTitle.trim();
+                if (matchWorkspace.trim() !== "") ruleMap.match["workspace"] = matchWorkspace.trim();
+                if (matchTag.trim() !== "") ruleMap.match["tag"] = matchTag.trim();
+                if (matchXWayland) ruleMap.match["xwayland"] = true;
+                if (matchModal) ruleMap.match["modal"] = true;
+                if (matchFloating) ruleMap.match["float"] = true;
+                if (matchFullscreen) ruleMap.match["fullscreen"] = true;
+                if (matchPinned) ruleMap.match["pin"] = true;
+
+                if (isFloat) ruleMap["float"] = true;
+                if (isPin) ruleMap["pin"] = true;
+                if (isCenter) ruleMap["center"] = true;
+                if (isOpaque) ruleMap["opaque"] = true;
+                if (isNoBlur) ruleMap["noblur"] = true;
+                if (isFullscreen) ruleMap["fullscreen"] = true;
+                if (targetWorkspace.trim() !== "") ruleMap["workspace"] = targetWorkspace.trim();
+                if (targetSize.trim() !== "") ruleMap["size"] = targetSize.trim();
+                if (targetMove.trim() !== "") ruleMap["move"] = targetMove.trim();
+                if (targetOpacity.trim() !== "") ruleMap["opacity"] = targetOpacity.trim();
+                if (targetRounding.trim() !== "") {
+                    var rVal = parseInt(targetRounding.trim());
+                    ruleMap["rounding"] = isNaN(rVal) ? targetRounding.trim() : rVal;
                 }
+
+                FlightDeckWriter.addWindowRule(ruleMap);
+                FlightDeckWriter.save();
+                resetFields();
             }
 
             content: Component {
-                ColumnLayout {
-                    spacing: Tokens.spacing.medium
+                ScrollView {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-                    StyledText {
-                        text: qsTr("Window Match Criteria")
-                        font: Tokens.font.body.small
-                        color: Colours.palette.m3onSurfaceVariant
-                    }
+                    ColumnLayout {
+                        width: parent.width
+                        spacing: Tokens.spacing.medium
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Tokens.spacing.small
+                        StyledText {
+                            text: qsTr("Window Match Criteria")
+                            font: Tokens.font.body.small
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
 
-                        OptionRow {
-                            first: true
-                            last: false
-                            Layout.preferredWidth: 160
-                            implicitHeight: 44
-                            title: ""
-                            options: [
-                                { label: qsTr("Window class"), value: "class" },
-                                { label: qsTr("Window title"), value: "title" },
-                                { label: qsTr("Initial class"), value: "initialClass" },
-                                { label: qsTr("Initial title"), value: "initialTitle" }
-                            ]
-                            currentValue: {
-                                if (addRuleBtn.matchKey === "class") return qsTr("Window class");
-                                if (addRuleBtn.matchKey === "title") return qsTr("Window title");
-                                return addRuleBtn.matchKey;
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.small
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Window Class regex (e.g. ^(zen|firefox)$)")
+                                text: addRuleBtn.matchClass
+                                onTextEdited: addRuleBtn.matchClass = text
                             }
-                            onOptionSelected: (val, lbl) => addRuleBtn.matchKey = val
+
+                            ClientPickerPopup {
+                                Layout.alignment: Qt.AlignVCenter
+                                rootParent: root.modalOverlay
+                                onClientSelected: (winClass, winTitle) => {
+                                    addRuleBtn.matchClass = "^(" + winClass + ")$";
+                                    if (winTitle && addRuleBtn.matchTitle === "") {
+                                        addRuleBtn.matchTitle = "^(" + winTitle + ")$";
+                                    }
+                                }
+                            }
                         }
 
                         StyledTextField {
                             Layout.fillWidth: true
-                            placeholderText: qsTr("e.g. ^(zen)$ or regex")
-                            text: addRuleBtn.matchValue
-                            onTextEdited: addRuleBtn.matchValue = text
+                            placeholderText: qsTr("Window Title regex (Optional, e.g. ^(Picture.*)$)")
+                            text: addRuleBtn.matchTitle
+                            onTextEdited: addRuleBtn.matchTitle = text
                         }
 
-                        ClientPickerPopup {
-                            Layout.alignment: Qt.AlignVCenter
-                            rootParent: root.modalOverlay
-                            onClientSelected: (winClass, winTitle) => {
-                                addRuleBtn.matchKey = "class";
-                                addRuleBtn.matchValue = "^(" + winClass + ")$";
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.small
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Initial Class (Optional)")
+                                text: addRuleBtn.matchInitialClass
+                                onTextEdited: addRuleBtn.matchInitialClass = text
+                            }
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Initial Title (Optional)")
+                                text: addRuleBtn.matchInitialTitle
+                                onTextEdited: addRuleBtn.matchInitialTitle = text
                             }
                         }
-                    }
 
-                    StyledText {
-                        text: qsTr("Window Actions & Effects")
-                        font: Tokens.font.body.small
-                        color: Colours.palette.m3onSurfaceVariant
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: Tokens.spacing.extraSmall / 2
-
-                        ToggleRow {
-                            first: true
-                            text: qsTr("Float Window")
-                            subtext: qsTr("Open matched windows in floating mode")
-                            checked: addRuleBtn.isFloat
-                            onToggled: addRuleBtn.isFloat = checked
+                        StyledText {
+                            text: qsTr("Match Modifiers")
+                            font: Tokens.font.label.small
+                            color: Colours.palette.m3outline
+                            Layout.topMargin: Tokens.spacing.extraSmall / 2
                         }
 
-                        ToggleRow {
-                            text: qsTr("Pin Window")
-                            subtext: qsTr("Stay visible across all workspaces")
-                            checked: addRuleBtn.isPin
-                            onToggled: addRuleBtn.isPin = checked
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.extraSmall / 2
+
+                            ToggleRow {
+                                first: true
+                                text: qsTr("XWayland Window Only")
+                                subtext: qsTr("Match windows running under XWayland")
+                                checked: addRuleBtn.matchXWayland
+                                onToggled: addRuleBtn.matchXWayland = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Modal Dialog Only")
+                                subtext: qsTr("Match dialog and confirmation windows")
+                                checked: addRuleBtn.matchModal
+                                onToggled: addRuleBtn.matchModal = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Floating Window Only")
+                                subtext: qsTr("Match currently floating windows")
+                                checked: addRuleBtn.matchFloating
+                                onToggled: addRuleBtn.matchFloating = checked
+                            }
+
+                            ToggleRow {
+                                last: true
+                                text: qsTr("Pinned Window Only")
+                                subtext: qsTr("Match pinned windows across workspaces")
+                                checked: addRuleBtn.matchPinned
+                                onToggled: addRuleBtn.matchPinned = checked
+                            }
                         }
 
-                        ToggleRow {
-                            text: qsTr("Center Window")
-                            subtext: qsTr("Center floating window upon creation")
-                            checked: addRuleBtn.isCenter
-                            onToggled: addRuleBtn.isCenter = checked
+                        StyledText {
+                            text: qsTr("Window Actions & Effects")
+                            font: Tokens.font.body.small
+                            color: Colours.palette.m3onSurfaceVariant
+                            Layout.topMargin: Tokens.spacing.extraSmall
                         }
 
-                        ToggleRow {
-                            text: qsTr("Force Opaque")
-                            subtext: qsTr("Disable transparency for this application")
-                            checked: addRuleBtn.isOpaque
-                            onToggled: addRuleBtn.isOpaque = checked
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.extraSmall / 2
+
+                            ToggleRow {
+                                first: true
+                                text: qsTr("Float Window")
+                                subtext: qsTr("Open matched windows in floating mode")
+                                checked: addRuleBtn.isFloat
+                                onToggled: addRuleBtn.isFloat = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Pin Window")
+                                subtext: qsTr("Stay visible across all workspaces")
+                                checked: addRuleBtn.isPin
+                                onToggled: addRuleBtn.isPin = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Center Window")
+                                subtext: qsTr("Center floating window upon creation")
+                                checked: addRuleBtn.isCenter
+                                onToggled: addRuleBtn.isCenter = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Fullscreen Window")
+                                subtext: qsTr("Launch window in fullscreen mode")
+                                checked: addRuleBtn.isFullscreen
+                                onToggled: addRuleBtn.isFullscreen = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Force Opaque")
+                                subtext: qsTr("Disable transparency for this application")
+                                checked: addRuleBtn.isOpaque
+                                onToggled: addRuleBtn.isOpaque = checked
+                            }
+
+                            ToggleRow {
+                                last: true
+                                text: qsTr("No Blur")
+                                subtext: qsTr("Disable backdrop blur behind window")
+                                checked: addRuleBtn.isNoBlur
+                                onToggled: addRuleBtn.isNoBlur = checked
+                            }
                         }
 
-                        ToggleRow {
-                            last: true
-                            text: qsTr("No Blur")
-                            subtext: qsTr("Disable blur behind window")
-                            checked: addRuleBtn.isNoBlur
-                            onToggled: addRuleBtn.isNoBlur = checked
+                        StyledText {
+                            text: qsTr("Placement & Size (Optional)")
+                            font: Tokens.font.body.small
+                            color: Colours.palette.m3onSurfaceVariant
+                            Layout.topMargin: Tokens.spacing.extraSmall
                         }
-                    }
 
-                    StyledTextField {
-                        Layout.fillWidth: true
-                        placeholderText: qsTr("Assign Workspace (Optional, e.g. 1, 2, special:sysmon)")
-                        text: addRuleBtn.targetWorkspace
-                        onTextEdited: addRuleBtn.targetWorkspace = text
+                        StyledTextField {
+                            Layout.fillWidth: true
+                            placeholderText: qsTr("Assign Workspace (e.g. 1, 2, special:communication)")
+                            text: addRuleBtn.targetWorkspace
+                            onTextEdited: addRuleBtn.targetWorkspace = text
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.small
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Initial Size (e.g. 1280 720)")
+                                text: addRuleBtn.targetSize
+                                onTextEdited: addRuleBtn.targetSize = text
+                            }
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Initial Position (e.g. 100 100)")
+                                text: addRuleBtn.targetMove
+                                onTextEdited: addRuleBtn.targetMove = text
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.small
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Opacity (e.g. 0.95 or 0.9 0.8)")
+                                text: addRuleBtn.targetOpacity
+                                onTextEdited: addRuleBtn.targetOpacity = text
+                            }
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Corner Rounding (px, e.g. 12)")
+                                text: addRuleBtn.targetRounding
+                                onTextEdited: addRuleBtn.targetRounding = text
+                            }
+                        }
                     }
                 }
             }
@@ -184,7 +353,7 @@ PageBase {
             text: qsTr("Configured Rules (%1)").arg(FlightDeckWriter.windowRules.length)
         }
 
-        // Each Configured Rule is its own DialogRowButton so editing morphs the entire button row!
+        // Each Configured Rule is its own DialogRowButton
         Repeater {
             model: FlightDeckWriter.windowRules
 
@@ -193,21 +362,26 @@ PageBase {
                 required property var modelData
                 required property int index
 
+                readonly property bool isReadOnly: editRuleRow.modelData ? (editRuleRow.modelData.isReadOnly || false) : false
+
                 rootParent: root.modalOverlay
                 first: index === 0
                 last: index === FlightDeckWriter.windowRules.length - 1
-                icon: "web_asset"
+                icon: editRuleRow.isReadOnly ? "tune" : "web_asset"
 
                 label: {
                     var r = editRuleRow.modelData;
                     var acts = [];
-                    if (r.float) acts.push(qsTr("Float window"));
+                    if (r.float) acts.push(qsTr("Float"));
                     if (r.opaque) acts.push(qsTr("Force opaque"));
-                    if (r.pin) acts.push(qsTr("Pin window"));
-                    if (r.center) acts.push(qsTr("Center window"));
-                    if (r.noblur) acts.push(qsTr("No blur"));
+                    if (r.pin) acts.push(qsTr("Pin"));
+                    if (r.center) acts.push(qsTr("Center"));
+                    if (r.noblur || r.no_blur) acts.push(qsTr("No blur"));
                     if (r.fullscreen) acts.push(qsTr("Fullscreen"));
                     if (r.workspace) acts.push(qsTr("Workspace %1").arg(r.workspace));
+                    if (r.size) acts.push(qsTr("Size %1").arg(r.size));
+                    if (r.opacity) acts.push(qsTr("Opacity %1").arg(r.opacity));
+                    if (r.rounding !== undefined) acts.push(qsTr("Rounding %1px").arg(r.rounding));
                     return acts.length > 0 ? acts.join(" + ") : (r.name || qsTr("Window Rule"));
                 }
 
@@ -216,56 +390,116 @@ PageBase {
                     var conds = [];
                     if (r.match) {
                         for (var k in r.match) {
-                            conds.push(k + ": " + r.match[k]);
+                            var val = r.match[k];
+                            if (val === true) {
+                                conds.push(k);
+                            } else {
+                                conds.push(k + ": " + val);
+                            }
                         }
                     }
-                    return conds.length > 0 ? conds.join(" • ") : qsTr("Default matching");
-                }
-
-                header: qsTr("Edit Window Rule")
-                acceptLabel: qsTr("Save Changes")
-
-                property string matchKey: {
-                    var r = editRuleRow.modelData;
-                    if (r.match) {
-                        for (var k in r.match) return k;
+                    var txt = conds.length > 0 ? conds.join(" • ") : qsTr("Default matching");
+                    if (editRuleRow.isReadOnly) {
+                        txt += " • " + qsTr("System default");
                     }
-                    return "class";
+                    return txt;
                 }
-                property string matchValue: {
-                    var r = editRuleRow.modelData;
-                    if (r.match) {
-                        for (var k in r.match) return r.match[k];
-                    }
-                    return "";
-                }
-                property bool isFloat: !!editRuleRow.modelData.float
-                property bool isPin: !!editRuleRow.modelData.pin
-                property bool isOpaque: !!editRuleRow.modelData.opaque
-                property bool isCenter: !!editRuleRow.modelData.center
-                property bool isNoBlur: !!editRuleRow.modelData.noblur
-                property string targetWorkspace: editRuleRow.modelData.workspace || ""
 
-                acceptAllowed: matchValue.trim() !== ""
+                header: editRuleRow.isReadOnly ? qsTr("Override Window Rule") : qsTr("Edit Window Rule")
+                acceptLabel: editRuleRow.isReadOnly ? qsTr("Save Override") : qsTr("Save Changes")
+
+                openWidth: Math.min((rootParent ? rootParent.width : 560) * 0.95, 540)
+                openHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
+
+                property string matchClass: ""
+                property string matchTitle: ""
+                property string matchInitialClass: ""
+                property string matchInitialTitle: ""
+                property string matchWorkspace: ""
+                property string matchTag: ""
+                property bool matchXWayland: false
+                property bool matchModal: false
+                property bool matchFloating: false
+                property bool matchFullscreen: false
+                property bool matchPinned: false
+
+                property bool isFloat: false
+                property bool isPin: false
+                property bool isCenter: false
+                property bool isOpaque: false
+                property bool isNoBlur: false
+                property bool isFullscreen: false
+                property string targetWorkspace: ""
+                property string targetSize: ""
+                property string targetMove: ""
+                property string targetOpacity: ""
+                property string targetRounding: ""
+
+                acceptAllowed: matchClass.trim() !== "" || matchTitle.trim() !== "" || matchInitialClass.trim() !== "" || matchInitialTitle.trim() !== "" || matchWorkspace.trim() !== "" || matchTag.trim() !== "" || matchXWayland || matchModal || matchFloating || matchPinned
+
+                onOpenChanged: {
+                    if (open && editRuleRow.modelData) {
+                        var r = editRuleRow.modelData;
+                        var m = r.match || {};
+                        matchClass = m["class"] || "";
+                        matchTitle = m["title"] || "";
+                        matchInitialClass = m["initial_class"] || m["initialClass"] || "";
+                        matchInitialTitle = m["initial_title"] || m["initialTitle"] || "";
+                        matchWorkspace = m["workspace"] || "";
+                        matchTag = m["tag"] || "";
+                        matchXWayland = !!m["xwayland"];
+                        matchModal = !!m["modal"];
+                        matchFloating = !!(m["float"] || m["floating"]);
+                        matchFullscreen = !!m["fullscreen"];
+                        matchPinned = !!(m["pin"] || m["pinned"]);
+
+                        isFloat = !!r.float;
+                        isPin = !!r.pin;
+                        isCenter = !!r.center;
+                        isOpaque = !!r.opaque;
+                        isNoBlur = !!(r.noblur || r.no_blur);
+                        isFullscreen = !!r.fullscreen;
+                        targetWorkspace = r.workspace || "";
+                        targetSize = r.size ? String(r.size) : "";
+                        targetMove = r.move ? String(r.move) : "";
+                        targetOpacity = r.opacity ? String(r.opacity) : "";
+                        targetRounding = r.rounding !== undefined ? String(r.rounding) : "";
+                    }
+                }
 
                 onAccepted: {
-                    if (matchValue.trim() !== "") {
-                        var ruleMap = {
-                            "match": {
-                                [matchKey]: matchValue.trim()
-                            },
-                            "float": isFloat,
-                            "pin": isPin,
-                            "center": isCenter,
-                            "opaque": isOpaque
-                        };
-                        if (isNoBlur) ruleMap["noblur"] = true;
-                        if (targetWorkspace.trim() !== "") {
-                            ruleMap["workspace"] = targetWorkspace.trim();
-                        }
-                        FlightDeckWriter.updateWindowRule(editRuleRow.index, ruleMap);
-                        FlightDeckWriter.save();
+                    var ruleMap = {
+                        "match": {}
+                    };
+                    if (matchClass.trim() !== "") ruleMap.match["class"] = matchClass.trim();
+                    if (matchTitle.trim() !== "") ruleMap.match["title"] = matchTitle.trim();
+                    if (matchInitialClass.trim() !== "") ruleMap.match["initial_class"] = matchInitialClass.trim();
+                    if (matchInitialTitle.trim() !== "") ruleMap.match["initial_title"] = matchInitialTitle.trim();
+                    if (matchWorkspace.trim() !== "") ruleMap.match["workspace"] = matchWorkspace.trim();
+                    if (matchTag.trim() !== "") ruleMap.match["tag"] = matchTag.trim();
+                    if (matchXWayland) ruleMap.match["xwayland"] = true;
+                    if (matchModal) ruleMap.match["modal"] = true;
+                    if (matchFloating) ruleMap.match["float"] = true;
+                    if (matchFullscreen) ruleMap.match["fullscreen"] = true;
+                    if (matchPinned) ruleMap.match["pin"] = true;
+
+                    if (isFloat) ruleMap["float"] = true;
+                    if (isPin) ruleMap["pin"] = true;
+                    if (isCenter) ruleMap["center"] = true;
+                    if (isOpaque) ruleMap["opaque"] = true;
+                    if (isNoBlur) ruleMap["noblur"] = true;
+                    if (isFullscreen) ruleMap["fullscreen"] = true;
+                    if (targetWorkspace.trim() !== "") ruleMap["workspace"] = targetWorkspace.trim();
+                    if (targetSize.trim() !== "") ruleMap["size"] = targetSize.trim();
+                    if (targetMove.trim() !== "") ruleMap["move"] = targetMove.trim();
+                    if (targetOpacity.trim() !== "") ruleMap["opacity"] = targetOpacity.trim();
+                    if (targetRounding.trim() !== "") {
+                        var rVal = parseInt(targetRounding.trim());
+                        ruleMap["rounding"] = isNaN(rVal) ? targetRounding.trim() : rVal;
                     }
+
+                    FlightDeckWriter.updateWindowRule(editRuleRow.index, ruleMap);
+                    FlightDeckWriter.save();
                 }
 
                 trailingActions: Component {
@@ -280,6 +514,7 @@ PageBase {
                         }
 
                         IconButton {
+                            visible: !editRuleRow.isReadOnly
                             icon: "delete"
                             type: IconButton.Text
                             font: Tokens.font.icon.small
@@ -292,109 +527,220 @@ PageBase {
                 }
 
                 content: Component {
-                    ColumnLayout {
-                        spacing: Tokens.spacing.medium
+                    ScrollView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-                        StyledText {
-                            text: qsTr("Window Match Criteria")
-                            font: Tokens.font.body.small
-                            color: Colours.palette.m3onSurfaceVariant
-                        }
+                        ColumnLayout {
+                            width: parent.width
+                            spacing: Tokens.spacing.medium
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: Tokens.spacing.small
+                            StyledText {
+                                text: qsTr("Window Match Criteria")
+                                font: Tokens.font.body.small
+                                color: Colours.palette.m3onSurfaceVariant
+                            }
 
-                            OptionRow {
-                                first: true
-                                last: false
-                                Layout.preferredWidth: 160
-                                implicitHeight: 44
-                                title: ""
-                                options: [
-                                    { label: qsTr("Window class"), value: "class" },
-                                    { label: qsTr("Window title"), value: "title" },
-                                    { label: qsTr("Initial class"), value: "initialClass" },
-                                    { label: qsTr("Initial title"), value: "initialTitle" }
-                                ]
-                                currentValue: {
-                                    if (editRuleRow.matchKey === "class") return qsTr("Window class");
-                                    if (editRuleRow.matchKey === "title") return qsTr("Window title");
-                                    return editRuleRow.matchKey;
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Tokens.spacing.small
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: qsTr("Window Class regex (e.g. ^(zen|firefox)$)")
+                                    text: editRuleRow.matchClass
+                                    onTextEdited: editRuleRow.matchClass = text
                                 }
-                                onOptionSelected: (val, lbl) => editRuleRow.matchKey = val
+
+                                ClientPickerPopup {
+                                    Layout.alignment: Qt.AlignVCenter
+                                    rootParent: root.modalOverlay
+                                    onClientSelected: (winClass, winTitle) => {
+                                        editRuleRow.matchClass = "^(" + winClass + ")$";
+                                        if (winTitle && editRuleRow.matchTitle === "") {
+                                            editRuleRow.matchTitle = "^(" + winTitle + ")$";
+                                        }
+                                    }
+                                }
                             }
 
                             StyledTextField {
                                 Layout.fillWidth: true
-                                placeholderText: qsTr("e.g. ^(zen)$ or regex")
-                                text: editRuleRow.matchValue
-                                onTextEdited: editRuleRow.matchValue = text
+                                placeholderText: qsTr("Window Title regex (Optional, e.g. ^(Picture.*)$)")
+                                text: editRuleRow.matchTitle
+                                onTextEdited: editRuleRow.matchTitle = text
                             }
 
-                            ClientPickerPopup {
-                            Layout.alignment: Qt.AlignVCenter
-                            rootParent: root.modalOverlay
-                                onClientSelected: (winClass, winTitle) => {
-                                    editRuleRow.matchKey = "class";
-                                    editRuleRow.matchValue = "^(" + winClass + ")$";
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Tokens.spacing.small
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: qsTr("Initial Class (Optional)")
+                                    text: editRuleRow.matchInitialClass
+                                    onTextEdited: editRuleRow.matchInitialClass = text
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: qsTr("Initial Title (Optional)")
+                                    text: editRuleRow.matchInitialTitle
+                                    onTextEdited: editRuleRow.matchInitialTitle = text
                                 }
                             }
-                        }
 
-                        StyledText {
-                            text: qsTr("Window Actions & Effects")
-                            font: Tokens.font.body.small
-                            color: Colours.palette.m3onSurfaceVariant
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: Tokens.spacing.extraSmall / 2
-
-                            ToggleRow {
-                                first: true
-                                text: qsTr("Float Window")
-                                subtext: qsTr("Open matched windows in floating mode")
-                                checked: editRuleRow.isFloat
-                                onToggled: editRuleRow.isFloat = checked
+                            StyledText {
+                                text: qsTr("Match Modifiers")
+                                font: Tokens.font.label.small
+                                color: Colours.palette.m3outline
+                                Layout.topMargin: Tokens.spacing.extraSmall / 2
                             }
 
-                            ToggleRow {
-                                text: qsTr("Pin Window")
-                                subtext: qsTr("Stay visible across all workspaces")
-                                checked: editRuleRow.isPin
-                                onToggled: editRuleRow.isPin = checked
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Tokens.spacing.extraSmall / 2
+
+                                ToggleRow {
+                                    first: true
+                                    text: qsTr("XWayland Window Only")
+                                    subtext: qsTr("Match windows running under XWayland")
+                                    checked: editRuleRow.matchXWayland
+                                    onToggled: editRuleRow.matchXWayland = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("Modal Dialog Only")
+                                    subtext: qsTr("Match dialog and confirmation windows")
+                                    checked: editRuleRow.matchModal
+                                    onToggled: editRuleRow.matchModal = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("Floating Window Only")
+                                    subtext: qsTr("Match currently floating windows")
+                                    checked: editRuleRow.matchFloating
+                                    onToggled: editRuleRow.matchFloating = checked
+                                }
+
+                                ToggleRow {
+                                    last: true
+                                    text: qsTr("Pinned Window Only")
+                                    subtext: qsTr("Match pinned windows across workspaces")
+                                    checked: editRuleRow.matchPinned
+                                    onToggled: editRuleRow.matchPinned = checked
+                                }
                             }
 
-                            ToggleRow {
-                                text: qsTr("Center Window")
-                                subtext: qsTr("Center floating window upon creation")
-                                checked: editRuleRow.isCenter
-                                onToggled: editRuleRow.isCenter = checked
+                            StyledText {
+                                text: qsTr("Window Actions & Effects")
+                                font: Tokens.font.body.small
+                                color: Colours.palette.m3onSurfaceVariant
+                                Layout.topMargin: Tokens.spacing.extraSmall
                             }
 
-                            ToggleRow {
-                                text: qsTr("Force Opaque")
-                                subtext: qsTr("Disable transparency for this application")
-                                checked: editRuleRow.isOpaque
-                                onToggled: editRuleRow.isOpaque = checked
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Tokens.spacing.extraSmall / 2
+
+                                ToggleRow {
+                                    first: true
+                                    text: qsTr("Float Window")
+                                    subtext: qsTr("Open matched windows in floating mode")
+                                    checked: editRuleRow.isFloat
+                                    onToggled: editRuleRow.isFloat = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("Pin Window")
+                                    subtext: qsTr("Stay visible across all workspaces")
+                                    checked: editRuleRow.isPin
+                                    onToggled: editRuleRow.isPin = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("Center Window")
+                                    subtext: qsTr("Center floating window upon creation")
+                                    checked: editRuleRow.isCenter
+                                    onToggled: editRuleRow.isCenter = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("Fullscreen Window")
+                                    subtext: qsTr("Launch window in fullscreen mode")
+                                    checked: editRuleRow.isFullscreen
+                                    onToggled: editRuleRow.isFullscreen = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("Force Opaque")
+                                    subtext: qsTr("Disable transparency for this application")
+                                    checked: editRuleRow.isOpaque
+                                    onToggled: editRuleRow.isOpaque = checked
+                                }
+
+                                ToggleRow {
+                                    last: true
+                                    text: qsTr("No Blur")
+                                    subtext: qsTr("Disable backdrop blur behind window")
+                                    checked: editRuleRow.isNoBlur
+                                    onToggled: editRuleRow.isNoBlur = checked
+                                }
                             }
 
-                            ToggleRow {
-                                last: true
-                                text: qsTr("No Blur")
-                                subtext: qsTr("Disable blur behind window")
-                                checked: editRuleRow.isNoBlur
-                                onToggled: editRuleRow.isNoBlur = checked
+                            StyledText {
+                                text: qsTr("Placement & Size (Optional)")
+                                font: Tokens.font.body.small
+                                color: Colours.palette.m3onSurfaceVariant
+                                Layout.topMargin: Tokens.spacing.extraSmall
                             }
-                        }
 
-                        StyledTextField {
-                            Layout.fillWidth: true
-                            placeholderText: qsTr("Assign Workspace (Optional, e.g. 1, 2, special:sysmon)")
-                            text: editRuleRow.targetWorkspace
-                            onTextEdited: editRuleRow.targetWorkspace = text
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                placeholderText: qsTr("Assign Workspace (e.g. 1, 2, special:communication)")
+                                text: editRuleRow.targetWorkspace
+                                onTextEdited: editRuleRow.targetWorkspace = text
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Tokens.spacing.small
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: qsTr("Initial Size (e.g. 1280 720)")
+                                    text: editRuleRow.targetSize
+                                    onTextEdited: editRuleRow.targetSize = text
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: qsTr("Initial Position (e.g. 100 100)")
+                                    text: editRuleRow.targetMove
+                                    onTextEdited: editRuleRow.targetMove = text
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Tokens.spacing.small
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: qsTr("Opacity (e.g. 0.95 or 0.9 0.8)")
+                                    text: editRuleRow.targetOpacity
+                                    onTextEdited: editRuleRow.targetOpacity = text
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: qsTr("Corner Rounding (px, e.g. 12)")
+                                    text: editRuleRow.targetRounding
+                                    onTextEdited: editRuleRow.targetRounding = text
+                                }
+                            }
                         }
                     }
                 }

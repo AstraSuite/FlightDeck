@@ -18,6 +18,7 @@ class FlightDeckWriter : public QObject {
     Q_PROPERTY(QVariantList layerRules READ layerRules WRITE setLayerRules NOTIFY layerRulesChanged)
     Q_PROPERTY(QVariantList customBinds READ customBinds WRITE setCustomBinds NOTIFY customBindsChanged)
     Q_PROPERTY(QStringList autostartCommands READ autostartCommands WRITE setAutostartCommands NOTIFY autostartChanged)
+    Q_PROPERTY(QVariantList autostartEntries READ autostartEntries WRITE setAutostartEntries NOTIFY autostartChanged)
     Q_PROPERTY(QVariantMap pluginConfigs READ pluginConfigs WRITE setPluginConfigs NOTIFY pluginsChanged)
 
 public:
@@ -45,6 +46,9 @@ public:
     QStringList autostartCommands() const;
     void setAutostartCommands(const QStringList& cmds);
 
+    QVariantList autostartEntries() const;
+    void setAutostartEntries(const QVariantList& entries);
+
     QVariantMap pluginConfigs() const;
     void setPluginConfigs(const QVariantMap& plugins);
 
@@ -55,10 +59,11 @@ public:
 
     Q_INVOKABLE void addLayerRule(const QVariantMap& rule);
     Q_INVOKABLE void removeLayerRule(int index);
+    Q_INVOKABLE void updateLayerRule(int index, const QVariantMap& rule);
 
-    Q_INVOKABLE void addAutostart(const QString& cmd);
+    Q_INVOKABLE void addAutostart(const QString& cmd, bool onReload = false);
     Q_INVOKABLE void removeAutostart(int index);
-    Q_INVOKABLE void updateAutostart(int index, const QString& cmd);
+    Q_INVOKABLE void updateAutostart(int index, const QString& cmd, bool onReload = false);
 
     Q_INVOKABLE void addCustomBind(const QString& key, const QString& dispatcher, const QString& args, bool isUnbindFirst = true);
     Q_INVOKABLE void removeCustomBind(int index);
@@ -98,6 +103,7 @@ private:
     QVariantList m_layerRules;
     QVariantList m_customBinds;
     QStringList m_autostartCommands;
+    QVariantList m_autostartEntries;
     QVariantMap m_pluginConfigs;
 };
 

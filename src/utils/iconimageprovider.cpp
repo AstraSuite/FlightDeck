@@ -100,7 +100,19 @@ QImage IconImageProvider::requestImage(const QString& id, QSize* size, const QSi
         }
     }
 
-    return QImage();
+    const QString fallbackPath = resolvePath(QStringLiteral("application-x-executable"));
+    if (!fallbackPath.isEmpty()) {
+        const QImage img = loadImage(fallbackPath, targetSize);
+        if (!img.isNull()) {
+            if (size) *size = img.size();
+            return img;
+        }
+    }
+
+    QImage fallbackImg(targetSize, QImage::Format_ARGB32_Premultiplied);
+    fallbackImg.fill(Qt::transparent);
+    if (size) *size = fallbackImg.size();
+    return fallbackImg;
 }
 
 QString IconImageProvider::resolvePath(const QString& name) {

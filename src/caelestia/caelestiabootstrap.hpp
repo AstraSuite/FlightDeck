@@ -9,7 +9,8 @@ class CaelestiaBootstrap : public QObject {
     Q_OBJECT
 
 public:
-    static void ensureAstraHelmSourced();
+    static void ensureFlightDeckSourced();
+    static void ensureAstraHelmSourced() { ensureFlightDeckSourced(); }
 };
 
 } // namespace FlightDeck::Caelestia
