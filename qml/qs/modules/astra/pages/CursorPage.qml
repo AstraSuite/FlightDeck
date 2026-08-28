@@ -27,15 +27,25 @@ PageBase {
 
         DialogRowButton {
             id: themeRow
+            rootParent: root.flickable
             first: true
+            last: false
             icon: "mouse"
             label: qsTr("Cursor Theme")
             header: qsTr("Select Cursor Theme")
             acceptLabel: qsTr("Apply")
+            separateContent: true
+            horizontalContentMargin: -Tokens.padding.small
 
             property string selectedTheme: CursorManager.currentTheme
 
             acceptAllowed: selectedTheme !== ""
+
+            onOpenChanged: {
+                if (open) {
+                    selectedTheme = CursorManager.currentTheme;
+                }
+            }
 
             onAccepted: {
                 if (selectedTheme !== "") {
@@ -44,79 +54,94 @@ PageBase {
             }
 
             content: Component {
-                ColumnLayout {
-                    spacing: Tokens.spacing.small
+                VerticalFadeListView {
+                    spacing: 0
+                    topMargin: Tokens.padding.large
+                    bottomMargin: Tokens.padding.large
 
-                    VerticalFadeListView {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.preferredHeight: 260
-                        clip: true
+                    model: CursorManager.availableThemes
 
-                        model: CursorManager.availableThemes
+                    delegate: StyledRect {
+                        id: itemRow
+                        required property var modelData
+                        required property int index
 
-                        delegate: Item {
-                            id: itemRow
-                            required property var modelData
-                            required property int index
+                        readonly property bool selected: themeRow.selectedTheme === (itemRow.modelData ? itemRow.modelData.name : "")
 
-                            width: ListView.view ? ListView.view.width : 320
-                            implicitHeight: 52
+                        anchors.left: ListView.view.contentItem.left
+                        anchors.right: ListView.view.contentItem.right
+                        anchors.margins: 1
+                        implicitHeight: Math.max(52, col.implicitHeight + Tokens.padding.medium * 2)
 
-                            readonly property bool selected: themeRow.selectedTheme === (itemRow.modelData ? itemRow.modelData.name : "")
+                        radius: stateLayer.pressed ? Tokens.rounding.extraSmall : selected ? Tokens.rounding.largeIncreased : Tokens.rounding.medium
+                        color: Qt.alpha(Colours.palette.m3tertiaryContainer, selected ? 1 : 0)
 
-                            StateLayer {
-                                radius: Tokens.rounding.small
+                        Behavior on radius {
+                            Anim {
+                                type: Anim.SlowEffects
+                            }
+                        }
 
-                                onClicked: {
-                                    if (itemRow.modelData) {
-                                        themeRow.selectedTheme = itemRow.modelData.name;
-                                    }
+                        StateLayer {
+                            id: stateLayer
+                            anchors.fill: parent
+                            onClicked: {
+                                if (itemRow.modelData) {
+                                    themeRow.selectedTheme = itemRow.modelData.name;
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.margins: Tokens.padding.large
+                            spacing: Tokens.spacing.medium
+
+                            Image {
+                                id: cursorImg
+                                source: (itemRow.modelData && itemRow.modelData.name) ? "image://cursor/" + itemRow.modelData.name : ""
+                                sourceSize.width: 32
+                                sourceSize.height: 32
+                                Layout.preferredWidth: 32
+                                Layout.preferredHeight: 32
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                asynchronous: true
+                            }
+
+                            ColumnLayout {
+                                id: col
+                                Layout.fillWidth: true
+                                spacing: 0
+
+                                StyledText {
+                                    text: itemRow.modelData ? itemRow.modelData.name : ""
+                                    font: Tokens.font.body.small
+                                    color: itemRow.selected ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
                                 }
 
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.margins: Tokens.padding.medium
-                                    spacing: Tokens.spacing.medium
+                                StyledText {
+                                    text: itemRow.modelData ? (itemRow.modelData.isHyprcursor ? qsTr("Hyprcursor") : qsTr("XCursor")) : ""
+                                    font: Tokens.font.label.small
+                                    color: itemRow.selected ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3outline
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                }
+                            }
 
-                                    Image {
-                                        id: cursorImg
-                                        source: (itemRow.modelData && itemRow.modelData.name) ? "image://cursor/" + itemRow.modelData.name : ""
-                                        sourceSize.width: 32
-                                        sourceSize.height: 32
-                                        Layout.preferredWidth: 32
-                                        Layout.preferredHeight: 32
-                                        fillMode: Image.PreserveAspectFit
-                                        smooth: true
-                                        asynchronous: true
-                                    }
+                            MaterialIcon {
+                                text: "check"
+                                color: Colours.palette.m3onTertiaryContainer
+                                fontStyle: Tokens.font.icon.medium
+                                opacity: itemRow.selected ? 1 : 0
 
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 0
-
-                                        StyledText {
-                                            text: itemRow.modelData ? itemRow.modelData.name : ""
-                                            font: Tokens.font.body.small
-                                            color: itemRow.selected ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                                            elide: Text.ElideRight
-                                            Layout.fillWidth: true
-                                        }
-
-                                        StyledText {
-                                            text: itemRow.modelData ? (itemRow.modelData.isHyprcursor ? qsTr("Hyprcursor") : qsTr("XCursor")) : ""
-                                            font: Tokens.font.label.small
-                                            color: Colours.palette.m3outline
-                                            elide: Text.ElideRight
-                                            Layout.fillWidth: true
-                                        }
-                                    }
-
-                                    MaterialIcon {
-                                        visible: itemRow.selected || (itemRow.modelData && CursorManager.currentTheme === itemRow.modelData.name)
-                                        text: "check"
-                                        color: Colours.palette.m3primary
-                                        fontStyle: Tokens.font.icon.small
+                                Behavior on opacity {
+                                    Anim {
+                                        type: Anim.SlowEffects
                                     }
                                 }
                             }

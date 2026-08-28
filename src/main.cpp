@@ -164,7 +164,7 @@ int main(int argc, char* argv[]) {
         qmlRegisterAnonymousType<caelestia::config::FontSizeTokens>(uri, 1);
     }
 
-    const char* blobUris[] = { "Helm.Blobs", "Foundry.Blobs" };
+    const char* blobUris[] = { "Helm.Blobs", "Foundry.Blobs", "Caelestia.Blobs" };
     for (const char* uri : blobUris) {
         qmlRegisterType<BlobGroup>(uri, 1, 0, "BlobGroup");
         qmlRegisterType<BlobInvertedRect>(uri, 1, 0, "BlobInvertedRect");

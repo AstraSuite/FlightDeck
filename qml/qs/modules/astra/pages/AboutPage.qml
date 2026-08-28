@@ -37,7 +37,7 @@ PageBase {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "Helm"
+                    text: "FlightDeck"
                     font: Tokens.font.headline.large
                     color: Colours.palette.m3onSurface
                 }

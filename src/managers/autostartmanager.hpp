@@ -27,6 +27,7 @@ public:
 
     Q_INVOKABLE void toggleApp(const QString& execCmd, bool enabled);
     Q_INVOKABLE void addCustomCommand(const QString& cmd);
+    Q_INVOKABLE void updateCommand(int index, const QString& cmd);
     Q_INVOKABLE void removeCommand(int index);
     Q_INVOKABLE void scanApps();
 

@@ -49,6 +49,10 @@ void AutostartManager::addCustomCommand(const QString& cmd) {
     Caelestia::AstraHelmWriter::instance()->addAutostart(cmd);
 }
 
+void AutostartManager::updateCommand(int index, const QString& cmd) {
+    Caelestia::AstraHelmWriter::instance()->updateAutostart(index, cmd);
+}
+
 void AutostartManager::removeCommand(int index) {
     Caelestia::AstraHelmWriter::instance()->removeAutostart(index);
 }

@@ -177,6 +177,15 @@ void AstraHelmWriter::removeAutostart(int index) {
     }
 }
 
+void AstraHelmWriter::updateAutostart(int index, const QString& cmd) {
+    if (index >= 0 && index < m_autostartCommands.size()) {
+        m_autostartCommands[index] = cmd;
+        m_isDirty = true;
+        emit autostartChanged();
+        emit dirtyChanged();
+    }
+}
+
 void AstraHelmWriter::addCustomBind(const QString& key, const QString& dispatcher, const QString& args, bool isUnbindFirst) {
     QVariantMap bindMap{
         { QStringLiteral("key"), key },
@@ -193,6 +202,15 @@ void AstraHelmWriter::addCustomBind(const QString& key, const QString& dispatche
 void AstraHelmWriter::removeCustomBind(int index) {
     if (index >= 0 && index < m_customBinds.size()) {
         m_customBinds.removeAt(index);
+        m_isDirty = true;
+        emit customBindsChanged();
+        emit dirtyChanged();
+    }
+}
+
+void AstraHelmWriter::updateCustomBind(int index, const QVariantMap& bindMap) {
+    if (index >= 0 && index < m_customBinds.size()) {
+        m_customBinds[index] = bindMap;
         m_isDirty = true;
         emit customBindsChanged();
         emit dirtyChanged();

@@ -1,6 +1,7 @@
 module qs.modules.astra.common
 AnimatedLogo 1.0 AnimatedLogo.qml
 ButtonRow 1.0 ButtonRow.qml
+RowButton 1.0 RowButton.qml
 ConnectedRect 1.0 ConnectedRect.qml
 InfoRow 1.0 InfoRow.qml
 PageBase 1.0 PageBase.qml
@@ -17,3 +18,6 @@ KeybindRow 1.0 KeybindRow.qml
 BlobPopup 1.0 BlobPopup.qml
 PopupRow 1.0 PopupRow.qml
 DialogRowButton 1.0 DialogRowButton.qml
+DialogSelectButton 1.0 DialogSelectButton.qml
+AppPickerDialog 1.0 AppPickerDialog.qml
+ClientPickerDialog 1.0 ClientPickerDialog.qml

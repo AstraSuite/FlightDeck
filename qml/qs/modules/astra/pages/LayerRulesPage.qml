@@ -26,7 +26,7 @@ PageBase {
 
         DialogRowButton {
             id: addLayerBtn
-            rootParent: root
+            rootParent: root.flickable
             first: true
             last: (AstraHelmWriter.layerRules || []).length === 0
             icon: "add_circle"

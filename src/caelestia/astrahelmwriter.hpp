@@ -61,9 +61,11 @@ public:
 
     Q_INVOKABLE void addAutostart(const QString& cmd);
     Q_INVOKABLE void removeAutostart(int index);
+    Q_INVOKABLE void updateAutostart(int index, const QString& cmd);
 
     Q_INVOKABLE void addCustomBind(const QString& key, const QString& dispatcher, const QString& args, bool isUnbindFirst = true);
     Q_INVOKABLE void removeCustomBind(int index);
+    Q_INVOKABLE void updateCustomBind(int index, const QVariantMap& bindMap);
 
     Q_INVOKABLE void setMonitorConfig(const QString& output, const QString& mode, const QString& position, qreal scale, int transform = 0, bool disabled = false);
 

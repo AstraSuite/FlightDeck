@@ -8,196 +8,247 @@ import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.services
+import qs.modules.astra.common
 
 Item {
     id: root
 
-    property Item rootParent: null
+    required property Item rootParent
+    required property string icon
+    required property string label
+    required property string header
+    required property Component content
+    required property string acceptLabel
     property bool first: false
-    property bool last: false
-    property string icon: "add"
-    property string label: qsTr("Add Entry")
-    property string header: qsTr("Add New Entry")
-    property Component content: null
-    property string acceptLabel: qsTr("Add")
+    property bool last: true
     property bool acceptAllowed: true
-    property bool separateContent: false
-    property int horizontalContentMargin: 0
+    property bool separateContent
+    property int horizontalContentMargin
 
-    property real openWidth: 540
-    property real openHeight: 480
-    property bool open: false
+    property real openWidth: Math.min(rootParent.width * 0.8, Tokens.sizes.astra.maxDialogWidth)
+    property real openHeight: Math.min(rootParent.height * 0.8, Tokens.sizes.astra.maxDialogHeight)
+    property bool open
 
-    signal accepted()
-    signal cancelled()
+    signal accepted
+    signal cancelled
 
-    function getTargetParent(): Item {
-        if (rootParent) return rootParent.modalOverlay ? rootParent.modalOverlay : rootParent;
-        let p = root.parent;
-        while (p) {
-            if (p.modalOverlay) return p.modalOverlay;
-            p = p.parent;
-        }
-        return root.Window.contentItem ? root.Window.contentItem : root;
-    }
-
-    onOpenChanged: {
-        if (open) {
-            modalWrapper.parent = getTargetParent();
-        } else {
-            modalWrapper.parent = root;
-        }
+    function reparentWrapper(): void {
+        const newParent = open ? rootParent : root;
+        const pos = dialogWrapper.mapToItem(newParent, 0, 0);
+        dialogWrapper.parent = newParent;
+        dialogWrapper.x = pos.x;
+        dialogWrapper.y = pos.y;
     }
 
     Layout.fillWidth: true
     implicitHeight: openButton.implicitHeight
+    z: open || dialogTransition.running ? 2 : 0
 
-    ButtonRow {
-        id: openButton
-        anchors.fill: parent
-        first: root.first
-        last: root.last
-        icon: root.icon
-        text: root.label
-        onClicked: root.open = true
+    BlobGroup {
+        id: blobGroup
+
+        color: root.open ? Colours.palette.m3surfaceContainerHighest : Colours.tPalette.m3surfaceContainer
+
+        Behavior on color {
+            CAnim {}
+        }
     }
 
-    // Modal Wrapper (reparented into page overlayLayer on open)
-    Item {
-        id: modalWrapper
-        anchors.fill: parent
-        visible: opacity > 0
-        opacity: root.open ? 1.0 : 0.0
-        z: 99999
+    MouseArea {
+        id: backdrop
 
-        Behavior on opacity {
-            NumberAnimation { duration: 160; easing.type: Easing.OutQuad }
+        anchors.fill: parent
+        parent: root.open ? root.rootParent : root
+        enabled: false
+        hoverEnabled: enabled
+        onClicked: root.open = false
+    }
+
+    Item {
+        id: dialogWrapper
+
+        z: 1
+        width: root.width
+        height: openButton.implicitHeight
+
+        states: State {
+            name: "open"
+            when: root.open
+
+            PropertyChanges {
+                backdrop.enabled: true
+                elevation.opacity: 1
+                openButton.opacity: 0
+                dialogContent.opacity: 1
+                dialogBg.radius: root.Tokens.rounding.extraLargeIncreased
+                dialogBg.topLeftRadius: root.Tokens.rounding.extraLargeIncreased
+                dialogBg.topRightRadius: root.Tokens.rounding.extraLargeIncreased
+                dialogBg.bottomLeftRadius: root.Tokens.rounding.extraLargeIncreased
+                dialogBg.bottomRightRadius: root.Tokens.rounding.extraLargeIncreased
+                dialogWrapper.x: (root.rootParent.width - root.openWidth) / 2
+                dialogWrapper.y: (root.rootParent.height - root.openHeight) / 2
+                dialogWrapper.width: root.openWidth
+                dialogWrapper.height: root.openHeight
+            }
         }
 
-        // Dimmed backdrop scrim
-        Rectangle {
-            anchors.fill: parent
-            color: Qt.rgba(0, 0, 0, 0.5)
+        transitions: Transition {
+            id: dialogTransition
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    root.cancelled();
-                    root.open = false;
+            SequentialAnimation {
+                ScriptAction {
+                    script: root.reparentWrapper()
+                }
+                Anim {
+                    properties: "x,y"
                 }
             }
+            PropertyAction {
+                property: "enabled"
+            }
+            Anim {
+                properties: "opacity,radius,topLeftRadius,topRightRadius,bottomLeftRadius,bottomRightRadius"
+                type: Anim.DefaultEffects
+            }
+            Anim {
+                properties: "width,height"
+            }
         }
 
-        // Dialog Card
-        StyledRect {
-            id: dialogCard
-            anchors.centerIn: parent
-            width: Math.min(root.openWidth, parent.width - 40)
-            height: Math.min(root.openHeight, parent.height - 40)
-            radius: Tokens.rounding.extraLargeIncreased
-            color: Colours.palette.m3surfaceContainerHighest
-            border.width: 1
-            border.color: Colours.palette.m3outlineVariant
+        Elevation {
+            id: elevation
 
-            scale: root.open ? 1.0 : 0.92
-
-            Behavior on scale {
-                NumberAnimation { duration: 200; easing.type: Easing.OutBack }
+            transform: Matrix4x4 {
+                matrix: dialogBg.deformMatrix
             }
 
-            MouseArea {
-                anchors.fill: parent
-                // absorb clicks inside dialog card
-                onClicked: {}
+            anchors.fill: parent
+            radius: dialogBg.radius
+            topLeftRadius: dialogBg.topLeftRadius
+            topRightRadius: dialogBg.topRightRadius
+            bottomLeftRadius: dialogBg.bottomLeftRadius
+            bottomRightRadius: dialogBg.bottomRightRadius
+            level: 4
+            opacity: 0
+        }
+
+        BlobRect {
+            id: dialogBg
+
+            anchors.fill: parent
+
+            deformScale: 0.00005
+            group: blobGroup
+            opacity: blobGroup.color.a
+
+            radius: Tokens.rounding.extraSmall
+            topLeftRadius: root.first ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+            topRightRadius: root.first ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+            bottomLeftRadius: root.last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+            bottomRightRadius: root.last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+        }
+
+        RowButton {
+            id: openButton
+
+            transform: Matrix4x4 {
+                matrix: dialogBg.deformMatrix
             }
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.extraLarge
-                anchors.bottomMargin: Tokens.padding.largeIncreased
-                spacing: 0
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: Math.min(implicitHeight, parent.height) // Clamp to parent height due to overshoot anim
+            color: "transparent"
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Tokens.spacing.small
+            first: root.first
+            last: root.last
+            icon: root.icon
+            text: root.label
+            onClicked: root.open = true
+        }
+
+        Loader {
+            id: dialogContent
+
+            transform: Matrix4x4 {
+                matrix: dialogBg.deformMatrix
+            }
+
+            anchors.fill: parent
+
+            opacity: 0
+            active: opacity > 0
+            asynchronous: true
+
+            sourceComponent: MouseArea {
+                onWheel: event => event.accepted = true
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: Tokens.padding.extraLarge
+                    anchors.bottomMargin: Tokens.padding.largeIncreased
+                    spacing: 0
 
                     StyledText {
                         text: root.header
-                        font: Tokens.font.title.medium
-                        color: Colours.palette.m3onSurface
+                        font: Tokens.font.title.builders.large.weight(Font.Normal).build()
+                    }
+
+                    Loader {
+                        Layout.topMargin: Tokens.spacing.medium
                         Layout.fillWidth: true
-                    }
-
-                    IconButton {
-                        icon: "close"
-                        type: IconButton.Text
-                        font: Tokens.font.icon.small
-                        onClicked: {
-                            root.cancelled();
-                            root.open = false;
-                        }
-                    }
-                }
-
-                Loader {
-                    Layout.topMargin: Tokens.spacing.medium
-                    Layout.fillWidth: true
-                    active: root.separateContent
-                    visible: active
-                    sourceComponent: StyledRect {
-                        implicitHeight: 1
-                        color: Colours.palette.m3outlineVariant
-                    }
-                }
-
-                Loader {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.topMargin: Tokens.spacing.small
-                    Layout.bottomMargin: Tokens.spacing.small
-                    Layout.leftMargin: root.horizontalContentMargin
-                    Layout.rightMargin: root.horizontalContentMargin
-                    active: root.open
-                    sourceComponent: root.content
-                }
-
-                Loader {
-                    Layout.bottomMargin: Tokens.spacing.medium
-                    Layout.fillWidth: true
-                    active: root.separateContent
-                    visible: active
-                    sourceComponent: StyledRect {
-                        implicitHeight: 1
-                        color: Colours.palette.m3outlineVariant
-                    }
-                }
-
-                RowLayout {
-                    Layout.alignment: Qt.AlignRight
-                    spacing: Tokens.spacing.small
-
-                    TextButton {
-                        type: TextButton.Text
-                        isRound: true
-                        horizontalPadding: Tokens.padding.largeIncreased
-                        verticalPadding: Tokens.padding.medium
-                        text: qsTr("Cancel")
-                        onClicked: {
-                            root.cancelled();
-                            root.open = false;
+                        active: root.separateContent
+                        sourceComponent: StyledRect {
+                            implicitHeight: 1
+                            color: Colours.palette.m3outline
                         }
                     }
 
-                    TextButton {
-                        type: TextButton.Filled
-                        isRound: true
-                        horizontalPadding: Tokens.padding.largeIncreased
-                        verticalPadding: Tokens.padding.medium
-                        disabled: !root.acceptAllowed
-                        text: root.acceptLabel
-                        onClicked: {
-                            root.accepted();
-                            root.open = false;
+                    Loader {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.leftMargin: root.horizontalContentMargin
+                        Layout.rightMargin: root.horizontalContentMargin
+                        sourceComponent: root.content
+                    }
+
+                    Loader {
+                        Layout.bottomMargin: Tokens.spacing.medium
+                        Layout.fillWidth: true
+                        active: root.separateContent
+                        sourceComponent: StyledRect {
+                            implicitHeight: 1
+                            color: Colours.palette.m3outline
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignRight
+                        spacing: Tokens.spacing.extraSmall
+
+                        TextButton {
+                            type: TextButton.Text
+                            isRound: true
+                            horizontalPadding: Tokens.padding.largeIncreased
+                            verticalPadding: Tokens.padding.medium
+                            text: qsTr("Cancel")
+                            onClicked: {
+                                root.cancelled();
+                                root.open = false;
+                            }
+                        }
+
+                        TextButton {
+                            type: TextButton.Text
+                            isRound: true
+                            horizontalPadding: Tokens.padding.largeIncreased
+                            verticalPadding: Tokens.padding.medium
+                            disabled: !root.acceptAllowed
+                            text: root.acceptLabel
+                            onClicked: {
+                                root.accepted();
+                                root.open = false;
+                            }
                         }
                     }
                 }

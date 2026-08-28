@@ -6,12 +6,14 @@ import qs.services
 Item {
     id: root
 
+    readonly property real designWidth: 1000
+    readonly property real designHeight: 750
     readonly property real designSize: 1000
     property bool skipIntroAnimation: false
 
     property real outerProgress: 1.0
-    property real ringProgress: 1.0
     property real glyphProgress: 1.0
+    property real cogRotation: 0.0
 
     implicitWidth: 120
     implicitHeight: 120
@@ -33,8 +35,8 @@ Item {
 
         ParallelAnimation {
             NumberAnimation {
-                target: logo
-                property: "rotation"
+                target: root
+                property: "cogRotation"
                 from: 0
                 to: 360
                 duration: 700
@@ -45,8 +47,8 @@ Item {
                 NumberAnimation {
                     target: logo
                     property: "scale"
-                    from: root.implicitWidth / root.designSize
-                    to: (root.implicitWidth / root.designSize) * 1.12
+                    from: Math.min(root.width / root.designWidth, root.height / root.designHeight)
+                    to: Math.min(root.width / root.designWidth, root.height / root.designHeight) * 1.12
                     duration: 300
                     easing.type: Easing.OutCubic
                 }
@@ -54,8 +56,8 @@ Item {
                 NumberAnimation {
                     target: logo
                     property: "scale"
-                    from: (root.implicitWidth / root.designSize) * 1.12
-                    to: root.implicitWidth / root.designSize
+                    from: Math.min(root.width / root.designWidth, root.height / root.designHeight) * 1.12
+                    to: Math.min(root.width / root.designWidth, root.height / root.designHeight)
                     duration: 400
                     easing.type: Easing.OutBack
                     easing.overshoot: 1.2
@@ -67,7 +69,7 @@ Item {
                     target: root
                     property: "glyphProgress"
                     from: 1.0
-                    to: 0.55
+                    to: 0.6
                     duration: 250
                     easing.type: Easing.InOutQuad
                 }
@@ -75,7 +77,7 @@ Item {
                 NumberAnimation {
                     target: root
                     property: "glyphProgress"
-                    from: 0.55
+                    from: 0.6
                     to: 1.0
                     duration: 450
                     easing.type: Easing.OutBack
@@ -85,18 +87,18 @@ Item {
         }
 
         ScriptAction {
-            script: logo.rotation = 0
+            script: root.cogRotation = 0
         }
     }
 
     Item {
         id: logo
 
-        implicitWidth: root.designSize
-        implicitHeight: root.designSize
+        implicitWidth: root.designWidth
+        implicitHeight: root.designHeight
 
         anchors.centerIn: parent
-        scale: root.implicitWidth / root.designSize
+        scale: Math.min(root.width / root.designWidth, root.height / root.designHeight)
         transformOrigin: Item.Center
 
         rotation: 0.0
@@ -109,9 +111,9 @@ Item {
             ScriptAction {
                 script: {
                     root.outerProgress = 0.0;
-                    root.ringProgress = 0.0;
                     root.glyphProgress = 0.0;
-                    logo.rotation = -135.0;
+                    root.cogRotation = 0.0;
+                    logo.rotation = -45.0;
                     logo.opacity = 0.0;
                 }
             }
@@ -129,20 +131,20 @@ Item {
                 NumberAnimation {
                     target: logo
                     property: "rotation"
-                    from: -135
+                    from: -45
                     to: 0
-                    duration: 950
+                    duration: 900
                     easing.type: Easing.OutCubic
                 }
 
                 SequentialAnimation {
-                    PauseAnimation { duration: 120 }
+                    PauseAnimation { duration: 100 }
                     NumberAnimation {
                         target: logo
                         property: "scale"
-                        from: (root.implicitWidth / root.designSize) * 0.7
-                        to: root.implicitWidth / root.designSize
-                        duration: 830
+                        from: Math.min(root.width / root.designWidth, root.height / root.designHeight) * 0.7
+                        to: Math.min(root.width / root.designWidth, root.height / root.designHeight)
+                        duration: 800
                         easing.type: Easing.OutBack
                         easing.overshoot: 1.15
                     }
@@ -153,116 +155,76 @@ Item {
                     property: "outerProgress"
                     from: 0.0
                     to: 1.0
-                    duration: 950
+                    duration: 900
                     easing.type: Easing.OutCubic
                 }
 
                 SequentialAnimation {
-                    PauseAnimation { duration: 180 }
-                    NumberAnimation {
-                        target: root
-                        property: "ringProgress"
-                        from: 0.0
-                        to: 1.0
-                        duration: 800
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 1.3
-                    }
-                }
-
-                SequentialAnimation {
-                    PauseAnimation { duration: 450 }
+                    PauseAnimation { duration: 300 }
                     NumberAnimation {
                         target: root
                         property: "glyphProgress"
                         from: 0.0
                         to: 1.0
-                        duration: 600
+                        duration: 650
                         easing.type: Easing.OutBack
-                        easing.overshoot: 1.5
+                        easing.overshoot: 1.4
                     }
                 }
             }
         }
 
         Shape {
-            id: outerSwoosh
-            width: 1000
-            height: 1000
+            id: shieldShape
+            width: root.designWidth
+            height: root.designHeight
             z: 1
             preferredRendererType: Shape.CurveRenderer
 
             opacity: Math.min(1.0, root.outerProgress * 1.8)
 
             transform: [
-                Rotation {
-                    origin.x: 500
-                    origin.y: 500
-                    angle: (1.0 - root.outerProgress) * -260
-                }
-            ]
-
-            ShapePath {
-                fillColor: Colours.palette.m3onSurface
-                strokeColor: "transparent"
-
-                PathSvg {
-                    path: "M999.991 497.412C998.599 277.689 820.051 100 600 100C379.086 100 200 279.086 200 500C200 720.914 379.086 900 600 900C820.051 900 998.601 722.31 999.992 502.587L999.99 503.233C998.251 777.888 775.064 1000 500 1000C223.858 1000 0 776.142 0 500C0 223.858 223.858 0 500 0C775.279 0 998.598 222.46 999.991 497.412Z"
-                }
-            }
-        }
-
-        Shape {
-            id: innerRing
-            width: 1000
-            height: 1000
-            z: 2
-            preferredRendererType: Shape.CurveRenderer
-
-            opacity: Math.min(1.0, root.ringProgress * 1.8)
-
-            transform: [
                 Scale {
-                    origin.x: 600
-                    origin.y: 500
-                    xScale: 0.5 + 0.5 * root.ringProgress
-                    yScale: 0.5 + 0.5 * root.ringProgress
-                },
-                Rotation {
-                    origin.x: 600
-                    origin.y: 500
-                    angle: (1.0 - root.ringProgress) * 180
+                    origin.x: 500
+                    origin.y: 375
+                    xScale: 0.6 + 0.4 * root.outerProgress
+                    yScale: 0.6 + 0.4 * root.outerProgress
                 }
             ]
 
             ShapePath {
                 fillColor: Colours.palette.m3primary
-                strokeColor: "transparent"
+                strokeColor: Colours.palette.m3onSurface
+                strokeWidth: 50
+                capStyle: ShapePath.RoundCap
+                joinStyle: ShapePath.RoundJoin
 
                 PathSvg {
-                    path: "M600 125C807.107 125 975 292.893 975 500C975 348.122 851.878 225 700 225C548.122 225 425 348.122 425 500C425 651.878 548.122 775 700 775C851.285 775 974.038 652.838 974.994 501.778L974.992 502.425C973.688 708.416 806.298 875 600 875C392.893 875 225 707.107 225 500C225 292.893 392.893 125 600 125Z"
+                    path: "M500 25C634.878 25 816.792 83.1182 918.125 119.957C947.7 130.709 963.957 162.588 955.495 194.167L826.153 676.825C818.538 705.241 792.787 725 763.368 725H231.77C202.154 725 176.282 704.981 168.85 676.313L43.7754 193.904C35.6199 162.449 51.875 130.873 81.2607 120.181C182.457 83.3592 364.841 25 500 25Z"
                 }
             }
         }
 
         Shape {
-            id: helmGlyph
-            width: 1000
-            height: 1000
-            z: 3
+            id: gearGlyph
+            width: root.designWidth
+            height: root.designHeight
+            z: 2
             preferredRendererType: Shape.CurveRenderer
 
             opacity: Math.min(1.0, root.glyphProgress * 1.8)
 
             transform: [
-                Translate {
-                    y: (1.0 - root.glyphProgress) * 90
+                Rotation {
+                    origin.x: 501.244
+                    origin.y: 376
+                    angle: (1.0 - root.glyphProgress) * -120 + root.cogRotation
                 },
                 Scale {
-                    origin.x: 700
-                    origin.y: 500
-                    xScale: 0.55 + 0.45 * root.glyphProgress
-                    yScale: 0.55 + 0.45 * root.glyphProgress
+                    origin.x: 501.244
+                    origin.y: 376
+                    xScale: 0.5 + 0.5 * root.glyphProgress
+                    yScale: 0.5 + 0.5 * root.glyphProgress
                 }
             ]
 
@@ -271,9 +233,10 @@ Item {
                 strokeColor: "transparent"
 
                 PathSvg {
-                    path: "M550 623V584.578C550 577.031 551.941 569.941 555.822 563.308C559.703 556.676 565.068 551.644 571.918 548.214C583.562 542.268 596.689 537.236 611.301 533.119C625.913 529.003 642.009 526.944 659.589 526.944C677.169 526.944 693.265 529.003 707.877 533.119C722.489 537.236 735.616 542.268 747.26 548.214C754.11 551.644 759.475 556.676 763.356 563.308C767.237 569.941 769.178 577.031 769.178 584.578V623H550ZM577.397 595.556H741.781V584.578C741.781 582.062 741.153 579.775 739.897 577.717C738.642 575.658 736.986 574.057 734.932 572.914C726.712 568.797 716.153 564.681 703.253 560.564C690.354 556.447 675.799 554.389 659.589 554.389C643.379 554.389 628.824 556.447 615.925 560.564C603.025 564.681 592.466 568.797 584.247 572.914C582.192 574.057 580.537 575.658 579.281 577.717C578.025 579.775 577.397 582.062 577.397 584.578V595.556ZM620.89 497.099C610.16 486.35 604.795 473.428 604.795 458.333H601.37C599.315 458.333 597.66 457.704 596.404 456.447C595.148 455.189 594.521 453.531 594.521 451.472C594.521 449.414 595.148 447.756 596.404 446.498C597.66 445.24 599.315 444.611 601.37 444.611H604.795C604.795 434.319 607.306 425.057 612.329 416.824C617.352 408.59 623.973 402.072 632.192 397.269V410.306C632.192 412.364 632.82 414.022 634.075 415.28C635.331 416.538 636.986 417.167 639.041 417.167C641.096 417.167 642.751 416.538 644.007 415.28C645.263 414.022 645.89 412.364 645.89 410.306V391.781C647.945 391.094 650.114 390.58 652.397 390.237C654.68 389.894 657.078 389.722 659.589 389.722C662.1 389.722 664.498 389.894 666.781 390.237C669.064 390.58 671.233 391.094 673.288 391.781V410.306C673.288 412.364 673.916 414.022 675.171 415.28C676.427 416.538 678.082 417.167 680.137 417.167C682.192 417.167 683.847 416.538 685.103 415.28C686.358 414.022 686.986 412.364 686.986 410.306V397.269C695.205 402.072 701.826 408.59 706.849 416.824C711.872 425.057 714.384 434.319 714.384 444.611H717.808C719.863 444.611 721.518 445.24 722.774 446.498C724.03 447.756 724.658 449.414 724.658 451.472C724.658 453.531 724.03 455.189 722.774 456.447C721.518 457.704 719.863 458.333 717.808 458.333H714.384C714.384 473.428 709.018 486.35 698.288 497.099C687.557 507.848 674.658 513.222 659.589 513.222C644.521 513.222 631.621 507.848 620.89 497.099ZM678.938 477.716C684.304 472.341 686.986 465.881 686.986 458.333H632.192C632.192 465.881 634.874 472.341 640.24 477.716C645.605 483.091 652.055 485.778 659.589 485.778C667.123 485.778 673.573 483.091 678.938 477.716ZM762.329 540.667L760.274 530.375C758.904 529.918 757.591 529.403 756.336 528.831C755.08 528.259 753.881 527.402 752.74 526.258L743.151 529.689L736.301 517.339L743.836 510.478V502.244L736.301 495.383L743.151 483.033L752.74 486.464C753.653 485.549 754.795 484.749 756.164 484.062C757.534 483.376 758.904 482.805 760.274 482.347L762.329 472.056H776.027L778.082 482.347C779.452 482.805 780.822 483.376 782.192 484.062C783.562 484.749 784.703 485.549 785.616 486.464L795.205 483.033L802.055 495.383L794.521 502.244V510.478L802.055 517.339L795.205 529.689L785.616 526.258C784.475 527.402 783.276 528.259 782.021 528.831C780.765 529.403 779.452 529.918 778.082 530.375L776.027 540.667H762.329ZM776.37 513.565C778.425 511.507 779.452 509.106 779.452 506.361C779.452 503.617 778.425 501.215 776.37 499.157C774.315 497.099 771.918 496.069 769.178 496.069C766.438 496.069 764.041 497.099 761.986 499.157C759.932 501.215 758.904 503.617 758.904 506.361C758.904 509.106 759.932 511.507 761.986 513.565C764.041 515.624 766.438 516.653 769.178 516.653C771.918 516.653 774.315 515.624 776.37 513.565ZM793.836 472.056L791.096 457.647C789.041 456.961 787.158 456.103 785.445 455.074C783.733 454.045 782.192 452.844 780.822 451.472L766.438 456.275L756.849 439.808L768.493 429.517C768.037 428.373 767.808 427.458 767.808 426.772V421.283C767.808 420.597 768.037 419.682 768.493 418.539L756.849 408.247L766.438 391.781L780.822 396.583C782.192 395.211 783.733 394.01 785.445 392.981C787.158 391.952 789.041 391.094 791.096 390.408L793.836 376H813.014L815.753 390.408C817.808 391.094 819.692 391.952 821.404 392.981C823.116 394.01 824.658 395.211 826.027 396.583L840.411 391.781L850 408.247L838.356 418.539C838.813 419.682 839.041 420.597 839.041 421.283V426.772C839.041 427.458 838.813 428.373 838.356 429.517L850 439.808L840.411 456.275L826.027 451.472C824.658 452.844 823.116 454.045 821.404 455.074C819.692 456.103 817.808 456.961 815.753 457.647L813.014 472.056H793.836ZM815.582 436.206C818.893 432.89 820.548 428.831 820.548 424.028C820.548 419.225 818.893 415.166 815.582 411.849C812.272 408.533 808.219 406.875 803.425 406.875C798.63 406.875 794.578 408.533 791.267 411.849C787.957 415.166 786.301 419.225 786.301 424.028C786.301 428.831 787.957 432.89 791.267 436.206C794.578 439.522 798.63 441.181 803.425 441.181C808.219 441.181 812.272 439.522 815.582 436.206Z"
+                    path: "M431.592 625L421.642 545.32C416.252 543.245 411.173 540.755 406.405 537.85C401.638 534.945 396.973 531.833 392.413 528.513L318.408 559.638L250 441.363L314.055 392.808C313.64 389.903 313.433 387.101 313.433 384.404V367.596C313.433 364.899 313.64 362.098 314.055 359.193L250 310.638L318.408 192.363L392.413 223.488C396.973 220.168 401.741 217.055 406.716 214.15C411.692 211.245 416.667 208.755 421.642 206.68L431.592 127H568.408L578.358 206.68C583.748 208.755 588.827 211.245 593.595 214.15C598.362 217.055 603.027 220.168 607.587 223.488L681.592 192.363L750 310.638L685.945 359.193C686.36 362.098 686.567 364.899 686.567 367.596V384.404C686.567 387.101 686.153 389.903 685.323 392.808L749.378 441.363L680.97 559.638L607.587 528.513C603.027 531.833 598.259 534.945 593.284 537.85C588.308 540.755 583.333 543.245 578.358 545.32L568.408 625H431.592ZM475.124 575.2H524.254L532.96 509.215C545.813 505.895 557.732 501.019 568.719 494.586C579.706 488.154 589.76 480.373 598.881 471.243L660.448 496.765L684.701 454.435L631.219 413.973C633.292 408.163 634.743 402.041 635.572 395.609C636.401 389.176 636.816 382.64 636.816 376C636.816 369.36 636.401 362.824 635.572 356.391C634.743 349.959 633.292 343.838 631.219 338.028L684.701 297.565L660.448 255.235L598.881 281.38C589.76 271.835 579.706 263.846 568.719 257.414C557.732 250.981 545.813 246.105 532.96 242.785L524.876 176.8H475.746L467.04 242.785C454.187 246.105 442.268 250.981 431.281 257.414C420.294 263.846 410.24 271.628 401.119 280.758L339.552 255.235L315.299 297.565L368.781 337.405C366.708 343.63 365.257 349.855 364.428 356.08C363.599 362.305 363.184 368.945 363.184 376C363.184 382.64 363.599 389.073 364.428 395.298C365.257 401.523 366.708 407.748 368.781 413.973L315.299 454.435L339.552 496.765L401.119 470.62C410.24 480.165 420.294 488.154 431.281 494.586C442.268 501.019 454.187 505.895 467.04 509.215L475.124 575.2ZM501.244 463.15C525.29 463.15 545.813 454.643 562.811 437.628C579.809 420.613 588.308 400.07 588.308 376C588.308 351.93 579.809 331.388 562.811 314.373C545.813 297.358 525.29 288.85 501.244 288.85C476.783 288.85 456.157 297.358 439.366 314.373C422.575 331.388 414.179 351.93 414.179 376C414.179 400.07 422.575 420.613 439.366 437.628C456.157 454.643 476.783 463.15 501.244 463.15Z"
                 }
             }
         }
     }
 }
+

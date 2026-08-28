@@ -1,11 +1,72 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import qs.components
+import qs.components.effects
+import QtQuick.Effects
 
 StyledListView {
     id: root
 
-    clip: true
+    property real fadeAmount: 0.15
+
+    property real topFadeOpacity: fadeShouldBeActive(true) ? 0 : 1
+    property real bottomFadeOpacity: fadeShouldBeActive(false) ? 0 : 1
+
+    function fadeShouldBeActive(isStart: bool): bool {
+        if (contentHeight + topMargin + bottomMargin <= height)
+            return false;
+        if (isStart)
+            return visibleArea.yPosition > 0.001;
+        return visibleArea.yPosition + visibleArea.heightRatio < 0.999;
+    }
+
     flickableDirection: Flickable.VerticalFlick
     orientation: ListView.Vertical
-    boundsBehavior: Flickable.DragAndOvershootBounds
+
+    layer.enabled: true
+    layer.effect: Mask {
+        maskSource: mask
+
+        Rectangle {
+            id: mask
+
+            anchors.fill: parent
+            visible: false
+            layer.enabled: true
+
+            gradient: Gradient {
+                orientation: Gradient.Vertical
+
+                GradientStop {
+                    position: 0
+                    color: Qt.rgba(0, 0, 0, root.topFadeOpacity)
+                }
+                GradientStop {
+                    position: root.fadeAmount
+                    color: Qt.rgba(0, 0, 0, 1)
+                }
+                GradientStop {
+                    position: 1 - root.fadeAmount
+                    color: Qt.rgba(0, 0, 0, 1)
+                }
+                GradientStop {
+                    position: 1
+                    color: Qt.rgba(0, 0, 0, root.bottomFadeOpacity)
+                }
+            }
+        }
+    }
+
+    Behavior on topFadeOpacity {
+        Anim {
+            type: Anim.SlowEffects
+        }
+    }
+
+    Behavior on bottomFadeOpacity {
+        Anim {
+            type: Anim.SlowEffects
+        }
+    }
 }

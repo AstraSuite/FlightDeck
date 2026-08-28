@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=FlightDeck
+GenericName=Hyprland Configuration Manager
+Comment=Manage Hyprland settings, monitors, animations, and keybinds
+Exec=flightdeck %U
+Icon=flightdeck
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;Qt;
+StartupNotify=true
+StartupWMClass=flightdeck
+Keywords=hyprland;settings;config;desktop;display;monitors;keybinds;caelestia;astra;

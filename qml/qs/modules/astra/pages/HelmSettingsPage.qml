@@ -12,7 +12,7 @@ import Helm.Managers 1.0
 PageBase {
     id: root
 
-    title: qsTr("Helm Settings")
+    title: qsTr("FlightDeck Settings")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

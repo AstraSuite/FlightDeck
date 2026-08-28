@@ -94,10 +94,10 @@ void CursorManager::scanThemes() {
             const QString cursorsDir = entry.filePath() + QStringLiteral("/cursors");
             const QString hyprDir = entry.filePath() + QStringLiteral("/hyprcursors");
             const QString manifestFile = entry.filePath() + QStringLiteral("/manifest.hl");
-            const QString indexTheme = entry.filePath() + QStringLiteral("/index.theme");
+            const QString cursorTheme = entry.filePath() + QStringLiteral("/cursor.theme");
 
             bool isHyprcursor = QDir(hyprDir).exists() || QFile::exists(manifestFile);
-            bool isXcursor = QDir(cursorsDir).exists() || QFile::exists(indexTheme);
+            bool isXcursor = QDir(cursorsDir).exists() || QFile::exists(cursorTheme);
 
             if (isHyprcursor || isXcursor) {
                 seen.insert(themeName);
@@ -267,16 +267,26 @@ void CursorManager::applyBibataBuilder(int size) {
 static QImage parseXCursorImage(const QString& filePath, int targetSize) {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) return QImage();
+    const QByteArray data = file.readAll();
+    file.close();
 
-    QDataStream stream(&file);
-    stream.setByteOrder(QDataStream::LittleEndian);
+    if (data.size() < 16) return QImage();
 
-    quint32 magic = 0;
-    stream >> magic;
+    const uchar* raw = reinterpret_cast<const uchar*>(data.constData());
+    auto readU32 = [raw, dataSize = data.size()](qsizetype offset) -> quint32 {
+        if (offset < 0 || offset + 4 > dataSize) return 0;
+        return static_cast<quint32>(raw[offset]) |
+               (static_cast<quint32>(raw[offset + 1]) << 8) |
+               (static_cast<quint32>(raw[offset + 2]) << 16) |
+               (static_cast<quint32>(raw[offset + 3]) << 24);
+    };
+
+    quint32 magic = readU32(0);
     if (magic != 0x72756358) return QImage(); // 'Xcur'
 
-    quint32 headerSize = 0, version = 0, ntoc = 0;
-    stream >> headerSize >> version >> ntoc;
+    quint32 headerSize = readU32(4);
+    quint32 version = readU32(8);
+    quint32 ntoc = readU32(12);
 
     struct TocEntry {
         quint32 type;
@@ -285,17 +295,18 @@ static QImage parseXCursorImage(const QString& filePath, int targetSize) {
     };
     QVector<TocEntry> tocs;
     for (quint32 i = 0; i < ntoc; ++i) {
-        TocEntry entry;
-        stream >> entry.type >> entry.subtype >> entry.position;
-        if (entry.type == 0xfffd0002) { // XCUR_IMAGE_TYPE
-            tocs.append(entry);
+        qsizetype tocOffset = 16 + i * 12;
+        quint32 type = readU32(tocOffset);
+        quint32 subtype = readU32(tocOffset + 4);
+        quint32 position = readU32(tocOffset + 8);
+        if (type == 0xfffd0002) { // XCUR_IMAGE_TYPE
+            tocs.append({type, subtype, position});
         }
     }
 
     if (tocs.isEmpty()) return QImage();
 
-    // Find closest subtype to targetSize
-    int bestDiff = 99999;
+    int bestDiff = 999999;
     TocEntry bestToc = tocs.first();
     for (const TocEntry& t : tocs) {
         int diff = std::abs(static_cast<int>(t.subtype) - targetSize);
@@ -305,19 +316,60 @@ static QImage parseXCursorImage(const QString& filePath, int targetSize) {
         }
     }
 
-    file.seek(bestToc.position);
-    quint32 cSize, cType, cSubtype, cVersion, width, height, xhot, yhot, delay;
-    stream >> cSize >> cType >> cSubtype >> cVersion >> width >> height >> xhot >> yhot >> delay;
+    qsizetype imgPos = bestToc.position;
+    quint32 cSize = readU32(imgPos);
+    quint32 cType = readU32(imgPos + 4);
+    quint32 cSubtype = readU32(imgPos + 8);
+    quint32 cVersion = readU32(imgPos + 12);
+    quint32 width = readU32(imgPos + 16);
+    quint32 height = readU32(imgPos + 20);
+    quint32 xhot = readU32(imgPos + 24);
+    quint32 yhot = readU32(imgPos + 28);
+    quint32 delay = readU32(imgPos + 32);
 
     if (width == 0 || height == 0 || width > 512 || height > 512) return QImage();
+    qsizetype pixelOffset = imgPos + 36;
+    qsizetype byteCount = static_cast<qsizetype>(width) * height * 4;
+    if (pixelOffset + byteCount > data.size()) return QImage();
 
-    QImage img(width, height, QImage::Format_ARGB32);
-    qint64 byteCount = static_cast<qint64>(width) * height * 4;
-    if (file.read(reinterpret_cast<char*>(img.bits()), byteCount) != byteCount) {
-        return QImage();
+    QImage img(raw + pixelOffset, width, height, width * 4, QImage::Format_ARGB32_Premultiplied);
+    return img.copy();
+}
+
+static QImage loadFromHlcFile(const QString& hlcPath, int targetSize) {
+    if (!QFile::exists(hlcPath)) return QImage();
+
+    // 1. Try extracting SVG from .hlc (zip archive)
+    QProcess proc;
+    proc.start(QStringLiteral("unzip"), {QStringLiteral("-p"), hlcPath, QStringLiteral("*.svg")});
+    if (proc.waitForFinished(500) && proc.exitCode() == 0) {
+        QByteArray svgData = proc.readAllStandardOutput();
+        if (!svgData.isEmpty()) {
+            QSvgRenderer renderer(svgData);
+            if (renderer.isValid()) {
+                QImage img(targetSize, targetSize, QImage::Format_ARGB32_Premultiplied);
+                img.fill(Qt::transparent);
+                QPainter p(&img);
+                renderer.render(&p);
+                return img;
+            }
+        }
     }
 
-    return img;
+    // 2. Try extracting PNG from .hlc
+    QProcess procPng;
+    procPng.start(QStringLiteral("unzip"), {QStringLiteral("-p"), hlcPath, QStringLiteral("*.png")});
+    if (procPng.waitForFinished(500) && procPng.exitCode() == 0) {
+        QByteArray pngData = procPng.readAllStandardOutput();
+        if (!pngData.isEmpty()) {
+            QImage img;
+            if (img.loadFromData(pngData)) {
+                return img.scaled(targetSize, targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            }
+        }
+    }
+
+    return QImage();
 }
 
 QImage CursorManager::loadCursorPreview(const QString& themeName, int targetSize) {
@@ -328,35 +380,73 @@ QImage CursorManager::loadCursorPreview(const QString& themeName, int targetSize
         QStringLiteral("/usr/local/share/icons/") + themeName
     };
 
-    // 1. Try SVG templates (e.g. Bibata templates)
+    const QStringList cursorNames = {
+        QStringLiteral("left_ptr"), QStringLiteral("default"), QStringLiteral("arrow"),
+        QStringLiteral("pointer"), QStringLiteral("top_left_arrow"), QStringLiteral("right_ptr")
+    };
+
+    // 1. Try Hyprcursor formats (.hlc zip or unpacked directory)
+    for (const QString& themeDir : searchDirs) {
+        if (!QDir(themeDir).exists()) continue;
+
+        for (const QString& cName : cursorNames) {
+            // A. Check .hlc zip archive
+            const QString hlcFile = themeDir + QStringLiteral("/hyprcursors/") + cName + QStringLiteral(".hlc");
+            if (QFile::exists(hlcFile)) {
+                QImage img = loadFromHlcFile(hlcFile, targetSize);
+                if (!img.isNull()) return img;
+            }
+
+            // B. Check unpacked hyprcursor directory
+            const QString hyprCursorDir = themeDir + QStringLiteral("/hyprcursors/") + cName;
+            if (QDir(hyprCursorDir).exists()) {
+                QDir dir(hyprCursorDir);
+                const QStringList svgs = dir.entryList({QStringLiteral("*.svg")}, QDir::Files);
+                for (const QString& s : svgs) {
+                    QSvgRenderer renderer(dir.filePath(s));
+                    if (renderer.isValid()) {
+                        QImage img(targetSize, targetSize, QImage::Format_ARGB32_Premultiplied);
+                        img.fill(Qt::transparent);
+                        QPainter p(&img);
+                        renderer.render(&p);
+                        return img;
+                    }
+                }
+
+                const QStringList pngs = dir.entryList({QStringLiteral("*.png")}, QDir::Files);
+                for (const QString& p : pngs) {
+                    QImage img;
+                    if (img.load(dir.filePath(p))) {
+                        return img.scaled(targetSize, targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Try SVG templates if available
     const QStringList svgCandidates = {
         QDir::homePath() + QStringLiteral("/.config/caelestia/templates/bibata/left_ptr.svg"),
         QDir::homePath() + QStringLiteral("/Projects/Bibata_Cursor/templates/left_ptr.svg"),
         QDir::homePath() + QStringLiteral("/.local/share/icons/") + themeName + QStringLiteral("/left_ptr.svg")
     };
 
-    if (themeName.contains(QStringLiteral("Bibata"), Qt::CaseInsensitive)) {
-        for (const QString& svgPath : svgCandidates) {
-            if (QFile::exists(svgPath)) {
-                QSvgRenderer renderer(svgPath);
-                if (renderer.isValid()) {
-                    QImage img(targetSize, targetSize, QImage::Format_ARGB32_Premultiplied);
-                    img.fill(Qt::transparent);
-                    QPainter p(&img);
-                    renderer.render(&p);
-                    return img;
-                }
+    for (const QString& svgPath : svgCandidates) {
+        if (QFile::exists(svgPath)) {
+            QSvgRenderer renderer(svgPath);
+            if (renderer.isValid()) {
+                QImage img(targetSize, targetSize, QImage::Format_ARGB32_Premultiplied);
+                img.fill(Qt::transparent);
+                QPainter p(&img);
+                renderer.render(&p);
+                return img;
             }
         }
     }
 
-    // 2. Try XCursor left_ptr / default
+    // 3. Try XCursor left_ptr / default / arrow / pointer
     for (const QString& themeDir : searchDirs) {
         if (!QDir(themeDir).exists()) continue;
-
-        const QStringList cursorNames = {
-            QStringLiteral("left_ptr"), QStringLiteral("default"), QStringLiteral("arrow"), QStringLiteral("pointer")
-        };
 
         for (const QString& cName : cursorNames) {
             const QString xcursorFile = themeDir + QStringLiteral("/cursors/") + cName;
