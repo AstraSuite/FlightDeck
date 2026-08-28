@@ -15,6 +15,7 @@ AnimationManager* AnimationManager::instance() {
 }
 
 AnimationManager* AnimationManager::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 

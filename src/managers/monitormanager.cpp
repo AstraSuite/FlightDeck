@@ -11,6 +11,7 @@ MonitorManager* MonitorManager::instance() {
 }
 
 MonitorManager* MonitorManager::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 

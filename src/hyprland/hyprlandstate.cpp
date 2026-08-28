@@ -14,6 +14,7 @@ HyprlandState* HyprlandState::instance() {
 }
 
 HyprlandState* HyprlandState::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 

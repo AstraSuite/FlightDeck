@@ -16,6 +16,7 @@ ProfileManager* ProfileManager::instance() {
 }
 
 ProfileManager* ProfileManager::create(QQmlEngine*, QJSEngine*) {
+    QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 
