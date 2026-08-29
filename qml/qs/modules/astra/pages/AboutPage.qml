@@ -81,7 +81,7 @@ PageBase {
         InfoRow {
             last: true
             label: qsTr("Configuration Target")
-            value: "hypr-vars.lua & flightdeck.lua"
+            value: "hypr-vars.lua & astra-flightdeck.lua"
             icon: "folder"
         }
 

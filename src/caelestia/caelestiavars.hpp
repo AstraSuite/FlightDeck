@@ -19,6 +19,7 @@ class CaelestiaVars : public QObject {
     Q_PROPERTY(QStringList pendingKeys READ pendingKeys NOTIFY pendingChanged)
     Q_PROPERTY(QVariantMap currentVars READ currentVars NOTIFY varsChanged)
     Q_PROPERTY(QVariantMap pendingVars READ pendingVars NOTIFY pendingChanged)
+    Q_PROPERTY(QVariantList schemeColors READ schemeColors NOTIFY schemeColorsChanged)
 
 public:
     static CaelestiaVars* instance();
@@ -28,6 +29,7 @@ public:
 
     static QString varsFilePath();
     static QString defaultVarsFilePath();
+    static QString schemeFilePath();
 
     bool isDirty() const;
     int dirtyCount() const;
@@ -35,6 +37,7 @@ public:
 
     QVariantMap currentVars() const;
     QVariantMap pendingVars() const;
+    QVariantList schemeColors() const;
 
     Q_INVOKABLE QVariant get(const QString& key, const QVariant& fallback = QVariant()) const;
     Q_INVOKABLE QVariant getDefault(const QString& key, const QVariant& fallback = QVariant()) const;
@@ -49,6 +52,12 @@ public:
     Q_INVOKABLE void reload();
     Q_INVOKABLE void syncFromHyprland();
 
+    // Scheme & Color helpers
+    Q_INVOKABLE QVariantList getSchemeColors() const;
+    Q_INVOKABLE QString getSchemeHex(const QString& token) const;
+    Q_INVOKABLE QVariantMap parseColor(const QString& colorStr) const;
+    Q_INVOKABLE QString formatColor(bool isScheme, const QString& tokenOrHex, int alphaPercent) const;
+
     // Keybinds convenience methods
     Q_INVOKABLE QStringList getBinds(const QString& key) const;
     Q_INVOKABLE void setBinds(const QString& key, const QStringList& binds);
@@ -57,6 +66,7 @@ signals:
     void varsChanged();
     void pendingChanged();
     void dirtyChanged();
+    void schemeColorsChanged();
     void saveSucceeded();
     void saveFailed(const QString& error);
 

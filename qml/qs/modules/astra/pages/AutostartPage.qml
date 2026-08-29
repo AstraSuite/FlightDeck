@@ -246,14 +246,6 @@ PageBase {
 
                         IconButton {
                             visible: !editCmdRow.isReadOnly
-                            icon: "edit"
-                            type: IconButton.Text
-                            font: Tokens.font.icon.small
-                            onClicked: editCmdRow.open = true
-                        }
-
-                        IconButton {
-                            visible: !editCmdRow.isReadOnly
                             icon: "delete"
                             type: IconButton.Text
                             font: Tokens.font.icon.small

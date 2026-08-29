@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import FlightDeck.Config
@@ -6,78 +8,77 @@ import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
+import qs.modules.astra.pages.input
 import FlightDeck.Caelestia 1.0
 
-PageBase {
+StackPage {
     id: root
 
-    title: qsTr("Touchpad & Gestures")
+    pages: [
+        Component {
+            PageBase {
+                id: mainHub
+                title: qsTr("Input devices & gestures")
+                nState: root.nState
 
-    ColumnLayout {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        width: root.cappedWidth
-        spacing: Tokens.spacing.extraSmall / 2
+                ColumnLayout {
+                    anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
+                    anchors.top: parent ? parent.top : undefined
+                    width: mainHub ? mainHub.cappedWidth : 800
+                    spacing: Tokens.spacing.extraSmall / 2
 
-        SectionHeader {
-            first: true
-            text: qsTr("Touchpad Options")
+                    SectionHeader {
+                        first: true
+                        text: qsTr("Input Hardware & Methods")
+                    }
+
+                    NavRow {
+                        first: true
+                        label: qsTr("Keyboard")
+                        subtext: qsTr("Keyboard layout, variants, XKB options, and key repeat rates")
+                        icon: "keyboard"
+                        onClicked: root.nState.openSubPage(1)
+                    }
+
+                    NavRow {
+                        label: qsTr("Mouse & pointer")
+                        subtext: qsTr("Sensitivity, acceleration profiles, natural scrolling, and focus behavior")
+                        icon: "mouse"
+                        onClicked: root.nState.openSubPage(2)
+                    }
+
+                    NavRow {
+                        last: true
+                        label: qsTr("Touchpad & gestures")
+                        subtext: qsTr("Typing palm rejection, tapping, scrolling, and workspace swipe gestures")
+                        icon: "touchpad_mouse"
+                        onClicked: root.nState.openSubPage(3)
+                    }
+
+                    Item {
+                        Layout.preferredHeight: Tokens.padding.large
+                        Layout.fillWidth: true
+                    }
+                }
+            }
+        },
+
+        Component {
+            KeyboardSubPage {
+                nState: root.nState
+            }
+        },
+
+        Component {
+            MouseSubPage {
+                nState: root.nState
+            }
+        },
+
+        Component {
+            TouchpadSubPage {
+                nState: root.nState
+            }
         }
-
-        ToggleRow {
-            first: true
-            varKey: "touchpadDisableTyping"
-            text: qsTr("Disable While Typing")
-            subtext: qsTr("Ignore accidental palm and touch events during keyboard typing")
-            checked: CaelestiaVars.pendingVars.touchpadDisableTyping ?? CaelestiaVars.currentVars.touchpadDisableTyping ?? CaelestiaVars.getDefault("touchpadDisableTyping", true)
-            onToggled: CaelestiaVars.set("touchpadDisableTyping", checked)
-        }
-
-        SliderRow {
-            last: true
-            varKey: "touchpadScrollFactor"
-            label: qsTr("Touchpad Scroll Factor")
-            subtext: qsTr("Two-finger scroll sensitivity multiplier")
-            value: CaelestiaVars.pendingVars.touchpadScrollFactor ?? CaelestiaVars.currentVars.touchpadScrollFactor ?? CaelestiaVars.getDefault("touchpadScrollFactor", 0.3)
-            valueLabel: Math.round(value * 100) + "%"
-            from: 0.1
-            to: 1.5
-            stepSize: 0.05
-            onInteraction: v => CaelestiaVars.set("touchpadScrollFactor", Math.round(v * 100) / 100)
-            onMoved: v => CaelestiaVars.set("touchpadScrollFactor", Math.round(v * 100) / 100)
-        }
-
-        SectionHeader {
-            text: qsTr("Swipe Gestures")
-        }
-
-        StepperRow {
-            first: true
-            varKey: "workspaceSwipeFingers"
-            label: qsTr("Workspace Swipe Fingers")
-            subtext: qsTr("Number of fingers for workspace swipe transition")
-            value: CaelestiaVars.pendingVars.workspaceSwipeFingers ?? CaelestiaVars.currentVars.workspaceSwipeFingers ?? CaelestiaVars.getDefault("workspaceSwipeFingers", 4)
-            from: 3
-            to: 5
-            stepSize: 1
-            onMoved: v => CaelestiaVars.set("workspaceSwipeFingers", v)
-        }
-
-        StepperRow {
-            last: true
-            varKey: "gestureFingers"
-            label: qsTr("General Gesture Fingers")
-            subtext: qsTr("Number of fingers for standard desktop gestures")
-            value: CaelestiaVars.pendingVars.gestureFingers ?? CaelestiaVars.currentVars.gestureFingers ?? CaelestiaVars.getDefault("gestureFingers", 3)
-            from: 3
-            to: 5
-            stepSize: 1
-            onMoved: v => CaelestiaVars.set("gestureFingers", v)
-        }
-
-        Item {
-            Layout.preferredHeight: Tokens.padding.large
-            Layout.fillWidth: true
-        }
-    }
+    ]
 }

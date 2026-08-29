@@ -4,6 +4,10 @@
 
 <h1 align="center">FlightDeck</h1>
 
+<p align="center">
+  <img src="assets/screenshots/flightdeck.png" alt="FlightDeck Screenshot" width="850">
+</p>
+
 **FlightDeck** is a powerful, modern Hyprland configuration manager built with C++20 and Qt 6 / QML for the Astra Suite and Caelestia dotfiles. It features the unified Astra design language, real-time Caelestia shell tokens, and live scheme reloading.
 
 ## Features

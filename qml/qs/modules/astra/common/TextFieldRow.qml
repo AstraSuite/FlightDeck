@@ -19,8 +19,8 @@ ConnectedRect {
     property alias label: label.text
     property alias text: label.text
     property string subtext
-    property string value
-    property alias placeholderText: input.placeholderText
+    property string value: ""
+    property string placeholderText: root.varKey !== "" ? String(CaelestiaVars.getDefault(root.varKey, "")) : ""
     property string errorText
     property alias maximumLength: input.maximumLength
     property alias validate: input.validate
@@ -42,7 +42,7 @@ ConnectedRect {
 
     Binding on value {
         when: root.varKey !== ""
-        value: CaelestiaVars.pendingVars[root.varKey] ?? CaelestiaVars.currentVars[root.varKey] ?? CaelestiaVars.getDefault(root.varKey, "")
+        value: CaelestiaVars.pendingVars[root.varKey] ?? CaelestiaVars.currentVars[root.varKey] ?? ""
         restoreMode: Binding.RestoreBinding
     }
 
@@ -82,7 +82,7 @@ ConnectedRect {
                     onClicked: {
                         if (root.varKey !== "") {
                             CaelestiaVars.resetToDefault(root.varKey);
-                            root.value = CaelestiaVars.getDefault(root.varKey, "");
+                            root.value = "";
                         }
                         root.reset();
                     }
@@ -106,22 +106,31 @@ ConnectedRect {
         StyledTextField {
             id: input
 
-            Layout.preferredWidth: root.smallField ? 140 : 200
-            Layout.maximumWidth: root.width / 2
+            Layout.preferredWidth: Math.max(root.smallField ? 140 : 240, Math.min(rowLayout.width * 0.6, Math.max(implicitWidth, (placeholderText.length + 3) * 8.5)))
+            Layout.maximumWidth: Math.max(240, rowLayout.width * 0.65)
             Layout.alignment: Qt.AlignVCenter
             verticalPadding: Tokens.padding.small
 
+            placeholderText: root.placeholderText
             text: root.value
 
             onTextEdited: {
                 if (root.varKey !== "") {
-                    CaelestiaVars.setVar(root.varKey, text);
+                    if (text.trim() === "") {
+                        CaelestiaVars.resetToDefault(root.varKey);
+                    } else {
+                        CaelestiaVars.setVar(root.varKey, text);
+                    }
                 }
                 root.valueEdited(text);
             }
             onEditingFinished: {
                 if (root.varKey !== "") {
-                    CaelestiaVars.setVar(root.varKey, text);
+                    if (text.trim() === "") {
+                        CaelestiaVars.resetToDefault(root.varKey);
+                    } else {
+                        CaelestiaVars.setVar(root.varKey, text);
+                    }
                 }
                 root.editingFinished(text);
             }

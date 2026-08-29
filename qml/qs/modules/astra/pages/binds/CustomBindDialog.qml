@@ -32,6 +32,11 @@ Popup {
         border.color: Colours.palette.m3outlineVariant
     }
 
+    onClosed: {
+        root.recording = false;
+        HyprlandState.stopCapture();
+    }
+
     contentItem: ColumnLayout {
         anchors.fill: parent
         anchors.margins: Tokens.padding.large
@@ -86,6 +91,9 @@ Popup {
                         root.recording = !root.recording;
                         if (root.recording) {
                             focusItem.forceActiveFocus();
+                            HyprlandState.startCapture();
+                        } else {
+                            HyprlandState.stopCapture();
                         }
                     }
                 }
@@ -187,6 +195,7 @@ Popup {
             let k = event.key;
             if (k === Qt.Key_Escape) {
                 root.recording = false;
+                HyprlandState.stopCapture();
                 event.accepted = true;
                 return;
             }
@@ -238,6 +247,7 @@ Popup {
                 mods.push(keyStr);
                 root.bindKey = mods.join(" + ");
                 root.recording = false;
+                HyprlandState.stopCapture();
                 event.accepted = true;
             } else if (isModKey) {
                 modifierOnly = true;
@@ -261,6 +271,7 @@ Popup {
             if (isModKey && modifierOnly && lastMods.length > 0) {
                 root.bindKey = lastMods.join(" + ");
                 root.recording = false;
+                HyprlandState.stopCapture();
                 event.accepted = true;
             }
         }

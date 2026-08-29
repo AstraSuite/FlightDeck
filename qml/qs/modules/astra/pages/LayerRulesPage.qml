@@ -12,7 +12,7 @@ import FlightDeck.Caelestia 1.0
 PageBase {
     id: root
 
-    title: qsTr("Layer Rules")
+    title: qsTr("Layer rules")
 
     ColumnLayout {
         id: mainCol
@@ -36,9 +36,10 @@ PageBase {
             label: qsTr("Add Layer Rule")
             header: qsTr("Add New Layer Rule")
             acceptLabel: qsTr("Save Rule")
-
+            separateContent: true
+            horizontalContentMargin: -Tokens.padding.small
             openWidth: Math.min((rootParent ? rootParent.width : 560) * 0.95, 540)
-            openHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
+            customOpenHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
 
             property string targetNamespace: ""
             property bool isBlur: true
@@ -90,12 +91,14 @@ PageBase {
             }
 
             content: Component {
-                Flickable {
+                VerticalFadeFlickable {
                     id: addLayerFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     contentWidth: width
                     contentHeight: addLayerCol.implicitHeight
+                    topMargin: Tokens.padding.medium
+                    bottomMargin: Tokens.padding.medium
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
 
@@ -178,41 +181,48 @@ PageBase {
                             color: Colours.palette.m3onSurfaceVariant
                         }
 
-                        SelectRow {
-                            first: true
-                            last: addLayerBtn.animType !== "popin"
-                            label: qsTr("Animation Type")
-                            subtext: qsTr("Layer entrance and exit motion effect")
-                            menuItems: [
-                                MenuItem { text: qsTr("None"); icon: "block"; onClicked: addLayerBtn.animType = "None" },
-                                MenuItem { text: qsTr("popin"); icon: "open_in_full"; onClicked: addLayerBtn.animType = "popin" },
-                                MenuItem { text: qsTr("fade"); icon: "gradient"; onClicked: addLayerBtn.animType = "fade" },
-                                MenuItem { text: qsTr("slide"); icon: "slideshow"; onClicked: addLayerBtn.animType = "slide" },
-                                MenuItem { text: qsTr("slide top"); icon: "arrow_upward"; onClicked: addLayerBtn.animType = "slide top" },
-                                MenuItem { text: qsTr("slide bottom"); icon: "arrow_downward"; onClicked: addLayerBtn.animType = "slide bottom" },
-                                MenuItem { text: qsTr("slide left"); icon: "arrow_back"; onClicked: addLayerBtn.animType = "slide left" },
-                                MenuItem { text: qsTr("slide right"); icon: "arrow_forward"; onClicked: addLayerBtn.animType = "slide right" }
-                            ]
-                            active: {
-                                for (var i = 0; i < menuItems.length; i++) {
-                                    if (menuItems[i].text === addLayerBtn.animType) return menuItems[i];
-                                }
-                                return menuItems[0];
-                            }
-                        }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.extraSmall / 2
 
-                        SliderRow {
-                            visible: addLayerBtn.animType === "popin"
-                            last: true
-                            label: qsTr("Popin Percentage")
-                            subtext: qsTr("Initial starting scale ratio for popin animation")
-                            value: addLayerBtn.popinPercent
-                            valueLabel: addLayerBtn.popinPercent + "%"
-                            from: 0
-                            to: 100
-                            stepSize: 5
-                            onMoved: v => addLayerBtn.popinPercent = Math.round(v)
-                            onInteraction: v => addLayerBtn.popinPercent = Math.round(v)
+                            SelectRow {
+                                first: true
+                                last: addLayerBtn.animType !== "popin"
+                                menuOnTop: true
+                                label: qsTr("Animation Type")
+                                subtext: qsTr("Layer entrance and exit motion effect")
+                                menuItems: [
+                                    MenuItem { text: qsTr("None"); icon: "block"; onClicked: addLayerBtn.animType = "None" },
+                                    MenuItem { text: qsTr("popin"); icon: "open_in_full"; onClicked: addLayerBtn.animType = "popin" },
+                                    MenuItem { text: qsTr("fade"); icon: "gradient"; onClicked: addLayerBtn.animType = "fade" },
+                                    MenuItem { text: qsTr("slide"); icon: "slideshow"; onClicked: addLayerBtn.animType = "slide" },
+                                    MenuItem { text: qsTr("slide top"); icon: "arrow_upward"; onClicked: addLayerBtn.animType = "slide top" },
+                                    MenuItem { text: qsTr("slide bottom"); icon: "arrow_downward"; onClicked: addLayerBtn.animType = "slide bottom" },
+                                    MenuItem { text: qsTr("slide left"); icon: "arrow_back"; onClicked: addLayerBtn.animType = "slide left" },
+                                    MenuItem { text: qsTr("slide right"); icon: "arrow_forward"; onClicked: addLayerBtn.animType = "slide right" }
+                                ]
+                                active: {
+                                    for (var i = 0; i < menuItems.length; i++) {
+                                        if (menuItems[i].text === addLayerBtn.animType) return menuItems[i];
+                                    }
+                                    return menuItems[0];
+                                }
+                            }
+
+                            SliderRow {
+                                visible: addLayerBtn.animType === "popin"
+                                first: false
+                                last: true
+                                label: qsTr("Popin Percentage")
+                                subtext: qsTr("Initial starting scale ratio for popin animation")
+                                value: addLayerBtn.popinPercent
+                                valueLabel: addLayerBtn.popinPercent + "%"
+                                from: 0
+                                to: 100
+                                stepSize: 5
+                                onMoved: v => addLayerBtn.popinPercent = Math.round(v)
+                                onInteraction: v => addLayerBtn.popinPercent = Math.round(v)
+                            }
                         }
                     }
                 }
@@ -259,9 +269,10 @@ PageBase {
 
                 header: editLayerRow.isReadOnly ? qsTr("Override Layer Rule") : qsTr("Edit Layer Rule")
                 acceptLabel: editLayerRow.isReadOnly ? qsTr("Save Override") : qsTr("Save Changes")
-
+                separateContent: true
+                horizontalContentMargin: -Tokens.padding.small
                 openWidth: Math.min((rootParent ? rootParent.width : 560) * 0.95, 540)
-                openHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
+                customOpenHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
 
                 property string targetNamespace: editLayerRow.modelData.namespace || ""
                 property bool isBlur: !!editLayerRow.modelData.blur
@@ -343,13 +354,6 @@ PageBase {
                         spacing: 0
 
                         IconButton {
-                            icon: "edit"
-                            type: IconButton.Text
-                            font: Tokens.font.icon.small
-                            onClicked: editLayerRow.open = true
-                        }
-
-                        IconButton {
                             visible: !editLayerRow.isReadOnly
                             icon: "delete"
                             type: IconButton.Text
@@ -363,12 +367,14 @@ PageBase {
                 }
 
             content: Component {
-                Flickable {
+                VerticalFadeFlickable {
                     id: editLayerFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     contentWidth: width
                     contentHeight: editLayerCol.implicitHeight
+                    topMargin: Tokens.padding.medium
+                    bottomMargin: Tokens.padding.medium
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
 
@@ -451,41 +457,48 @@ PageBase {
                                 color: Colours.palette.m3onSurfaceVariant
                             }
 
-                            SelectRow {
-                                first: true
-                                last: editLayerRow.animType !== "popin"
-                                label: qsTr("Animation Type")
-                                subtext: qsTr("Layer entrance and exit motion effect")
-                                menuItems: [
-                                    MenuItem { text: qsTr("None"); icon: "block"; onClicked: editLayerRow.animType = "None" },
-                                    MenuItem { text: qsTr("popin"); icon: "open_in_full"; onClicked: editLayerRow.animType = "popin" },
-                                    MenuItem { text: qsTr("fade"); icon: "gradient"; onClicked: editLayerRow.animType = "fade" },
-                                    MenuItem { text: qsTr("slide"); icon: "slideshow"; onClicked: editLayerRow.animType = "slide" },
-                                    MenuItem { text: qsTr("slide top"); icon: "arrow_upward"; onClicked: editLayerRow.animType = "slide top" },
-                                    MenuItem { text: qsTr("slide bottom"); icon: "arrow_downward"; onClicked: editLayerRow.animType = "slide bottom" },
-                                    MenuItem { text: qsTr("slide left"); icon: "arrow_back"; onClicked: editLayerRow.animType = "slide left" },
-                                    MenuItem { text: qsTr("slide right"); icon: "arrow_forward"; onClicked: editLayerRow.animType = "slide right" }
-                                ]
-                                active: {
-                                    for (var i = 0; i < menuItems.length; i++) {
-                                        if (menuItems[i].text === editLayerRow.animType) return menuItems[i];
-                                    }
-                                    return menuItems[0];
-                                }
-                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Tokens.spacing.extraSmall / 2
 
-                            SliderRow {
-                                visible: editLayerRow.animType === "popin"
-                                last: true
-                                label: qsTr("Popin Percentage")
-                                subtext: qsTr("Initial starting scale ratio for popin animation")
-                                value: editLayerRow.popinPercent
-                                valueLabel: editLayerRow.popinPercent + "%"
-                                from: 0
-                                to: 100
-                                stepSize: 5
-                                onMoved: v => editLayerRow.popinPercent = Math.round(v)
-                                onInteraction: v => editLayerRow.popinPercent = Math.round(v)
+                                SelectRow {
+                                    first: true
+                                    last: editLayerRow.animType !== "popin"
+                                    menuOnTop: true
+                                    label: qsTr("Animation Type")
+                                    subtext: qsTr("Layer entrance and exit motion effect")
+                                    menuItems: [
+                                        MenuItem { text: qsTr("None"); icon: "block"; onClicked: editLayerRow.animType = "None" },
+                                        MenuItem { text: qsTr("popin"); icon: "open_in_full"; onClicked: editLayerRow.animType = "popin" },
+                                        MenuItem { text: qsTr("fade"); icon: "gradient"; onClicked: editLayerRow.animType = "fade" },
+                                        MenuItem { text: qsTr("slide"); icon: "slideshow"; onClicked: editLayerRow.animType = "slide" },
+                                        MenuItem { text: qsTr("slide top"); icon: "arrow_upward"; onClicked: editLayerRow.animType = "slide top" },
+                                        MenuItem { text: qsTr("slide bottom"); icon: "arrow_downward"; onClicked: editLayerRow.animType = "slide bottom" },
+                                        MenuItem { text: qsTr("slide left"); icon: "arrow_back"; onClicked: editLayerRow.animType = "slide left" },
+                                        MenuItem { text: qsTr("slide right"); icon: "arrow_forward"; onClicked: editLayerRow.animType = "slide right" }
+                                    ]
+                                    active: {
+                                        for (var i = 0; i < menuItems.length; i++) {
+                                            if (menuItems[i].text === editLayerRow.animType) return menuItems[i];
+                                        }
+                                        return menuItems[0];
+                                    }
+                                }
+
+                                SliderRow {
+                                    visible: editLayerRow.animType === "popin"
+                                    first: false
+                                    last: true
+                                    label: qsTr("Popin Percentage")
+                                    subtext: qsTr("Initial starting scale ratio for popin animation")
+                                    value: editLayerRow.popinPercent
+                                    valueLabel: editLayerRow.popinPercent + "%"
+                                    from: 0
+                                    to: 100
+                                    stepSize: 5
+                                    onMoved: v => editLayerRow.popinPercent = Math.round(v)
+                                    onInteraction: v => editLayerRow.popinPercent = Math.round(v)
+                                }
                             }
                         }
                     }

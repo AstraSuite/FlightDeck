@@ -65,10 +65,23 @@ Row {
             anchors.horizontalCenterOffset: Math.floor(root.verticalPadding / 4)
             spacing: Tokens.spacing.small
 
+            StyledRect {
+                id: colorSwatch
+                Layout.alignment: Qt.AlignVCenter
+                visible: root.active && root.active.previewColor !== undefined && root.active.previewColor !== Qt.rgba(0,0,0,0) && String(root.active.previewColor) !== "#00000000" && String(root.active.previewColor) !== "transparent"
+                implicitWidth: 14
+                implicitHeight: 14
+                radius: Tokens.rounding.full
+                border.width: 1.5
+                border.color: Colours.palette.m3outline
+                color: root.active ? (root.active.previewColor || "transparent") : "transparent"
+            }
+
             MaterialIcon {
                 id: iconLabel
 
                 Layout.alignment: Qt.AlignVCenter
+                visible: !colorSwatch.visible && (text !== "")
                 animate: true
                 text: root.active?.activeIcon ?? root.fallbackIcon
                 color: root.disabled ? root.disabledTextColour : root.textColour

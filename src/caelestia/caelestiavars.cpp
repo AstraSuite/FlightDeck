@@ -31,10 +31,165 @@ QString CaelestiaVars::defaultVarsFilePath() {
     return QDir::homePath() + QStringLiteral("/.config/hypr/variables.lua");
 }
 
+QString CaelestiaVars::schemeFilePath() {
+    return QDir::homePath() + QStringLiteral("/.config/hypr/scheme/current.lua");
+}
+
 CaelestiaVars::CaelestiaVars(QObject* parent)
     : QObject(parent) {
     loadDefaults();
     loadFromFile();
+}
+
+QVariantList CaelestiaVars::schemeColors() const {
+    return getSchemeColors();
+}
+
+QVariantList CaelestiaVars::getSchemeColors() const {
+    QVariantList list;
+    const QString path = schemeFilePath();
+    QFile file(path);
+    if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return list;
+    }
+
+    const QString content = QString::fromUtf8(file.readAll());
+    file.close();
+
+    static const QRegularExpression lineRe(QStringLiteral(R"(^\s*([a-zA-Z0-9_]+)\s*=\s*\"([0-9a-fA-F]{6})\"\s*,?)"), QRegularExpression::MultilineOption);
+    auto matchIt = lineRe.globalMatch(content);
+    while (matchIt.hasNext()) {
+        auto m = matchIt.next();
+        const QString name = m.captured(1);
+        const QString hex = m.captured(2);
+
+        QVariantMap item;
+        item[QStringLiteral("name")] = name;
+        item[QStringLiteral("hex")] = hex;
+        item[QStringLiteral("color")] = QStringLiteral("#") + hex;
+        list.append(item);
+    }
+    return list;
+}
+
+QString CaelestiaVars::getSchemeHex(const QString& token) const {
+    const QVariantList colors = getSchemeColors();
+    for (const QVariant& c : colors) {
+        const QVariantMap m = c.toMap();
+        if (m.value(QStringLiteral("name")).toString() == token) {
+            return m.value(QStringLiteral("hex")).toString();
+        }
+    }
+    return QStringLiteral("9bd0cc"); // Fallback primary
+}
+
+QVariantMap CaelestiaVars::parseColor(const QString& colorStr) const {
+    QVariantMap res;
+    QString clean = colorStr.trimmed();
+
+    // Pattern 1: scheme.<token> .. "<alphaHex>" (e.g. "rgba(" .. scheme.shadow .. "60)" or rgba(" .. scheme.shadow .. "60)")
+    static const QRegularExpression schemeRe(QStringLiteral(R"(scheme\.([a-zA-Z0-9_]+)\s*\.\.\s*\"([0-9a-fA-F]{2})\")"));
+    auto sm = schemeRe.match(clean);
+    if (sm.hasMatch()) {
+        QString token = sm.captured(1);
+        QString alphaHex = sm.captured(2);
+        bool ok = false;
+        int alphaVal = alphaHex.toInt(&ok, 16);
+        int alphaPercent = ok ? qBound(0, qRound(alphaVal / 2.55), 100) : 100;
+        QString hex = getSchemeHex(token);
+
+        res[QStringLiteral("isScheme")] = true;
+        res[QStringLiteral("token")] = token;
+        res[QStringLiteral("hex")] = hex;
+        res[QStringLiteral("alphaPercent")] = alphaPercent;
+        res[QStringLiteral("alphaHex")] = alphaHex;
+        res[QStringLiteral("previewColor")] = QStringLiteral("#") + alphaHex + hex;
+        res[QStringLiteral("formatted")] = QStringLiteral("\"rgba(\" .. scheme.%1 .. \"%2)\"").arg(token, alphaHex);
+        return res;
+    }
+
+    // Pattern 2: rgba(RRGGBBAA) or rgba("RRGGBBAA") or "rgba(RRGGBBAA)"
+    static const QRegularExpression rgbaRe(QStringLiteral(R"(rgba\(\"?([0-9a-fA-F]{6})([0-9a-fA-F]{2})\"?\))"));
+    auto rm = rgbaRe.match(clean);
+    if (rm.hasMatch()) {
+        QString hex = rm.captured(1);
+        QString alphaHex = rm.captured(2);
+        bool ok = false;
+        int alphaVal = alphaHex.toInt(&ok, 16);
+        int alphaPercent = ok ? qBound(0, qRound(alphaVal / 2.55), 100) : 100;
+
+        res[QStringLiteral("isScheme")] = false;
+        res[QStringLiteral("token")] = QString();
+        res[QStringLiteral("hex")] = hex;
+        res[QStringLiteral("alphaPercent")] = alphaPercent;
+        res[QStringLiteral("alphaHex")] = alphaHex;
+        res[QStringLiteral("previewColor")] = QStringLiteral("#") + alphaHex + hex;
+        res[QStringLiteral("formatted")] = QStringLiteral("\"rgba(%1%2)\"").arg(hex, alphaHex);
+        return res;
+    }
+
+    // Pattern 3: #RRGGBBAA or #RRGGBB
+    if (clean.startsWith(QLatin1Char('#')) || (clean.startsWith(QLatin1Char('"')) && clean.contains(QLatin1Char('#')))) {
+        QString raw = clean;
+        raw.remove(QLatin1Char('"'));
+        raw.remove(QLatin1Char('\''));
+        raw.remove(QLatin1Char('#'));
+        if (raw.length() >= 8) {
+            QString hex = raw.left(6);
+            QString alphaHex = raw.mid(6, 2);
+            bool ok = false;
+            int alphaVal = alphaHex.toInt(&ok, 16);
+            int alphaPercent = ok ? qBound(0, qRound(alphaVal / 2.55), 100) : 100;
+
+            res[QStringLiteral("isScheme")] = false;
+            res[QStringLiteral("token")] = QString();
+            res[QStringLiteral("hex")] = hex;
+            res[QStringLiteral("alphaPercent")] = alphaPercent;
+            res[QStringLiteral("alphaHex")] = alphaHex;
+            res[QStringLiteral("previewColor")] = QStringLiteral("#") + alphaHex + hex;
+            res[QStringLiteral("formatted")] = QStringLiteral("\"rgba(%1%2)\"").arg(hex, alphaHex);
+            return res;
+        } else if (raw.length() >= 6) {
+            QString hex = raw.left(6);
+            res[QStringLiteral("isScheme")] = false;
+            res[QStringLiteral("token")] = QString();
+            res[QStringLiteral("hex")] = hex;
+            res[QStringLiteral("alphaPercent")] = 100;
+            res[QStringLiteral("alphaHex")] = QStringLiteral("ff");
+            res[QStringLiteral("previewColor")] = QStringLiteral("#ff") + hex;
+            res[QStringLiteral("formatted")] = QStringLiteral("\"rgba(%1ff)\"").arg(hex);
+            return res;
+        }
+    }
+
+    // Fallback default
+    res[QStringLiteral("isScheme")] = true;
+    res[QStringLiteral("token")] = QStringLiteral("shadow");
+    res[QStringLiteral("hex")] = getSchemeHex(QStringLiteral("shadow"));
+    res[QStringLiteral("alphaPercent")] = 38;
+    res[QStringLiteral("alphaHex")] = QStringLiteral("60");
+    res[QStringLiteral("previewColor")] = QStringLiteral("#60") + res[QStringLiteral("hex")].toString();
+    res[QStringLiteral("formatted")] = QStringLiteral("\"rgba(\" .. scheme.shadow .. \"60)\"");
+    return res;
+}
+
+QString CaelestiaVars::formatColor(bool isScheme, const QString& tokenOrHex, int alphaPercent) const {
+    int clampedAlpha = qBound(0, alphaPercent, 100);
+    int alphaVal = qBound(0, qRound(clampedAlpha * 2.55), 255);
+    QString alphaHex = QStringLiteral("%1").arg(alphaVal, 2, 16, QLatin1Char('0')).toLower();
+
+    if (isScheme) {
+        return QStringLiteral("\"rgba(\" .. scheme.%1 .. \"%2)\"").arg(tokenOrHex, alphaHex);
+    }
+
+    QString cleanHex = tokenOrHex.trimmed();
+    if (cleanHex.startsWith(QLatin1Char('#'))) {
+        cleanHex.remove(0, 1);
+    }
+    if (cleanHex.length() > 6) {
+        cleanHex = cleanHex.left(6);
+    }
+    return QStringLiteral("\"rgba(%1%2)\"").arg(cleanHex, alphaHex);
 }
 
 void CaelestiaVars::loadDefaults() {
@@ -44,14 +199,28 @@ void CaelestiaVars::loadDefaults() {
         { QStringLiteral("browser"), QStringLiteral("firefox") },
         { QStringLiteral("editor"), QStringLiteral("codium") },
         { QStringLiteral("fileExplorer"), QStringLiteral("thunar") },
-        { QStringLiteral("audioSettings"), QStringLiteral("pavucontrol") },
+        { QStringLiteral("audioSettings"), QStringLiteral("pwvucontrol") },
 
-        // Touchpad
+        // Touchpad & Gestures
         { QStringLiteral("touchpadDisableTyping"), true },
         { QStringLiteral("touchpadScrollFactor"), 0.3 },
         { QStringLiteral("gestureFingers"), 3 },
         { QStringLiteral("workspaceSwipeFingers"), 4 },
         { QStringLiteral("gestureFingersMore"), 4 },
+        { QStringLiteral("sleepGestureCmd"), QStringLiteral("systemctl suspend-then-hibernate") },
+        { QStringLiteral("touchpadTapToClick"), true },
+        { QStringLiteral("touchpadClickfingerBehavior"), false },
+        { QStringLiteral("touchpadMiddleButtonEmulation"), false },
+        { QStringLiteral("touchpadDragLock"), 0 },
+        { QStringLiteral("touchpadTapButtonMap"), QStringLiteral("") },
+        { QStringLiteral("workspaceSwipeCreateNew"), true },
+        { QStringLiteral("workspaceSwipeForever"), false },
+        { QStringLiteral("workspaceSwipeCancelRatio"), 0.5 },
+        { QStringLiteral("workspaceSwipeMinSpeedToForce"), 30 },
+        { QStringLiteral("workspaceSwipeDirectionLock"), true },
+        { QStringLiteral("workspaceSwipeUseR"), false },
+        { QStringLiteral("workspaceSwipeDistance"), 300 },
+        { QStringLiteral("workspaceSwipeInvert"), false },
 
         // Blur
         { QStringLiteral("blurEnabled"), true },
@@ -61,12 +230,23 @@ void CaelestiaVars::loadDefaults() {
         { QStringLiteral("blurSize"), 8 },
         { QStringLiteral("blurPasses"), 2 },
         { QStringLiteral("blurXray"), false },
+        { QStringLiteral("blurIgnoreOpacity"), false },
+        { QStringLiteral("blurNoise"), 0.0117 },
+        { QStringLiteral("blurContrast"), 0.8916 },
+        { QStringLiteral("blurBrightness"), 0.8172 },
+        { QStringLiteral("blurVibrancy"), 0.1696 },
+        { QStringLiteral("blurVibrancyDarkness"), 0.0 },
 
         // Shadow
         { QStringLiteral("shadowEnabled"), true },
         { QStringLiteral("shadowRange"), 15 },
         { QStringLiteral("shadowRenderPower"), 4 },
-        { QStringLiteral("shadowColour"), QStringLiteral("rgba(\" .. scheme.inversePrimary .. \"10)") },
+        { QStringLiteral("shadowOffset"), QStringLiteral("0 0") },
+        { QStringLiteral("shadowScale"), 1.0 },
+        { QStringLiteral("shadowColour"), QStringLiteral("rgba(\" .. scheme.shadow .. \"60)") },
+        { QStringLiteral("shadowColor"), QStringLiteral("rgba(\" .. scheme.shadow .. \"60)") },
+        { QStringLiteral("inactiveShadowColour"), QStringLiteral("rgba(\" .. scheme.shadow .. \"30)") },
+        { QStringLiteral("inactiveShadowColor"), QStringLiteral("rgba(\" .. scheme.shadow .. \"30)") },
 
         // Gaps
         { QStringLiteral("workspaceGaps"), 20 },
@@ -74,19 +254,111 @@ void CaelestiaVars::loadDefaults() {
         { QStringLiteral("windowGapsOut"), 10 },
         { QStringLiteral("singleWindowGapsOut"), 20 },
 
-        // Window styling
+        // Window styling & Borders
         { QStringLiteral("windowOpacity"), 0.95 },
+        { QStringLiteral("activeWindowOpacity"), 1.0 },
+        { QStringLiteral("inactiveWindowOpacity"), 0.95 },
+        { QStringLiteral("fullscreenWindowOpacity"), 1.0 },
         { QStringLiteral("windowRounding"), 15 },
+        { QStringLiteral("windowRoundingPower"), 2.0 },
         { QStringLiteral("windowBorderSize"), 1 },
+        { QStringLiteral("resizeOnBorder"), true },
+        { QStringLiteral("extendBorderGrabArea"), 15 },
+        { QStringLiteral("hoverIconOnBorder"), true },
+        { QStringLiteral("allowTearing"), false },
+        { QStringLiteral("layout"), QStringLiteral("dwindle") },
         { QStringLiteral("activeWindowBorderColour"), QStringLiteral("rgba(\" .. scheme.primary .. \"e6)") },
+        { QStringLiteral("activeWindowBorderColor"), QStringLiteral("rgba(\" .. scheme.primary .. \"e6)") },
         { QStringLiteral("inactiveWindowBorderColour"), QStringLiteral("rgba(\" .. scheme.onSurfaceVariant .. \"11)") },
+        { QStringLiteral("inactiveWindowBorderColor"), QStringLiteral("rgba(\" .. scheme.onSurfaceVariant .. \"11)") },
+
+        // Dimming
+        { QStringLiteral("dimInactive"), false },
+        { QStringLiteral("dimStrength"), 0.5 },
+        { QStringLiteral("dimAround"), 0.4 },
+        { QStringLiteral("dimSpecial"), 0.2 },
+
+        // Snap
+        { QStringLiteral("snapEnabled"), false },
+        { QStringLiteral("snapWindowGap"), 10 },
+        { QStringLiteral("snapMonitorGap"), 10 },
+        { QStringLiteral("snapBorderOverlap"), false },
+        { QStringLiteral("snapRespectGaps"), false },
+
+        // Cursor
+        { QStringLiteral("cursorTheme"), QStringLiteral("sweet-cursors") },
+        { QStringLiteral("cursorSize"), 24 },
+        { QStringLiteral("cursorNoHardwareCursors"), false },
+        { QStringLiteral("cursorEnableHyprcursor"), true },
+        { QStringLiteral("cursorNoWarps"), false },
+        { QStringLiteral("cursorPersistentWarps"), false },
+        { QStringLiteral("cursorWarpOnChangeWorkspace"), false },
+        { QStringLiteral("cursorZoomFactor"), 1.0 },
+        { QStringLiteral("cursorInactiveTimeout"), 0 },
+        { QStringLiteral("cursorHideOnKeyPress"), false },
+        { QStringLiteral("cursorHideOnTouch"), false },
+        { QStringLiteral("cursorHideOnTablet"), false },
+
+        // Keyboard & Mouse
+        { QStringLiteral("kbLayout"), QStringLiteral("us") },
+        { QStringLiteral("kbVariant"), QStringLiteral("") },
+        { QStringLiteral("kbOptions"), QStringLiteral("") },
+        { QStringLiteral("numlockByDefault"), false },
+        { QStringLiteral("keyRepeatRate"), 25 },
+        { QStringLiteral("keyRepeatDelay"), 600 },
+        { QStringLiteral("mouseSensitivity"), 0.0 },
+        { QStringLiteral("mouseAccelProfile"), QStringLiteral("") },
+        { QStringLiteral("followMouse"), 1 },
+        { QStringLiteral("mouseNaturalScroll"), false },
+        { QStringLiteral("mouseScrollFactor"), 1.0 },
+        { QStringLiteral("leftHandedMode"), false },
+        { QStringLiteral("mouseRefocus"), false },
+        { QStringLiteral("floatSwitchOverrideFocus"), 1 },
+
+        // Layout Engines (Dwindle, Master, Scrolling)
+        { QStringLiteral("dwindlePreserveSplit"), true },
+        { QStringLiteral("dwindlePseudotile"), false },
+        { QStringLiteral("dwindleForceSplit"), 0 },
+        { QStringLiteral("dwindleSmartSplit"), false },
+        { QStringLiteral("dwindleDefaultSplitRatio"), 1.0 },
+        { QStringLiteral("dwindleSplitWidthMultiplier"), 1.0 },
+        { QStringLiteral("dwindleSmartResizing"), true },
+        { QStringLiteral("dwindleSpecialScaleFactor"), 0.8 },
+        { QStringLiteral("masterOrientation"), QStringLiteral("left") },
+        { QStringLiteral("masterMfact"), 0.55 },
+        { QStringLiteral("masterNewStatus"), QStringLiteral("slave") },
+        { QStringLiteral("masterNewOnTop"), false },
+        { QStringLiteral("masterNewOnActive"), QStringLiteral("none") },
+        { QStringLiteral("masterSmartResizing"), true },
+        { QStringLiteral("masterSpecialScaleFactor"), 0.8 },
+        { QStringLiteral("scrollingColumnWidth"), 0.5 },
+        { QStringLiteral("scrollingDirection"), QStringLiteral("right") },
+        { QStringLiteral("scrollingFullscreenOnOneColumn"), false },
+        { QStringLiteral("scrollingFocusFitMethod"), QStringLiteral("Center") },
+        { QStringLiteral("scrollingFollowFocus"), true },
+
+        // XWayland & Ecosystem & Misc
+        { QStringLiteral("xwaylandEnabled"), true },
+        { QStringLiteral("xwaylandForceZeroScaling"), false },
+        { QStringLiteral("xwaylandUseNearestNeighbor"), false },
+        { QStringLiteral("noUpdateNews"), false },
+        { QStringLiteral("noDonationNag"), false },
+        { QStringLiteral("enforcePermissions"), false },
+        { QStringLiteral("disableAutoreload"), false },
+        { QStringLiteral("focusOnActivate"), false },
+        { QStringLiteral("animateManualResizes"), false },
+        { QStringLiteral("animateMouseWindowDragging"), false },
+        { QStringLiteral("disableHyprlandLogo"), false },
+        { QStringLiteral("disableSplashRendering"), false },
+        { QStringLiteral("forceDefaultWallpaper"), -1 },
+        { QStringLiteral("vrr"), 0 },
+        { QStringLiteral("vfr"), true },
+        { QStringLiteral("mouseMoveEnablesDpms"), false },
+        { QStringLiteral("keyPressEnablesDpms"), false },
 
         // Misc
         { QStringLiteral("volumeStep"), 10 },
         { QStringLiteral("volumeMax"), 100 },
-        { QStringLiteral("cursorTheme"), QStringLiteral("sweet-cursors") },
-        { QStringLiteral("cursorSize"), 24 },
-        { QStringLiteral("sleepGestureCmd"), QStringLiteral("systemctl suspend-then-hibernate") },
 
         // Keybinds (single or arrays)
         { QStringLiteral("kbGoToWs"), QStringLiteral("SUPER") },
@@ -141,7 +413,21 @@ void CaelestiaVars::loadDefaults() {
         { QStringLiteral("kbColorPicker"), QStringLiteral("SUPER + SHIFT + C") },
         { QStringLiteral("kbMediaToggle"), QStringLiteral("CTRL + SUPER + Space") },
         { QStringLiteral("kbMediaNext"), QStringLiteral("CTRL + SUPER + Equal") },
-        { QStringLiteral("kbMediaPrev"), QStringLiteral("CTRL + SUPER + Minus") }
+        { QStringLiteral("kbMediaPrev"), QStringLiteral("CTRL + SUPER + Minus") },
+        { QStringLiteral("kbMediaStop"), QStringLiteral("CTRL + SUPER + Backspace") },
+        { QStringLiteral("kbVolumeMute"), QStringLiteral("SUPER + SHIFT + M") },
+        { QStringLiteral("kbLauncher"), QStringLiteral("SUPER + SUPER_L") },
+        { QStringLiteral("kbSession"), QStringLiteral("CTRL + ALT + Delete") },
+        { QStringLiteral("kbShowSidebar"), QStringLiteral("SUPER + N") },
+        { QStringLiteral("kbClearNotifs"), QStringLiteral("CTRL + ALT + C") },
+        { QStringLiteral("kbShowPanels"), QStringLiteral("SUPER + K") },
+        { QStringLiteral("kbLock"), QStringLiteral("SUPER + L") },
+        { QStringLiteral("kbRestoreLock"), QStringLiteral("SUPER + ALT + L") },
+        { QStringLiteral("kbSleep"), QStringLiteral("SUPER + SHIFT + L") },
+        { QStringLiteral("kbClipboard"), QStringLiteral("SUPER + V") },
+        { QStringLiteral("kbClipboardDel"), QStringLiteral("SUPER + ALT + V") },
+        { QStringLiteral("kbClipboardPasteLatest"), QStringLiteral("CTRL + SHIFT + ALT + V") },
+        { QStringLiteral("kbEmoji"), QStringLiteral("SUPER + Period") }
     };
 
     const QString defPath = defaultVarsFilePath();
@@ -161,7 +447,9 @@ void CaelestiaVars::loadDefaults() {
                 valStr = valStr.trimmed();
             }
 
-            if (valStr.startsWith(QLatin1Char('"')) && valStr.endsWith(QLatin1Char('"'))) {
+            if (valStr.contains(QLatin1String("scheme.")) || valStr.contains(QLatin1String("..")) || valStr.startsWith(QLatin1String("rgba("))) {
+                m_defaults[key] = valStr;
+            } else if (valStr.startsWith(QLatin1Char('"')) && valStr.endsWith(QLatin1Char('"'))) {
                 m_defaults[key] = valStr.mid(1, valStr.length() - 2);
             } else if (valStr == QStringLiteral("true")) {
                 m_defaults[key] = true;
@@ -191,6 +479,33 @@ void CaelestiaVars::loadDefaults() {
             }
         }
     }
+
+    auto mirrorAliases = [](QVariantMap& map) {
+        if (map.contains(QStringLiteral("shadowColour")) && !map.contains(QStringLiteral("shadowColor"))) {
+            map[QStringLiteral("shadowColor")] = map[QStringLiteral("shadowColour")];
+        } else if (map.contains(QStringLiteral("shadowColor")) && !map.contains(QStringLiteral("shadowColour"))) {
+            map[QStringLiteral("shadowColour")] = map[QStringLiteral("shadowColor")];
+        }
+
+        if (map.contains(QStringLiteral("inactiveShadowColour")) && !map.contains(QStringLiteral("inactiveShadowColor"))) {
+            map[QStringLiteral("inactiveShadowColor")] = map[QStringLiteral("inactiveShadowColour")];
+        } else if (map.contains(QStringLiteral("inactiveShadowColor")) && !map.contains(QStringLiteral("inactiveShadowColour"))) {
+            map[QStringLiteral("inactiveShadowColour")] = map[QStringLiteral("inactiveShadowColor")];
+        }
+
+        if (map.contains(QStringLiteral("activeWindowBorderColour")) && !map.contains(QStringLiteral("activeWindowBorderColor"))) {
+            map[QStringLiteral("activeWindowBorderColor")] = map[QStringLiteral("activeWindowBorderColour")];
+        } else if (map.contains(QStringLiteral("activeWindowBorderColor")) && !map.contains(QStringLiteral("activeWindowBorderColour"))) {
+            map[QStringLiteral("activeWindowBorderColour")] = map[QStringLiteral("activeWindowBorderColor")];
+        }
+
+        if (map.contains(QStringLiteral("inactiveWindowBorderColour")) && !map.contains(QStringLiteral("inactiveWindowBorderColor"))) {
+            map[QStringLiteral("inactiveWindowBorderColor")] = map[QStringLiteral("inactiveWindowBorderColour")];
+        } else if (map.contains(QStringLiteral("inactiveWindowBorderColor")) && !map.contains(QStringLiteral("inactiveWindowBorderColour"))) {
+            map[QStringLiteral("inactiveWindowBorderColour")] = map[QStringLiteral("inactiveWindowBorderColor")];
+        }
+    };
+    mirrorAliases(m_defaults);
 }
 
 void CaelestiaVars::loadFromFile() {
@@ -220,7 +535,9 @@ void CaelestiaVars::loadFromFile() {
             valStr = valStr.trimmed();
         }
 
-        if (valStr.startsWith(QLatin1Char('"')) && valStr.endsWith(QLatin1Char('"'))) {
+        if (valStr.contains(QLatin1String("scheme.")) || valStr.contains(QLatin1String("..")) || valStr.startsWith(QLatin1String("rgba("))) {
+            m_savedVars[key] = valStr;
+        } else if (valStr.startsWith(QLatin1Char('"')) && valStr.endsWith(QLatin1Char('"'))) {
             m_savedVars[key] = valStr.mid(1, valStr.length() - 2);
         } else if (valStr == QStringLiteral("true")) {
             m_savedVars[key] = true;
@@ -249,6 +566,33 @@ void CaelestiaVars::loadFromFile() {
             }
         }
     }
+
+    auto mirrorAliases = [](QVariantMap& map) {
+        if (map.contains(QStringLiteral("shadowColour")) && !map.contains(QStringLiteral("shadowColor"))) {
+            map[QStringLiteral("shadowColor")] = map[QStringLiteral("shadowColour")];
+        } else if (map.contains(QStringLiteral("shadowColor")) && !map.contains(QStringLiteral("shadowColour"))) {
+            map[QStringLiteral("shadowColour")] = map[QStringLiteral("shadowColor")];
+        }
+
+        if (map.contains(QStringLiteral("inactiveShadowColour")) && !map.contains(QStringLiteral("inactiveShadowColor"))) {
+            map[QStringLiteral("inactiveShadowColor")] = map[QStringLiteral("inactiveShadowColour")];
+        } else if (map.contains(QStringLiteral("inactiveShadowColor")) && !map.contains(QStringLiteral("inactiveShadowColour"))) {
+            map[QStringLiteral("inactiveShadowColour")] = map[QStringLiteral("inactiveShadowColor")];
+        }
+
+        if (map.contains(QStringLiteral("activeWindowBorderColour")) && !map.contains(QStringLiteral("activeWindowBorderColor"))) {
+            map[QStringLiteral("activeWindowBorderColor")] = map[QStringLiteral("activeWindowBorderColour")];
+        } else if (map.contains(QStringLiteral("activeWindowBorderColor")) && !map.contains(QStringLiteral("activeWindowBorderColour"))) {
+            map[QStringLiteral("activeWindowBorderColour")] = map[QStringLiteral("activeWindowBorderColor")];
+        }
+
+        if (map.contains(QStringLiteral("inactiveWindowBorderColour")) && !map.contains(QStringLiteral("inactiveWindowBorderColor"))) {
+            map[QStringLiteral("inactiveWindowBorderColor")] = map[QStringLiteral("inactiveWindowBorderColour")];
+        } else if (map.contains(QStringLiteral("inactiveWindowBorderColor")) && !map.contains(QStringLiteral("inactiveWindowBorderColour"))) {
+            map[QStringLiteral("inactiveWindowBorderColour")] = map[QStringLiteral("inactiveWindowBorderColor")];
+        }
+    };
+    mirrorAliases(m_savedVars);
 
     m_pendingVars.clear();
     emit varsChanged();
@@ -361,6 +705,114 @@ void CaelestiaVars::applyKeywordToHyprland(const QString& key, const QVariant& v
         socket->send(QStringLiteral("keyword input:touchpad:scroll_factor %1").arg(value.toDouble()));
     } else if (key == QStringLiteral("workspaceSwipeFingers")) {
         socket->send(QStringLiteral("keyword gestures:workspace_swipe_fingers %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("gestureFingersMore")) {
+        socket->send(QStringLiteral("keyword gestures:workspace_swipe_fingers %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("blurSpecialWs")) {
+        socket->send(QStringLiteral("keyword decoration:blur:special %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("blurInputMethods")) {
+        socket->send(QStringLiteral("keyword decoration:blur:input_methods %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("singleWindowGapsOut")) {
+        socket->send(QStringLiteral("keyword general:gaps_out %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("resizeOnBorder")) {
+        socket->send(QStringLiteral("keyword general:resize_on_border %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("extendBorderGrabArea")) {
+        socket->send(QStringLiteral("keyword general:extend_border_grab_area %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("hoverIconOnBorder")) {
+        socket->send(QStringLiteral("keyword general:hover_icon_on_border %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("allowTearing")) {
+        socket->send(QStringLiteral("keyword general:allow_tearing %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("layout")) {
+        socket->send(QStringLiteral("keyword general:layout %1").arg(value.toString()));
+    } else if (key == QStringLiteral("windowRoundingPower")) {
+        socket->send(QStringLiteral("keyword decoration:rounding_power %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("activeWindowOpacity")) {
+        socket->send(QStringLiteral("keyword decoration:active_opacity %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("inactiveWindowOpacity")) {
+        socket->send(QStringLiteral("keyword decoration:inactive_opacity %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("fullscreenWindowOpacity")) {
+        socket->send(QStringLiteral("keyword decoration:fullscreen_opacity %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("dimInactive")) {
+        socket->send(QStringLiteral("keyword decoration:dim_inactive %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("dimStrength")) {
+        socket->send(QStringLiteral("keyword decoration:dim_strength %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("dimAround")) {
+        socket->send(QStringLiteral("keyword decoration:dim_around %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("dimSpecial")) {
+        socket->send(QStringLiteral("keyword decoration:dim_special %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("snapEnabled")) {
+        socket->send(QStringLiteral("keyword general:snap:enabled %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("snapWindowGap")) {
+        socket->send(QStringLiteral("keyword general:snap:window_gap %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("snapMonitorGap")) {
+        socket->send(QStringLiteral("keyword general:snap:monitor_gap %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("snapBorderOverlap")) {
+        socket->send(QStringLiteral("keyword general:snap:border_overlap %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("snapRespectGaps")) {
+        socket->send(QStringLiteral("keyword general:snap:respect_gaps %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("blurIgnoreOpacity")) {
+        socket->send(QStringLiteral("keyword decoration:blur:ignore_opacity %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("blurNoise")) {
+        socket->send(QStringLiteral("keyword decoration:blur:noise %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("blurContrast")) {
+        socket->send(QStringLiteral("keyword decoration:blur:contrast %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("blurBrightness")) {
+        socket->send(QStringLiteral("keyword decoration:blur:brightness %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("blurVibrancy")) {
+        socket->send(QStringLiteral("keyword decoration:blur:vibrancy %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("blurVibrancyDarkness")) {
+        socket->send(QStringLiteral("keyword decoration:blur:vibrancy_darkness %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("shadowOffset")) {
+        socket->send(QStringLiteral("keyword decoration:shadow:offset %1").arg(value.toString()));
+    } else if (key == QStringLiteral("shadowScale")) {
+        socket->send(QStringLiteral("keyword decoration:shadow:scale %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("cursorNoHardwareCursors")) {
+        socket->send(QStringLiteral("keyword cursor:no_hardware_cursors %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("cursorEnableHyprcursor")) {
+        socket->send(QStringLiteral("keyword cursor:enable_hyprcursor %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("cursorNoWarps")) {
+        socket->send(QStringLiteral("keyword cursor:no_warps %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("cursorPersistentWarps")) {
+        socket->send(QStringLiteral("keyword cursor:persistent_warps %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("cursorWarpOnChangeWorkspace")) {
+        socket->send(QStringLiteral("keyword cursor:warp_on_change_workspace %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("cursorZoomFactor")) {
+        socket->send(QStringLiteral("keyword cursor:zoom_factor %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("cursorInactiveTimeout")) {
+        socket->send(QStringLiteral("keyword cursor:inactive_timeout %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("cursorHideOnKeyPress")) {
+        socket->send(QStringLiteral("keyword cursor:hide_on_key_press %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("cursorHideOnTouch")) {
+        socket->send(QStringLiteral("keyword cursor:hide_on_touch %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("cursorHideOnTablet")) {
+        socket->send(QStringLiteral("keyword cursor:hide_on_tablet %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("kbLayout")) {
+        socket->send(QStringLiteral("keyword input:kb_layout %1").arg(value.toString()));
+    } else if (key == QStringLiteral("kbVariant")) {
+        socket->send(QStringLiteral("keyword input:kb_variant %1").arg(value.toString()));
+    } else if (key == QStringLiteral("kbOptions")) {
+        socket->send(QStringLiteral("keyword input:kb_options %1").arg(value.toString()));
+    } else if (key == QStringLiteral("numlockByDefault")) {
+        socket->send(QStringLiteral("keyword input:numlock_by_default %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("keyRepeatRate")) {
+        socket->send(QStringLiteral("keyword input:repeat_rate %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("keyRepeatDelay")) {
+        socket->send(QStringLiteral("keyword input:repeat_delay %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("mouseSensitivity")) {
+        socket->send(QStringLiteral("keyword input:sensitivity %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("mouseAccelProfile")) {
+        socket->send(QStringLiteral("keyword input:accel_profile %1").arg(value.toString()));
+    } else if (key == QStringLiteral("followMouse")) {
+        socket->send(QStringLiteral("keyword input:follow_mouse %1").arg(value.toInt()));
+    } else if (key == QStringLiteral("mouseNaturalScroll")) {
+        socket->send(QStringLiteral("keyword input:natural_scroll %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("mouseScrollFactor")) {
+        socket->send(QStringLiteral("keyword input:scroll_factor %1").arg(value.toDouble()));
+    } else if (key == QStringLiteral("leftHandedMode")) {
+        socket->send(QStringLiteral("keyword input:left_handed %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("mouseRefocus")) {
+        socket->send(QStringLiteral("keyword input:mouse_refocus %1").arg(value.toBool() ? 1 : 0));
+    } else if (key == QStringLiteral("floatSwitchOverrideFocus")) {
+        socket->send(QStringLiteral("keyword input:float_switch_override_focus %1").arg(value.toInt()));
     } else if (key == QStringLiteral("cursorTheme") || key == QStringLiteral("cursorSize")) {
         QString theme = m_savedVars.value(QStringLiteral("cursorTheme"), m_defaults.value(QStringLiteral("cursorTheme"))).toString();
         int size = m_savedVars.value(QStringLiteral("cursorSize"), m_defaults.value(QStringLiteral("cursorSize"))).toInt();
@@ -419,6 +871,21 @@ bool CaelestiaVars::isOverridden(const QString& key) const {
 void CaelestiaVars::set(const QString& key, const QVariant& value) {
     m_savedVars[key] = value;
     m_pendingVars.remove(key);
+
+    auto syncAlias = [&](const QString& k1, const QString& k2) {
+        if (key == k1) {
+            m_savedVars[k2] = value;
+            m_pendingVars.remove(k2);
+        } else if (key == k2) {
+            m_savedVars[k1] = value;
+            m_pendingVars.remove(k1);
+        }
+    };
+    syncAlias(QStringLiteral("shadowColour"), QStringLiteral("shadowColor"));
+    syncAlias(QStringLiteral("inactiveShadowColour"), QStringLiteral("inactiveShadowColor"));
+    syncAlias(QStringLiteral("activeWindowBorderColour"), QStringLiteral("activeWindowBorderColor"));
+    syncAlias(QStringLiteral("inactiveWindowBorderColour"), QStringLiteral("inactiveWindowBorderColor"));
+
     applyKeywordToHyprland(key, value);
     save();
     emit varsChanged();
@@ -450,6 +917,21 @@ void CaelestiaVars::remove(const QString& key) {
 void CaelestiaVars::resetToDefault(const QString& key) {
     m_savedVars.remove(key);
     m_pendingVars.remove(key);
+
+    auto removeAlias = [&](const QString& k1, const QString& k2) {
+        if (key == k1) {
+            m_savedVars.remove(k2);
+            m_pendingVars.remove(k2);
+        } else if (key == k2) {
+            m_savedVars.remove(k1);
+            m_pendingVars.remove(k1);
+        }
+    };
+    removeAlias(QStringLiteral("shadowColour"), QStringLiteral("shadowColor"));
+    removeAlias(QStringLiteral("inactiveShadowColour"), QStringLiteral("inactiveShadowColor"));
+    removeAlias(QStringLiteral("activeWindowBorderColour"), QStringLiteral("activeWindowBorderColor"));
+    removeAlias(QStringLiteral("inactiveWindowBorderColour"), QStringLiteral("inactiveWindowBorderColor"));
+
     save();
     if (m_defaults.contains(key)) {
         applyKeywordToHyprland(key, m_defaults.value(key));
@@ -526,7 +1008,7 @@ QString CaelestiaVars::formatLua() const {
                     valStr = s;
                 } else if (s.contains(QLatin1String("..")) || s.contains(QLatin1String("scheme."))) {
                     // String contains lua variable concatenation
-                    valStr = QStringLiteral("\"") + s + QStringLiteral("\"");
+                    valStr = s;
                 } else {
                     valStr = QStringLiteral("\"") + s + QStringLiteral("\"");
                 }
@@ -545,17 +1027,29 @@ QString CaelestiaVars::formatLua() const {
 
     writeSection(QStringLiteral("Touchpad & Gestures"), {
         QStringLiteral("touchpadDisableTyping"), QStringLiteral("touchpadScrollFactor"),
-        QStringLiteral("gestureFingers"), QStringLiteral("workspaceSwipeFingers"), QStringLiteral("gestureFingersMore")
+        QStringLiteral("touchpadTapToClick"), QStringLiteral("touchpadClickfingerBehavior"),
+        QStringLiteral("touchpadMiddleButtonEmulation"), QStringLiteral("touchpadDragLock"),
+        QStringLiteral("touchpadTapButtonMap"), QStringLiteral("gestureFingers"),
+        QStringLiteral("workspaceSwipeFingers"), QStringLiteral("gestureFingersMore"),
+        QStringLiteral("workspaceSwipeCreateNew"), QStringLiteral("workspaceSwipeForever"),
+        QStringLiteral("workspaceSwipeCancelRatio"), QStringLiteral("workspaceSwipeMinSpeedToForce"),
+        QStringLiteral("workspaceSwipeDirectionLock"), QStringLiteral("workspaceSwipeUseR"),
+        QStringLiteral("workspaceSwipeDistance"), QStringLiteral("workspaceSwipeInvert")
     });
 
     writeSection(QStringLiteral("Blur"), {
         QStringLiteral("blurEnabled"), QStringLiteral("blurSpecialWs"), QStringLiteral("blurPopups"),
-        QStringLiteral("blurInputMethods"), QStringLiteral("blurSize"), QStringLiteral("blurPasses"), QStringLiteral("blurXray")
+        QStringLiteral("blurInputMethods"), QStringLiteral("blurSize"), QStringLiteral("blurPasses"),
+        QStringLiteral("blurXray"), QStringLiteral("blurIgnoreOpacity"), QStringLiteral("blurNoise"),
+        QStringLiteral("blurContrast"), QStringLiteral("blurBrightness"), QStringLiteral("blurVibrancy"),
+        QStringLiteral("blurVibrancyDarkness")
     });
 
     writeSection(QStringLiteral("Shadow"), {
         QStringLiteral("shadowEnabled"), QStringLiteral("shadowRange"),
-        QStringLiteral("shadowRenderPower"), QStringLiteral("shadowColour")
+        QStringLiteral("shadowRenderPower"), QStringLiteral("shadowOffset"),
+        QStringLiteral("shadowScale"), QStringLiteral("shadowColour"),
+        QStringLiteral("inactiveShadowColour")
     });
 
     writeSection(QStringLiteral("Gaps"), {
@@ -563,14 +1057,68 @@ QString CaelestiaVars::formatLua() const {
         QStringLiteral("windowGapsOut"), QStringLiteral("singleWindowGapsOut")
     });
 
-    writeSection(QStringLiteral("Window styling"), {
-        QStringLiteral("windowOpacity"), QStringLiteral("windowRounding"), QStringLiteral("windowBorderSize"),
+    writeSection(QStringLiteral("Window styling & Borders"), {
+        QStringLiteral("windowOpacity"), QStringLiteral("activeWindowOpacity"),
+        QStringLiteral("inactiveWindowOpacity"), QStringLiteral("fullscreenWindowOpacity"),
+        QStringLiteral("windowRounding"), QStringLiteral("windowRoundingPower"),
+        QStringLiteral("windowBorderSize"), QStringLiteral("resizeOnBorder"),
+        QStringLiteral("extendBorderGrabArea"), QStringLiteral("hoverIconOnBorder"),
+        QStringLiteral("allowTearing"), QStringLiteral("layout"),
         QStringLiteral("activeWindowBorderColour"), QStringLiteral("inactiveWindowBorderColour")
     });
 
-    writeSection(QStringLiteral("Misc"), {
-        QStringLiteral("volumeStep"), QStringLiteral("volumeMax"),
-        QStringLiteral("cursorTheme"), QStringLiteral("cursorSize"), QStringLiteral("sleepGestureCmd")
+    writeSection(QStringLiteral("Dimming"), {
+        QStringLiteral("dimInactive"), QStringLiteral("dimStrength"),
+        QStringLiteral("dimAround"), QStringLiteral("dimSpecial")
+    });
+
+    writeSection(QStringLiteral("Snap"), {
+        QStringLiteral("snapEnabled"), QStringLiteral("snapWindowGap"),
+        QStringLiteral("snapMonitorGap"), QStringLiteral("snapBorderOverlap"),
+        QStringLiteral("snapRespectGaps")
+    });
+
+    writeSection(QStringLiteral("Cursor"), {
+        QStringLiteral("cursorTheme"), QStringLiteral("cursorSize"),
+        QStringLiteral("cursorNoHardwareCursors"), QStringLiteral("cursorEnableHyprcursor"),
+        QStringLiteral("cursorNoWarps"), QStringLiteral("cursorPersistentWarps"),
+        QStringLiteral("cursorWarpOnChangeWorkspace"), QStringLiteral("cursorZoomFactor"),
+        QStringLiteral("cursorInactiveTimeout"), QStringLiteral("cursorHideOnKeyPress"),
+        QStringLiteral("cursorHideOnTouch"), QStringLiteral("cursorHideOnTablet")
+    });
+
+    writeSection(QStringLiteral("Keyboard & Mouse"), {
+        QStringLiteral("kbLayout"), QStringLiteral("kbVariant"), QStringLiteral("kbOptions"),
+        QStringLiteral("numlockByDefault"), QStringLiteral("keyRepeatRate"), QStringLiteral("keyRepeatDelay"),
+        QStringLiteral("mouseSensitivity"), QStringLiteral("mouseAccelProfile"),
+        QStringLiteral("followMouse"), QStringLiteral("mouseNaturalScroll"),
+        QStringLiteral("mouseScrollFactor"), QStringLiteral("leftHandedMode"),
+        QStringLiteral("mouseRefocus"), QStringLiteral("floatSwitchOverrideFocus")
+    });
+
+    writeSection(QStringLiteral("Layout Engines"), {
+        QStringLiteral("dwindlePreserveSplit"), QStringLiteral("dwindlePseudotile"),
+        QStringLiteral("dwindleForceSplit"), QStringLiteral("dwindleSmartSplit"),
+        QStringLiteral("dwindleDefaultSplitRatio"), QStringLiteral("dwindleSplitWidthMultiplier"),
+        QStringLiteral("dwindleSmartResizing"), QStringLiteral("dwindleSpecialScaleFactor"),
+        QStringLiteral("masterOrientation"), QStringLiteral("masterMfact"),
+        QStringLiteral("masterNewStatus"), QStringLiteral("masterNewOnTop"),
+        QStringLiteral("masterNewOnActive"), QStringLiteral("masterSmartResizing"),
+        QStringLiteral("masterSpecialScaleFactor"), QStringLiteral("scrollingColumnWidth"),
+        QStringLiteral("scrollingDirection"), QStringLiteral("scrollingFullscreenOnOneColumn"),
+        QStringLiteral("scrollingFocusFitMethod"), QStringLiteral("scrollingFollowFocus")
+    });
+
+    writeSection(QStringLiteral("XWayland & Ecosystem & Misc"), {
+        QStringLiteral("xwaylandEnabled"), QStringLiteral("xwaylandForceZeroScaling"),
+        QStringLiteral("xwaylandUseNearestNeighbor"), QStringLiteral("noUpdateNews"),
+        QStringLiteral("noDonationNag"), QStringLiteral("enforcePermissions"),
+        QStringLiteral("disableAutoreload"), QStringLiteral("focusOnActivate"),
+        QStringLiteral("animateManualResizes"), QStringLiteral("animateMouseWindowDragging"),
+        QStringLiteral("disableHyprlandLogo"), QStringLiteral("disableSplashRendering"),
+        QStringLiteral("forceDefaultWallpaper"), QStringLiteral("vrr"), QStringLiteral("vfr"),
+        QStringLiteral("mouseMoveEnablesDpms"), QStringLiteral("keyPressEnablesDpms"),
+        QStringLiteral("volumeStep"), QStringLiteral("volumeMax"), QStringLiteral("sleepGestureCmd")
     });
 
     // Keybinds

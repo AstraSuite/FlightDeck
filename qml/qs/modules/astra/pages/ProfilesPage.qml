@@ -11,7 +11,7 @@ import FlightDeck.Managers 1.0
 PageBase {
     id: root
 
-    title: qsTr("Configuration Profiles")
+    title: qsTr("Profiles & backup")
 
     property string statusText: ""
 

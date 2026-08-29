@@ -37,17 +37,15 @@ Popup {
     parent: root.attachTo
     x: {
         if (!root.attachTo) return 0;
-        let offX = root.attachSideX === Menu.Left ? 0 : root.attachTo.width;
-        if (root.thisSideX === Menu.Right)
-            offX -= width;
-        return offX + root.marginX;
+        let anchorX = root.attachSideX === Menu.Left ? 0 : root.attachTo.width;
+        let selfOffset = root.thisSideX === Menu.Right ? -width : 0;
+        return anchorX + selfOffset + root.marginX;
     }
     y: {
         if (!root.attachTo) return 0;
-        let offY = root.attachSideY === Menu.Top ? -height : root.attachTo.height;
-        if (root.thisSideY === Menu.Bottom)
-            offY -= height;
-        return offY + root.marginY;
+        let anchorY = root.attachSideY === Menu.Top ? 0 : root.attachTo.height;
+        let selfOffset = root.thisSideY === Menu.Bottom ? -height : 0;
+        return anchorY + selfOffset + root.marginY;
     }
 
     implicitWidth: menuContainer.implicitWidth
@@ -176,9 +174,21 @@ Popup {
                                 anchors.margins: Tokens.padding.medium
                                 spacing: Tokens.spacing.small
 
+                                StyledRect {
+                                    id: menuColorSwatch
+                                    Layout.alignment: Qt.AlignVCenter
+                                    visible: item.modelData && item.modelData.previewColor !== undefined && item.modelData.previewColor !== Qt.rgba(0,0,0,0) && String(item.modelData.previewColor) !== "#00000000" && String(item.modelData.previewColor) !== "transparent"
+                                    implicitWidth: 16
+                                    implicitHeight: 16
+                                    radius: Tokens.rounding.full
+                                    border.width: 1.5
+                                    border.color: Colours.palette.m3outline
+                                    color: item.modelData ? (item.modelData.previewColor || "transparent") : "transparent"
+                                }
+
                                 MaterialIcon {
                                     Layout.alignment: Qt.AlignVCenter
-                                    visible: item.modelData && item.modelData.icon !== ""
+                                    visible: !menuColorSwatch.visible && item.modelData && item.modelData.icon !== ""
                                     text: item.modelData ? item.modelData.icon : ""
                                     color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurfaceVariant
                                 }

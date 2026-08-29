@@ -45,6 +45,8 @@ TextFieldBase {
     topPadding: verticalPadding + filledOffset
     bottomPadding: verticalPadding + supportingTextOffset - filledOffset
 
+    implicitWidth: Math.max(160, placeholder.implicitWidth + leftPadding + rightPadding + 24)
+
     onPressed: {
         if (!stateLayer.disabled)
             stateLayer.press(stateLayer.mouseX, stateLayer.mouseY);
@@ -97,6 +99,8 @@ TextFieldBase {
             anchors.leftMargin: root.leftPadding
             anchors.topMargin: Tokens.padding.extraSmall
             renderType: Text.QtRendering
+            elide: Text.ElideRight
+            width: Math.min(implicitWidth, contentWrapper.width - root.leftPadding - root.rightPadding)
 
             text: root.placeholderText
             color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor)

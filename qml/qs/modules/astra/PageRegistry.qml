@@ -8,9 +8,9 @@ QtObject {
     readonly property var pages: [
         // Look & Feel
         {
-            label: qsTr("Appearance"),
+            label: qsTr("Appearance & windows"),
             icon: "palette",
-            description: qsTr("Window styling, gaps, opacity, rounding, blur, shadows"),
+            description: qsTr("Window styling, gaps, opacity, rounding, blur, shadows, and snapping"),
             category: "look_and_feel"
         },
         {
@@ -20,43 +20,43 @@ QtObject {
             category: "look_and_feel"
         },
         {
-            label: qsTr("Cursor Theme"),
+            label: qsTr("Cursor & pointer"),
             icon: "mouse",
-            description: qsTr("Hyprcursor and XCursor theme and size options"),
+            description: qsTr("Cursor themes, hardware rendering, warps, and visibility"),
             category: "look_and_feel"
         },
 
         // Input
         {
-            label: qsTr("Keybinds"),
+            label: qsTr("Keyboard shortcuts"),
             icon: "keyboard",
-            description: qsTr("Configure system and application shortcuts"),
+            description: qsTr("System bindings, application launchers, and custom keybinds"),
             category: "input"
         },
         {
-            label: qsTr("Touchpad & Gestures"),
+            label: qsTr("Input devices"),
             icon: "touchpad_mouse",
-            description: qsTr("Touchpad settings and workspace swipe gestures"),
+            description: qsTr("Keyboard, mouse, touchpad, and workspace swipe gestures"),
             category: "input"
         },
 
         // Display
         {
-            label: qsTr("Monitors"),
+            label: qsTr("Displays & monitors"),
             icon: "desktop_windows",
-            description: qsTr("Arrange displays, set resolution, scale, and VRR"),
+            description: qsTr("Display arrangement, resolution, scale, and VRR settings"),
             category: "display"
         },
 
         // Rules
         {
-            label: qsTr("Window Rules"),
+            label: qsTr("Window rules"),
             icon: "web_asset",
             description: qsTr("Match window criteria, float, pin, and opacity"),
             category: "rules"
         },
         {
-            label: qsTr("Layer Rules"),
+            label: qsTr("Layer rules"),
             icon: "layers",
             description: qsTr("Blur and animation rules for desktop layers"),
             category: "rules"
@@ -72,21 +72,21 @@ QtObject {
 
         // System
         {
-            label: qsTr("Profiles & Backup"),
+            label: qsTr("Profiles & backup"),
             icon: "folder_zip",
             description: qsTr("Create and restore config snapshots"),
             category: "system"
         },
         {
-            label: qsTr("Pending Changes"),
+            label: qsTr("Pending changes"),
             icon: "difference",
             description: qsTr("Review diffs and apply live to Hyprland"),
             category: "system"
         },
         {
-            label: qsTr("Settings"),
+            label: qsTr("System & compositor"),
             icon: "settings",
-            description: qsTr("App settings, window behavior, and theme syncing"),
+            description: qsTr("XWayland, default apps, compositor behavior, and theme sync"),
             category: "system"
         },
         {

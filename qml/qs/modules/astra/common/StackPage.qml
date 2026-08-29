@@ -12,14 +12,15 @@ StackView {
     readonly property int animMovement: Tokens.padding.extraExtraLarge * 2
 
     function openSubPage(idx: int, immediate: bool): void {
+        if (idx < 0 || idx >= pages.length) return;
         const page = pages[idx];
         if (page) {
             push(page, {
-                nState
+                nState: root.nState
             }, immediate ? StackView.Immediate : StackView.PushTransition);
         } else {
             console.warn(logCat, "Attempted to open invalid sub-page index", idx);
-            nState.closeSubPage();
+            root.nState.closeSubPage();
         }
     }
 

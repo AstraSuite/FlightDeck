@@ -25,30 +25,6 @@ VerticalFadeFlickable {
     bottomMargin: Tokens.padding.large
     contentHeight: contentCol.implicitHeight
 
-    onQueryChanged: {
-        changeAnim.restart();
-    }
-
-    SequentialAnimation {
-        id: changeAnim
-
-        NumberAnimation {
-            target: contentCol
-            property: "opacity"
-            from: 1.0
-            to: 0.2
-            duration: 60
-            easing.type: Easing.OutQuad
-        }
-        NumberAnimation {
-            target: contentCol
-            property: "opacity"
-            to: 1.0
-            duration: 160
-            easing.type: Easing.OutCubic
-        }
-    }
-
     function highlightMatch(text, q) {
         if (!text || !q) return text || "";
         var cleanQ = q.trim();
@@ -143,8 +119,11 @@ VerticalFadeFlickable {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             var itemData = rowCol.modelData.item;
-                            root.nState.scrollToTarget = itemData.varKey || itemData.title;
+                            root.nState.scrollToTarget = (itemData.varKey ? itemData.varKey + "|" : "") + (itemData.title || "");
                             root.nState.currentPageIdx = itemData.pageIdx;
+                            if (itemData.subPageIdx !== undefined && itemData.subPageIdx > 0) {
+                                root.nState.openSubPage(itemData.subPageIdx);
+                            }
                             root.nState.scrollToRequested(root.nState.scrollToTarget);
                             root.resultSelected(itemData);
                         }

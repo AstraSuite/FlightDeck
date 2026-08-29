@@ -113,10 +113,18 @@ Item {
                     onTextEdited: root.searchQuery = text
                 }
 
+                StyledRect {
+                    Layout.fillWidth: true
+                    implicitHeight: 1
+                    color: Colours.palette.m3outlineVariant
+                }
+
                 VerticalFadeListView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
+                    topMargin: Tokens.padding.small
+                    bottomMargin: Tokens.padding.small
                     spacing: Tokens.spacing.extraSmall / 2
 
                     model: {
@@ -216,6 +224,12 @@ Item {
                             }
                         }
                     }
+                }
+
+                StyledRect {
+                    Layout.fillWidth: true
+                    implicitHeight: 1
+                    color: Colours.palette.m3outlineVariant
                 }
             }
         }

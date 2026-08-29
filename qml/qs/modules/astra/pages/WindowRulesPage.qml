@@ -13,7 +13,7 @@ import FlightDeck.Caelestia 1.0
 PageBase {
     id: root
 
-    title: qsTr("Window Rules")
+    title: qsTr("Window rules")
 
     ColumnLayout {
         id: mainCol
@@ -37,9 +37,10 @@ PageBase {
             label: qsTr("Add Window Rule")
             header: qsTr("Add New Window Rule")
             acceptLabel: qsTr("Save Rule")
-
+            separateContent: true
+            horizontalContentMargin: -Tokens.padding.small
             openWidth: Math.min((rootParent ? rootParent.width : 560) * 0.95, 540)
-            openHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
+            customOpenHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
 
             property string matchClass: ""
             property string matchTitle: ""
@@ -130,12 +131,14 @@ PageBase {
             }
 
             content: Component {
-                Flickable {
+                VerticalFadeFlickable {
                     id: addFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     contentWidth: width
                     contentHeight: addCol.implicitHeight + (Tokens.padding?.medium ?? 12)
+                    topMargin: Tokens.padding.medium
+                    bottomMargin: Tokens.padding.medium
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
 
@@ -408,9 +411,10 @@ PageBase {
 
                 header: editRuleRow.isReadOnly ? qsTr("Override Window Rule") : qsTr("Edit Window Rule")
                 acceptLabel: editRuleRow.isReadOnly ? qsTr("Save Override") : qsTr("Save Changes")
-
+                separateContent: true
+                horizontalContentMargin: -Tokens.padding.small
                 openWidth: Math.min((rootParent ? rootParent.width : 560) * 0.95, 540)
-                openHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
+                customOpenHeight: Math.min((rootParent ? rootParent.height : 700) * 0.95, 620)
 
                 property string matchClass: ""
                 property string matchTitle: ""
@@ -508,13 +512,6 @@ PageBase {
                         spacing: 0
 
                         IconButton {
-                            icon: "edit"
-                            type: IconButton.Text
-                            font: Tokens.font.icon.small
-                            onClicked: editRuleRow.open = true
-                        }
-
-                        IconButton {
                             visible: !editRuleRow.isReadOnly
                             icon: "delete"
                             type: IconButton.Text
@@ -528,12 +525,14 @@ PageBase {
                 }
 
                 content: Component {
-                    Flickable {
+                    VerticalFadeFlickable {
                         id: editFlick
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         contentWidth: width
                         contentHeight: editCol.implicitHeight + (Tokens.padding?.medium ?? 12)
+                        topMargin: Tokens.padding.medium
+                        bottomMargin: Tokens.padding.medium
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
 

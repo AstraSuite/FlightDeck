@@ -46,6 +46,8 @@ public:
     Q_INVOKABLE bool dispatch(const QString& dispatcher, const QString& arg = QString());
     Q_INVOKABLE bool keyword(const QString& key, const QVariant& value);
     Q_INVOKABLE QVariantMap getOption(const QString& key) const;
+    Q_INVOKABLE void startCapture();
+    Q_INVOKABLE void stopCapture();
 
 signals:
     void stateChanged();

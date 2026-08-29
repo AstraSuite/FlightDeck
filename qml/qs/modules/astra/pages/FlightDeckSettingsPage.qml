@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import FlightDeck.Config
@@ -6,75 +8,92 @@ import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.modules.astra.common
+import qs.modules.astra.pages.system
 import FlightDeck.Theme 1.0
 import FlightDeck.Managers 1.0
+import FlightDeck.Caelestia 1.0
 
-PageBase {
+StackPage {
     id: root
 
-    title: qsTr("FlightDeck Settings")
+    pages: [
+        Component {
+            PageBase {
+                id: mainHub
+                title: qsTr("System & compositor")
+                nState: root.nState
 
-    ColumnLayout {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        width: root.cappedWidth
-        spacing: Tokens.spacing.extraSmall / 2
+                ColumnLayout {
+                    anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
+                    anchors.top: parent ? parent.top : undefined
+                    width: mainHub ? mainHub.cappedWidth : 800
+                    spacing: Tokens.spacing.extraSmall / 2
 
-        SectionHeader {
-            first: true
-            text: qsTr("Caelestia Theme Sync")
-        }
+                    SectionHeader {
+                        first: true
+                        text: qsTr("System Configuration")
+                    }
 
-        ToggleRow {
-            first: true
-            text: qsTr("Sync Material Scheme")
-            subtext: qsTr("Automatically sync colors with ~/.local/state/caelestia/scheme.json")
-            checked: ThemeWatcher.syncScheme
-            onCheckedChanged: ThemeWatcher.syncScheme = checked
-        }
+                    NavRow {
+                        first: true
+                        label: qsTr("Default applications")
+                        subtext: qsTr("Terminal, web browser, code editor, file manager, and audio mixer")
+                        icon: "apps"
+                        onClicked: root.nState.openSubPage(1)
+                    }
 
-        ToggleRow {
-            last: true
-            text: qsTr("Sync Shell Tokens")
-            subtext: qsTr("Follow Caelestia shell padding, curves, and font tokens")
-            checked: ThemeWatcher.syncTokens
-            onCheckedChanged: ThemeWatcher.syncTokens = checked
-        }
+                    NavRow {
+                        label: qsTr("XWayland & compatibility")
+                        subtext: qsTr("Legacy X11 app support, zero scaling, nearest neighbor filtering, and privacy")
+                        icon: "layers"
+                        onClicked: root.nState.openSubPage(2)
+                    }
 
-        SectionHeader {
-            text: qsTr("Airlock Greeter Integration")
-        }
+                    NavRow {
+                        label: qsTr("Theme sync & airlock")
+                        subtext: qsTr("Caelestia material scheme sync and Airlock greeter integration")
+                        icon: "palette"
+                        onClicked: root.nState.openSubPage(3)
+                    }
 
-        InfoRow {
-            first: true
-            label: qsTr("Airlock Config Status")
-            value: AirlockManager.hasAirlockConfig ? qsTr("Found (/etc/greetd/hyprland.lua)") : qsTr("Not installed")
-            icon: "lock"
-        }
+                    NavRow {
+                        last: true
+                        label: qsTr("Compositor behavior")
+                        subtext: qsTr("Focus activation, window animations, VFR, VRR, DPMS, and wallpapers")
+                        icon: "settings"
+                        onClicked: root.nState.openSubPage(4)
+                    }
 
-        OptionRow {
-            last: true
-            title: qsTr("Sync Configuration to Airlock")
-            subtext: qsTr("Sync current monitors, cursor theme, and input settings (requires pkexec)")
-            currentValue: AirlockManager.isSyncing ? qsTr("Syncing...") : qsTr("Sync (pkexec)")
-            onClicked: {
-                if (!AirlockManager.isSyncing) {
-                    AirlockManager.syncToAirlock();
+                    Item {
+                        Layout.preferredHeight: Tokens.padding.large
+                        Layout.fillWidth: true
+                    }
                 }
             }
-        }
+        },
 
-        StyledText {
-            visible: AirlockManager.lastMessage.length > 0
-            text: AirlockManager.lastMessage
-            color: Colours.palette.m3primary
-            font: Tokens.font.body.medium
-            Layout.alignment: Qt.AlignHCenter
-        }
+        Component {
+            DefaultAppsSubPage {
+                nState: root.nState
+            }
+        },
 
-        Item {
-            Layout.preferredHeight: Tokens.padding.large
-            Layout.fillWidth: true
+        Component {
+            XWaylandSubPage {
+                nState: root.nState
+            }
+        },
+
+        Component {
+            ThemeAirlockSubPage {
+                nState: root.nState
+            }
+        },
+
+        Component {
+            CompositorSubPage {
+                nState: root.nState
+            }
         }
-    }
+    ]
 }

@@ -12,7 +12,7 @@ import FlightDeck.Managers 1.0
 PageBase {
     id: root
 
-    title: qsTr("Monitors & Displays")
+    title: qsTr("Displays & monitors")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

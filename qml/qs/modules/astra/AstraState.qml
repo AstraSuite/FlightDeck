@@ -5,7 +5,7 @@ QtObject {
     property bool isWindow: true
     property bool animatingContainer
     property int currentPageIdx: 0
-    property list<int> subPageIdxStack
+    property var subPageIdxStack: []
     property bool searchOpen
     property bool justUnlockedDevMode: false
     property string targetScreen: ""
@@ -28,14 +28,18 @@ QtObject {
     signal scrollToRequested(string target)
 
     function openSubPage(idx: int): void {
-        subPageIdxStack.push(idx);
+        var copy = subPageIdxStack ? subPageIdxStack.slice() : [];
+        copy.push(idx);
+        subPageIdxStack = copy;
         subPageOpened(idx);
     }
 
     function closeSubPage(): void {
         subPageClosed();
-        subPageIdxStack.pop();
+        var copy = subPageIdxStack ? subPageIdxStack.slice() : [];
+        copy.pop();
+        subPageIdxStack = copy;
     }
 
-    onCurrentPageIdxChanged: subPageIdxStack.length = 0
+    onCurrentPageIdxChanged: subPageIdxStack = []
 }

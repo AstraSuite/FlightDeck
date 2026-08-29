@@ -12,7 +12,7 @@ import FlightDeck.Caelestia 1.0
 PageBase {
     id: root
 
-    title: qsTr("Cursor Theme & Size")
+    title: qsTr("Cursor & Pointer")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -152,7 +152,7 @@ PageBase {
         }
 
         StepperRow {
-            last: true
+            last: false
             varKey: "cursorSize"
             label: qsTr("Cursor Size")
             subtext: qsTr("Pointer size in pixels: %1px").arg(CursorManager.currentSize)
@@ -165,34 +165,105 @@ PageBase {
             onReset: CursorManager.setCurrentSize(CaelestiaVars.getDefault("cursorSize", 24))
         }
 
-        SectionHeader {
-            text: qsTr("Multi-App Propagation")
+        ToggleRow {
+            varKey: "cursorNoHardwareCursors"
+            text: qsTr("Hardware Cursors")
+            subtext: qsTr("Render cursor in hardware planes for reduced latency")
+            checked: !(CaelestiaVars.pendingVars.cursorNoHardwareCursors ?? CaelestiaVars.currentVars.cursorNoHardwareCursors ?? CaelestiaVars.getDefault("cursorNoHardwareCursors", false))
+            onToggled: CaelestiaVars.set("cursorNoHardwareCursors", !checked)
         }
 
-        InfoRow {
-            first: true
-            label: qsTr("Hyprland & Environments")
-            value: qsTr("HYPRCURSOR & XCURSOR Env live reload")
-            icon: "terminal"
-        }
-
-        InfoRow {
-            label: qsTr("Desktop Interface")
-            value: qsTr("GNOME & Cinnamon GSettings")
-            icon: "settings"
-        }
-
-        InfoRow {
-            label: qsTr("Toolkit Settings")
-            value: qsTr("GTK 3/4 settings.ini & ~/.icons/default")
-            icon: "palette"
-        }
-
-        InfoRow {
+        ToggleRow {
             last: true
-            label: qsTr("X11 Compatibility")
-            value: qsTr("~/.Xresources (xrdb merge)")
-            icon: "desktop_windows"
+            varKey: "cursorEnableHyprcursor"
+            text: qsTr("Enable Hyprcursor")
+            subtext: qsTr("Hardware/software vector animated cursor support")
+            checked: CaelestiaVars.pendingVars.cursorEnableHyprcursor ?? CaelestiaVars.currentVars.cursorEnableHyprcursor ?? CaelestiaVars.getDefault("cursorEnableHyprcursor", true)
+            onToggled: CaelestiaVars.set("cursorEnableHyprcursor", checked)
+        }
+
+        SectionHeader {
+            text: qsTr("Cursor Movement & Warping")
+        }
+
+        ToggleRow {
+            first: true
+            varKey: "cursorNoWarps"
+            text: qsTr("Disable Cursor Warps")
+            subtext: qsTr("Do not warp cursor when focusing windows or using keybinds")
+            checked: CaelestiaVars.pendingVars.cursorNoWarps ?? CaelestiaVars.currentVars.cursorNoWarps ?? CaelestiaVars.getDefault("cursorNoWarps", false)
+            onToggled: CaelestiaVars.set("cursorNoWarps", checked)
+        }
+
+        ToggleRow {
+            varKey: "cursorPersistentWarps"
+            text: qsTr("Persistent Warps")
+            subtext: qsTr("Remember cursor position per window when warping back")
+            checked: CaelestiaVars.pendingVars.cursorPersistentWarps ?? CaelestiaVars.currentVars.cursorPersistentWarps ?? CaelestiaVars.getDefault("cursorPersistentWarps", false)
+            onToggled: CaelestiaVars.set("cursorPersistentWarps", checked)
+        }
+
+        ToggleRow {
+            varKey: "cursorWarpOnChangeWorkspace"
+            text: qsTr("Warp on Workspace Change")
+            subtext: qsTr("Move cursor to the last focused window after switching workspaces")
+            checked: CaelestiaVars.pendingVars.cursorWarpOnChangeWorkspace ?? CaelestiaVars.currentVars.cursorWarpOnChangeWorkspace ?? CaelestiaVars.getDefault("cursorWarpOnChangeWorkspace", false)
+            onToggled: CaelestiaVars.set("cursorWarpOnChangeWorkspace", checked)
+        }
+
+        SliderRow {
+            last: true
+            varKey: "cursorZoomFactor"
+            label: qsTr("Zoom Factor")
+            subtext: qsTr("Magnification scale factor for cursor zoom")
+            value: CaelestiaVars.pendingVars.cursorZoomFactor ?? CaelestiaVars.currentVars.cursorZoomFactor ?? CaelestiaVars.getDefault("cursorZoomFactor", 1.0)
+            valueLabel: value.toFixed(1) + "x"
+            from: 1.0
+            to: 5.0
+            stepSize: 0.1
+            onMoved: v => CaelestiaVars.set("cursorZoomFactor", Math.round(v * 10) / 10)
+        }
+
+        SectionHeader {
+            text: qsTr("Cursor Visibility")
+        }
+
+        StepperRow {
+            first: true
+            varKey: "cursorInactiveTimeout"
+            label: qsTr("Inactive Timeout")
+            subtext: qsTr("Seconds before hiding cursor automatically (0 = never hide)")
+            value: CaelestiaVars.pendingVars.cursorInactiveTimeout ?? CaelestiaVars.currentVars.cursorInactiveTimeout ?? CaelestiaVars.getDefault("cursorInactiveTimeout", 0)
+            from: 0
+            to: 60
+            stepSize: 1
+            suffix: "s"
+            onMoved: v => CaelestiaVars.set("cursorInactiveTimeout", v)
+        }
+
+        ToggleRow {
+            varKey: "cursorHideOnKeyPress"
+            text: qsTr("Hide on Key Press")
+            subtext: qsTr("Hide cursor when typing on keyboard")
+            checked: CaelestiaVars.pendingVars.cursorHideOnKeyPress ?? CaelestiaVars.currentVars.cursorHideOnKeyPress ?? CaelestiaVars.getDefault("cursorHideOnKeyPress", false)
+            onToggled: CaelestiaVars.set("cursorHideOnKeyPress", checked)
+        }
+
+        ToggleRow {
+            varKey: "cursorHideOnTouch"
+            text: qsTr("Hide on Touch")
+            subtext: qsTr("Hide cursor when using touch input")
+            checked: CaelestiaVars.pendingVars.cursorHideOnTouch ?? CaelestiaVars.currentVars.cursorHideOnTouch ?? CaelestiaVars.getDefault("cursorHideOnTouch", false)
+            onToggled: CaelestiaVars.set("cursorHideOnTouch", checked)
+        }
+
+        ToggleRow {
+            last: true
+            varKey: "cursorHideOnTablet"
+            text: qsTr("Hide on Tablet")
+            subtext: qsTr("Hide cursor when drawing with graphics tablet stylus")
+            checked: CaelestiaVars.pendingVars.cursorHideOnTablet ?? CaelestiaVars.currentVars.cursorHideOnTablet ?? CaelestiaVars.getDefault("cursorHideOnTablet", false)
+            onToggled: CaelestiaVars.set("cursorHideOnTablet", checked)
         }
 
         Item {

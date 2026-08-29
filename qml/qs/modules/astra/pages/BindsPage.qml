@@ -14,7 +14,7 @@ import FlightDeck.Hyprland 1.0
 PageBase {
     id: root
 
-    title: qsTr("Keybindings")
+    title: qsTr("Keyboard shortcuts")
 
     ColumnLayout {
         anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
@@ -27,12 +27,12 @@ PageBase {
             text: qsTr("Custom Keybinds")
         }
 
-        // Add Keybind via DialogRowButton (always rounded with first: true, last: true)
+        // Add Keybind via DialogRowButton (connected to custom keybinds list below)
         DialogRowButton {
             id: addBindBtn
             rootParent: root.modalOverlay
             first: true
-            last: true
+            last: FlightDeckWriter.customBinds.length === 0
             icon: "add_circle"
             label: qsTr("Add Keybind")
             header: qsTr("Add Custom Keybind")
@@ -45,6 +45,13 @@ PageBase {
             property bool recording: false
 
             acceptAllowed: shortcutKey.trim() !== ""
+
+            onOpenChanged: {
+                if (!open) {
+                    recording = false;
+                    HyprlandState.stopCapture();
+                }
+            }
 
             onAccepted: {
                 if (shortcutKey.trim() !== "") {
@@ -90,11 +97,41 @@ PageBase {
                             onTextEdited: addBindBtn.shortcutKey = text
                         }
 
-                        Button {
-                            text: addBindBtn.recording ? qsTr("Stop") : qsTr("Record")
-                            onClicked: {
-                                addBindBtn.recording = !addBindBtn.recording;
-                                if (addBindBtn.recording) addKeyListener.forceActiveFocus();
+                        ButtonBase {
+                            id: addRecBtn
+                            implicitHeight: 40
+                            implicitWidth: 96
+                            radius: Tokens.rounding.medium
+                            color: addBindBtn.recording ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHigh
+
+                            StateLayer {
+                                anchors.fill: parent
+                                onClicked: {
+                                    addBindBtn.recording = !addBindBtn.recording;
+                                    if (addBindBtn.recording) {
+                                        addKeyListener.forceActiveFocus();
+                                        HyprlandState.startCapture();
+                                    } else {
+                                        HyprlandState.stopCapture();
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: Tokens.spacing.extraSmall
+
+                                MaterialIcon {
+                                    text: addBindBtn.recording ? "stop" : "fiber_manual_record"
+                                    color: addBindBtn.recording ? Colours.palette.m3onPrimary : Colours.palette.m3error
+                                    fontStyle: Tokens.font.icon.small
+                                }
+
+                                StyledText {
+                                    text: addBindBtn.recording ? qsTr("Stop") : qsTr("Record")
+                                    font: Tokens.font.label.medium
+                                    color: addBindBtn.recording ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                                }
                             }
                         }
                     }
@@ -105,44 +142,59 @@ PageBase {
                         color: Colours.palette.m3onSurfaceVariant
                     }
 
-                    OptionRow {
-                        first: true
-                        last: false
-                        title: qsTr("Category")
-                        options: [
-                            { label: qsTr("Launch Application"), value: "Launch Application" },
-                            { label: qsTr("Window Management"), value: "Window Management" },
-                            { label: qsTr("Workspace Navigation"), value: "Workspace Navigation" },
-                            { label: qsTr("Custom Dispatcher"), value: "Custom Dispatcher" }
-                        ]
-                        currentValue: addBindBtn.selectedCategory
-                        onOptionSelected: (val, lbl) => addBindBtn.selectedCategory = val
-                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.extraSmall / 2
 
-                    OptionRow {
-                        first: false
-                        last: true
-                        title: qsTr("Action")
-                        options: {
-                            if (addBindBtn.selectedCategory === "Launch Application") {
-                                return [{ label: qsTr("Run command (exec)"), value: "Run command" }];
-                            } else if (addBindBtn.selectedCategory === "Window Management") {
-                                return [
-                                    { label: qsTr("Close window (killactive)"), value: "Close window" },
-                                    { label: qsTr("Toggle floating (togglefloating)"), value: "Toggle floating" },
-                                    { label: qsTr("Toggle fullscreen (fullscreen)"), value: "Toggle fullscreen" },
-                                    { label: qsTr("Pin window (pin)"), value: "Pin window" }
-                                ];
-                            } else if (addBindBtn.selectedCategory === "Workspace Navigation") {
-                                return [
-                                    { label: qsTr("Switch workspace (workspace)"), value: "Switch workspace" },
-                                    { label: qsTr("Move to workspace (movetoworkspace)"), value: "Move to workspace" }
-                                ];
+                        SelectRow {
+                            first: true
+                            last: false
+                            label: qsTr("Category")
+                            subtext: qsTr("Action type classification")
+                            menuItems: [
+                                MenuItem { text: qsTr("Launch Application"); onClicked: { addBindBtn.selectedCategory = "Launch Application"; addBindBtn.selectedAction = "Run command"; } },
+                                MenuItem { text: qsTr("Window Management"); onClicked: { addBindBtn.selectedCategory = "Window Management"; addBindBtn.selectedAction = "Close window"; } },
+                                MenuItem { text: qsTr("Workspace Navigation"); onClicked: { addBindBtn.selectedCategory = "Workspace Navigation"; addBindBtn.selectedAction = "Switch workspace"; } },
+                                MenuItem { text: qsTr("Custom Dispatcher"); onClicked: { addBindBtn.selectedCategory = "Custom Dispatcher"; addBindBtn.selectedAction = "exec"; } }
+                            ]
+                            active: {
+                                for (var i = 0; i < menuItems.length; i++) {
+                                    if (menuItems[i].text === addBindBtn.selectedCategory) return menuItems[i];
+                                }
+                                return menuItems[0] || null;
                             }
-                            return [{ label: qsTr("Custom Dispatcher"), value: "exec" }];
                         }
-                        currentValue: addBindBtn.selectedAction
-                        onOptionSelected: (val, lbl) => addBindBtn.selectedAction = val
+
+                        SelectRow {
+                            first: false
+                            last: true
+                            label: qsTr("Action")
+                            subtext: qsTr("Specific dispatcher to trigger")
+                            menuItems: {
+                                var items = [];
+                                var cat = addBindBtn.selectedCategory;
+                                if (cat === "Launch Application") {
+                                    items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Run command") + '"; onClicked: addBindBtn.selectedAction = "Run command" }', addBindBtn));
+                                } else if (cat === "Window Management") {
+                                    items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Close window") + '"; onClicked: addBindBtn.selectedAction = "Close window" }', addBindBtn));
+                                    items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Toggle floating") + '"; onClicked: addBindBtn.selectedAction = "Toggle floating" }', addBindBtn));
+                                    items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Toggle fullscreen") + '"; onClicked: addBindBtn.selectedAction = "Toggle fullscreen" }', addBindBtn));
+                                    items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Pin window") + '"; onClicked: addBindBtn.selectedAction = "Pin window" }', addBindBtn));
+                                } else if (cat === "Workspace Navigation") {
+                                    items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Switch workspace") + '"; onClicked: addBindBtn.selectedAction = "Switch workspace" }', addBindBtn));
+                                    items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Move to workspace") + '"; onClicked: addBindBtn.selectedAction = "Move to workspace" }', addBindBtn));
+                                } else {
+                                    items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + addBindBtn.selectedAction + '"; onClicked: {} }', addBindBtn));
+                                }
+                                return items;
+                            }
+                            active: {
+                                for (var i = 0; i < menuItems.length; i++) {
+                                    if (menuItems[i].text === addBindBtn.selectedAction) return menuItems[i];
+                                }
+                                return menuItems[0] || null;
+                            }
+                        }
                     }
 
                     StyledText {
@@ -157,12 +209,15 @@ PageBase {
 
                         StyledTextField {
                             Layout.fillWidth: true
-                            placeholderText: qsTr("e.g. grim -g ... or kitty or flatpak run ...")
+                            placeholderText: (addBindBtn.selectedCategory === "Launch Application")
+                                ? qsTr("e.g. grim -g ... or kitty or flatpak run ...")
+                                : qsTr("Dispatcher argument (optional)")
                             text: addBindBtn.paramInput
                             onTextEdited: addBindBtn.paramInput = text
                         }
 
                         AppPickerPopup {
+                            visible: addBindBtn.selectedCategory === "Launch Application" || addBindBtn.selectedAction === "Run command" || addBindBtn.selectedAction === "exec"
                             rootParent: root.modalOverlay
                             onAppSelected: (exec, name, icon) => {
                                 addBindBtn.paramInput = exec;
@@ -178,6 +233,7 @@ PageBase {
                             let k = event.key;
                             if (k === Qt.Key_Escape) {
                                 addBindBtn.recording = false;
+                                HyprlandState.stopCapture();
                                 event.accepted = true;
                                 return;
                             }
@@ -201,6 +257,7 @@ PageBase {
                                 mods.push(keyStr);
                                 addBindBtn.shortcutKey = mods.join(" + ");
                                 addBindBtn.recording = false;
+                                HyprlandState.stopCapture();
                                 event.accepted = true;
                             }
                         }
@@ -219,7 +276,7 @@ PageBase {
                 required property int index
 
                 rootParent: root.modalOverlay
-                first: index === 0
+                first: false
                 last: index === FlightDeckWriter.customBinds.length - 1
                 icon: "keyboard"
 
@@ -253,6 +310,17 @@ PageBase {
 
                 acceptAllowed: shortcutKey.trim() !== ""
 
+                onOpenChanged: {
+                    if (open) {
+                        recording = false;
+                        shortcutKey = editBindRow.modelData.key || "";
+                        paramInput = editBindRow.modelData.args || "";
+                    } else {
+                        recording = false;
+                        HyprlandState.stopCapture();
+                    }
+                }
+
                 onAccepted: {
                     if (shortcutKey.trim() !== "") {
                         let dsp = "exec";
@@ -284,13 +352,6 @@ PageBase {
                         spacing: 0
 
                         IconButton {
-                            icon: "edit"
-                            type: IconButton.Text
-                            font: Tokens.font.icon.small
-                            onClicked: editBindRow.open = true
-                        }
-
-                        IconButton {
                             icon: "delete"
                             type: IconButton.Text
                             font: Tokens.font.icon.small
@@ -304,6 +365,7 @@ PageBase {
 
                 content: Component {
                     ColumnLayout {
+                        id: editBindCol
                         spacing: Tokens.spacing.medium
 
                         StyledText {
@@ -323,11 +385,41 @@ PageBase {
                                 onTextEdited: editBindRow.shortcutKey = text
                             }
 
-                            Button {
-                                text: editBindRow.recording ? qsTr("Stop") : qsTr("Record")
-                                onClicked: {
-                                    editBindRow.recording = !editBindRow.recording;
-                                    if (editBindRow.recording) editKeyListener.forceActiveFocus();
+                            ButtonBase {
+                                id: editRecBtn
+                                implicitHeight: 40
+                                implicitWidth: 96
+                                radius: Tokens.rounding.medium
+                                color: editBindRow.recording ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHigh
+
+                                StateLayer {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        editBindRow.recording = !editBindRow.recording;
+                                        if (editBindRow.recording) {
+                                            editKeyListener.forceActiveFocus();
+                                            HyprlandState.startCapture();
+                                        } else {
+                                            HyprlandState.stopCapture();
+                                        }
+                                    }
+                                }
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: Tokens.spacing.extraSmall
+
+                                    MaterialIcon {
+                                        text: editBindRow.recording ? "stop" : "fiber_manual_record"
+                                        color: editBindRow.recording ? Colours.palette.m3onPrimary : Colours.palette.m3error
+                                        fontStyle: Tokens.font.icon.small
+                                    }
+
+                                    StyledText {
+                                        text: editBindRow.recording ? qsTr("Stop") : qsTr("Record")
+                                        font: Tokens.font.label.medium
+                                        color: editBindRow.recording ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                                    }
                                 }
                             }
                         }
@@ -338,44 +430,59 @@ PageBase {
                             color: Colours.palette.m3onSurfaceVariant
                         }
 
-                        OptionRow {
-                            first: true
-                            last: false
-                            title: qsTr("Category")
-                            options: [
-                                { label: qsTr("Launch Application"), value: "Launch Application" },
-                                { label: qsTr("Window Management"), value: "Window Management" },
-                                { label: qsTr("Workspace Navigation"), value: "Workspace Navigation" },
-                                { label: qsTr("Custom Dispatcher"), value: "Custom Dispatcher" }
-                            ]
-                            currentValue: editBindRow.selectedCategory
-                            onOptionSelected: (val, lbl) => editBindRow.selectedCategory = val
-                        }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.extraSmall / 2
 
-                        OptionRow {
-                            first: false
-                            last: true
-                            title: qsTr("Action")
-                            options: {
-                                if (editBindRow.selectedCategory === "Launch Application") {
-                                    return [{ label: qsTr("Run command (exec)"), value: "Run command" }];
-                                } else if (editBindRow.selectedCategory === "Window Management") {
-                                    return [
-                                        { label: qsTr("Close window (killactive)"), value: "Close window" },
-                                        { label: qsTr("Toggle floating (togglefloating)"), value: "Toggle floating" },
-                                        { label: qsTr("Toggle fullscreen (fullscreen)"), value: "Toggle fullscreen" },
-                                        { label: qsTr("Pin window (pin)"), value: "Pin window" }
-                                    ];
-                                } else if (editBindRow.selectedCategory === "Workspace Navigation") {
-                                    return [
-                                        { label: qsTr("Switch workspace (workspace)"), value: "Switch workspace" },
-                                        { label: qsTr("Move to workspace (movetoworkspace)"), value: "Move to workspace" }
-                                    ];
+                            SelectRow {
+                                first: true
+                                last: false
+                                label: qsTr("Category")
+                                subtext: qsTr("Action type classification")
+                                menuItems: [
+                                    MenuItem { text: qsTr("Launch Application"); onClicked: { editBindRow.selectedCategory = "Launch Application"; editBindRow.selectedAction = "Run command"; } },
+                                    MenuItem { text: qsTr("Window Management"); onClicked: { editBindRow.selectedCategory = "Window Management"; editBindRow.selectedAction = "Close window"; } },
+                                    MenuItem { text: qsTr("Workspace Navigation"); onClicked: { editBindRow.selectedCategory = "Workspace Navigation"; editBindRow.selectedAction = "Switch workspace"; } },
+                                    MenuItem { text: qsTr("Custom Dispatcher"); onClicked: { editBindRow.selectedCategory = "Custom Dispatcher"; editBindRow.selectedAction = "exec"; } }
+                                ]
+                                active: {
+                                    for (var i = 0; i < menuItems.length; i++) {
+                                        if (menuItems[i].text === editBindRow.selectedCategory) return menuItems[i];
+                                    }
+                                    return menuItems[0] || null;
                                 }
-                                return [{ label: qsTr("Custom Dispatcher"), value: "exec" }];
                             }
-                            currentValue: editBindRow.selectedAction
-                            onOptionSelected: (val, lbl) => editBindRow.selectedAction = val
+
+                            SelectRow {
+                                first: false
+                                last: true
+                                label: qsTr("Action")
+                                subtext: qsTr("Specific action to execute")
+                                menuItems: {
+                                    let cat = editBindRow.selectedCategory;
+                                    let items = [];
+                                    if (cat === "Launch Application") {
+                                        items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Run command") + '"; onClicked: editBindRow.selectedAction = "Run command" }', editBindRow));
+                                    } else if (cat === "Window Management") {
+                                        items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Close window") + '"; onClicked: editBindRow.selectedAction = "Close window" }', editBindRow));
+                                        items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Toggle floating") + '"; onClicked: editBindRow.selectedAction = "Toggle floating" }', editBindRow));
+                                        items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Toggle fullscreen") + '"; onClicked: editBindRow.selectedAction = "Toggle fullscreen" }', editBindRow));
+                                        items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Pin window") + '"; onClicked: editBindRow.selectedAction = "Pin window" }', editBindRow));
+                                    } else if (cat === "Workspace Navigation") {
+                                        items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Switch workspace") + '"; onClicked: editBindRow.selectedAction = "Switch workspace" }', editBindRow));
+                                        items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + qsTr("Move to workspace") + '"; onClicked: editBindRow.selectedAction = "Move to workspace" }', editBindRow));
+                                    } else {
+                                        items.push(Qt.createQmlObject('import qs.components.controls; MenuItem { text: "' + editBindRow.selectedAction + '"; onClicked: {} }', editBindRow));
+                                    }
+                                    return items;
+                                }
+                                active: {
+                                    for (var i = 0; i < menuItems.length; i++) {
+                                        if (menuItems[i].text === editBindRow.selectedAction) return menuItems[i];
+                                    }
+                                    return menuItems[0] || null;
+                                }
+                            }
                         }
 
                         StyledText {
@@ -390,13 +497,16 @@ PageBase {
 
                             StyledTextField {
                                 Layout.fillWidth: true
-                                placeholderText: qsTr("e.g. grim -g ... or kitty")
+                                placeholderText: (editBindRow.selectedCategory === "Launch Application")
+                                    ? qsTr("e.g. grim -g ... or kitty or flatpak run ...")
+                                    : qsTr("Dispatcher argument (optional)")
                                 text: editBindRow.paramInput
                                 onTextEdited: editBindRow.paramInput = text
                             }
 
                             AppPickerPopup {
-                            rootParent: root.modalOverlay
+                                visible: editBindRow.selectedCategory === "Launch Application" || editBindRow.selectedAction === "Run command" || editBindRow.selectedAction === "exec"
+                                rootParent: root.modalOverlay
                                 onAppSelected: (exec, name, icon) => {
                                     editBindRow.paramInput = exec;
                                 }
@@ -411,6 +521,7 @@ PageBase {
                                 let k = event.key;
                                 if (k === Qt.Key_Escape) {
                                     editBindRow.recording = false;
+                                    HyprlandState.stopCapture();
                                     event.accepted = true;
                                     return;
                                 }
@@ -434,6 +545,7 @@ PageBase {
                                     mods.push(keyStr);
                                     editBindRow.shortcutKey = mods.join(" + ");
                                     editBindRow.recording = false;
+                                    HyprlandState.stopCapture();
                                     event.accepted = true;
                                 }
                             }
@@ -447,76 +559,118 @@ PageBase {
             text: qsTr("Workspace Navigation Modifiers")
         }
 
-        KeybindRow { first: true; isModifier: true; label: qsTr("Go to workspace"); varKey: "kbGoToWs" }
-        KeybindRow { isModifier: true; label: qsTr("Go to workspace group"); varKey: "kbGoToWsGroup" }
-        KeybindRow { isModifier: true; label: qsTr("Move window to workspace"); varKey: "kbMoveWinToWs" }
-        KeybindRow { isModifier: true; label: qsTr("Move window to workspace group"); varKey: "kbMoveWinToWsGroup" }
-        KeybindRow { label: qsTr("Next workspace"); varKey: "kbNextWs" }
-        KeybindRow { last: true; label: qsTr("Previous workspace"); varKey: "kbPrevWs" }
+        KeybindRow { rootParent: root.modalOverlay; first: true; isModifier: true; label: qsTr("Go to workspace"); varKey: "kbGoToWs" }
+        KeybindRow { rootParent: root.modalOverlay; isModifier: true; label: qsTr("Go to workspace group"); varKey: "kbGoToWsGroup" }
+        KeybindRow { rootParent: root.modalOverlay; isModifier: true; label: qsTr("Move window to workspace"); varKey: "kbMoveWinToWs" }
+        KeybindRow { rootParent: root.modalOverlay; isModifier: true; label: qsTr("Move window to workspace group"); varKey: "kbMoveWinToWsGroup" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Next workspace"); varKey: "kbNextWs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Previous workspace"); varKey: "kbPrevWs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Next workspace group"); varKey: "kbNextWsGroup" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Previous workspace group"); varKey: "kbPrevWsGroup" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Move window to next workspace"); varKey: "kbMoveWinToWsNext" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Move window to previous workspace"); varKey: "kbMoveWinToWsPrev" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Move window to special workspace"); varKey: "kbMoveWinToWsSpecial" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Move window from special workspace"); varKey: "kbMoveWinFromWsSpecial" }
 
         SectionHeader {
             text: qsTr("Window Group")
         }
 
-        KeybindRow { first: true; label: qsTr("Cycle next in group"); varKey: "kbWindowGroupCycleNext" }
-        KeybindRow { label: qsTr("Cycle previous in group"); varKey: "kbWindowGroupCyclePrev" }
-        KeybindRow { label: qsTr("Ungroup"); varKey: "kbUngroup" }
-        KeybindRow { last: true; label: qsTr("Toggle group"); varKey: "kbToggleGroup" }
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Cycle next window"); varKey: "kbWindowCycleNext" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Cycle previous window"); varKey: "kbWindowCyclePrev" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Cycle next in group"); varKey: "kbWindowGroupCycleNext" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Cycle previous in group"); varKey: "kbWindowGroupCyclePrev" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Lock active group"); varKey: "kbGroupLockActive" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Ungroup"); varKey: "kbUngroup" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Toggle group"); varKey: "kbToggleGroup" }
 
         SectionHeader {
             text: qsTr("Window Management")
         }
 
-        KeybindRow { first: true; label: qsTr("Move window"); varKey: "kbMoveWindow" }
-        KeybindRow { label: qsTr("Resize window"); varKey: "kbResizeWindow" }
-        KeybindRow { label: qsTr("Picture-in-picture"); varKey: "kbWindowPip" }
-        KeybindRow { label: qsTr("Pin window"); varKey: "kbPinWindow" }
-        KeybindRow { label: qsTr("Center window"); varKey: "kbCenterWindow" }
-        KeybindRow { label: qsTr("Fullscreen"); varKey: "kbWindowFullscreen" }
-        KeybindRow { label: qsTr("Maximized / Bordered Fullscreen"); varKey: "kbWindowBorderedFullscreen" }
-        KeybindRow { last: true; label: qsTr("Close active window"); varKey: "kbCloseWindow" }
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Move window"); varKey: "kbMoveWindow" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Resize window"); varKey: "kbResizeWindow" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Picture-in-picture"); varKey: "kbWindowPip" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Pin window"); varKey: "kbPinWindow" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Center window"); varKey: "kbCenterWindow" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Normalize window size"); varKey: "kbNormalizeWindow" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Fullscreen"); varKey: "kbWindowFullscreen" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Maximized / Bordered Fullscreen"); varKey: "kbWindowBorderedFullscreen" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Toggle floating"); varKey: "kbToggleWindowFloating" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Close active window"); varKey: "kbCloseWindow" }
+
+        SectionHeader {
+            text: qsTr("Window Resizing Shortcuts")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Decrease window width"); varKey: "kbWindowDecreaseWidth" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Increase window width"); varKey: "kbWindowIncreaseWidth" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Decrease window height"); varKey: "kbWindowDecreaseHeight" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Increase window height"); varKey: "kbWindowIncreaseHeight" }
 
         SectionHeader {
             text: qsTr("Applications")
         }
 
-        KeybindRow { first: true; label: qsTr("Terminal"); varKey: "kbTerminal" }
-        KeybindRow { label: qsTr("Web Browser"); varKey: "kbBrowser" }
-        KeybindRow { label: qsTr("Code / Text Editor"); varKey: "kbEditor" }
-        KeybindRow { label: qsTr("File Explorer"); varKey: "kbFileExplorer" }
-        KeybindRow { last: true; label: qsTr("Audio Settings"); varKey: "kbAudioSettings" }
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Terminal"); varKey: "kbTerminal" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Web Browser"); varKey: "kbBrowser" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Code / Text Editor"); varKey: "kbEditor" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("File Explorer"); varKey: "kbFileExplorer" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Audio Settings"); varKey: "kbAudioSettings" }
 
         SectionHeader {
             text: qsTr("Utilities")
         }
 
-        KeybindRow { first: true; label: qsTr("Full Screenshot"); varKey: "kbScreenshot" }
-        KeybindRow { label: qsTr("Screenshot Region"); varKey: "kbScreenshotRegion" }
-        KeybindRow { label: qsTr("Screenshot Freeze"); varKey: "kbScreenshotFreeze" }
-        KeybindRow { label: qsTr("Screen Record"); varKey: "kbRecord" }
-        KeybindRow { label: qsTr("Screen Record Sound"); varKey: "kbRecordSound" }
-        KeybindRow { label: qsTr("Screen Record Region"); varKey: "kbRecordRegion" }
-        KeybindRow { last: true; label: qsTr("Color Picker"); varKey: "kbColorPicker" }
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Full Screenshot"); varKey: "kbScreenshot" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screenshot Region"); varKey: "kbScreenshotRegion" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screenshot Freeze"); varKey: "kbScreenshotFreeze" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screen Record"); varKey: "kbRecord" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screen Record Sound"); varKey: "kbRecordSound" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screen Record Region"); varKey: "kbRecordRegion" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Color Picker"); varKey: "kbColorPicker" }
 
         SectionHeader {
             text: qsTr("Media & Volume")
         }
 
-        KeybindRow { first: true; label: qsTr("Media Play / Pause"); varKey: "kbMediaToggle" }
-        KeybindRow { label: qsTr("Next Track"); varKey: "kbMediaNext" }
-        KeybindRow { label: qsTr("Previous Track"); varKey: "kbMediaPrev" }
-        KeybindRow { label: qsTr("Stop Media"); varKey: "kbMediaStop" }
-        KeybindRow { last: true; label: qsTr("Mute Volume"); varKey: "kbVolumeMute" }
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Media Play / Pause"); varKey: "kbMediaToggle" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Next Track"); varKey: "kbMediaNext" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Previous Track"); varKey: "kbMediaPrev" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Stop Media"); varKey: "kbMediaStop" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Mute Volume"); varKey: "kbVolumeMute" }
+
+        SectionHeader {
+            text: qsTr("System & Session")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Application Launcher"); varKey: "kbLauncher" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Session Menu"); varKey: "kbSession" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Toggle Sidebar"); varKey: "kbShowSidebar" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Clear Notifications"); varKey: "kbClearNotifs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Toggle Panels"); varKey: "kbShowPanels" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Lock Screen"); varKey: "kbLock" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Restore Lock Screen"); varKey: "kbRestoreLock" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Sleep / Suspend"); varKey: "kbSleep" }
+
+        SectionHeader {
+            text: qsTr("Clipboard & Emoji")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Clipboard History"); varKey: "kbClipboard" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Delete Clipboard Entry"); varKey: "kbClipboardDel" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Paste Latest Entry"); varKey: "kbClipboardPasteLatest" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Emoji Picker"); varKey: "kbEmoji" }
 
         SectionHeader {
             text: qsTr("Special Workspaces")
         }
 
-        KeybindRow { first: true; label: qsTr("Toggle Special Workspace"); varKey: "kbSpecialWs" }
-        KeybindRow { label: qsTr("System Monitor"); varKey: "kbSystemMonitorWs" }
-        KeybindRow { label: qsTr("Music Workspace"); varKey: "kbMusicWs" }
-        KeybindRow { label: qsTr("Communication"); varKey: "kbCommunicationWs" }
-        KeybindRow { last: true; label: qsTr("Todo Workspace"); varKey: "kbTodoWs" }
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Toggle Special Workspace"); varKey: "kbSpecialWs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("System Monitor"); varKey: "kbSystemMonitorWs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Music Workspace"); varKey: "kbMusicWs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Communication"); varKey: "kbCommunicationWs" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Todo Workspace"); varKey: "kbTodoWs" }
 
         Item {
             Layout.preferredHeight: Tokens.padding.large

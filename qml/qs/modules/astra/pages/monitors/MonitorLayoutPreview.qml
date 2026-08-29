@@ -71,6 +71,97 @@ ConnectedRect {
         root.scaleFactor = Math.min(sx, sy) * 0.85;
     }
 
+    focus: true
+
+    function snapPosition(targetIdx, proposedX, proposedY, currentEffW, currentEffH) {
+        var snapThreshold = 35; // px in monitor coordinate space
+        var finalX = proposedX;
+        var finalY = proposedY;
+        var snappedX = false;
+        var snappedY = false;
+
+        for (var i = 0; i < root.monitors.length; i++) {
+            if (i === targetIdx) continue;
+            var other = root.monitors[i];
+            if (other.disabled) continue;
+
+            var otherEffW = root.getEffW(other);
+            var otherEffH = root.getEffH(other);
+            var ox = other.x || 0;
+            var oy = other.y || 0;
+
+            // X-axis alignment
+            if (!snappedX) {
+                if (Math.abs(proposedX - ox) < snapThreshold) {
+                    finalX = ox;
+                    snappedX = true;
+                } else if (Math.abs(proposedX - (ox + otherEffW)) < snapThreshold) {
+                    finalX = ox + otherEffW;
+                    snappedX = true;
+                } else if (Math.abs(proposedX + currentEffW - ox) < snapThreshold) {
+                    finalX = ox - currentEffW;
+                    snappedX = true;
+                } else if (Math.abs(proposedX + currentEffW - (ox + otherEffW)) < snapThreshold) {
+                    finalX = ox + otherEffW - currentEffW;
+                    snappedX = true;
+                } else if (Math.abs(proposedX + currentEffW / 2 - (ox + otherEffW / 2)) < snapThreshold) {
+                    finalX = Math.round(ox + (otherEffW - currentEffW) / 2);
+                    snappedX = true;
+                }
+            }
+
+            // Y-axis alignment
+            if (!snappedY) {
+                if (Math.abs(proposedY - oy) < snapThreshold) {
+                    finalY = oy;
+                    snappedY = true;
+                } else if (Math.abs(proposedY - (oy + otherEffH)) < snapThreshold) {
+                    finalY = oy + otherEffH;
+                    snappedY = true;
+                } else if (Math.abs(proposedY + currentEffH - oy) < snapThreshold) {
+                    finalY = oy - currentEffH;
+                    snappedY = true;
+                } else if (Math.abs(proposedY + currentEffH - (oy + otherEffH)) < snapThreshold) {
+                    finalY = oy + otherEffH - currentEffH;
+                    snappedY = true;
+                } else if (Math.abs(proposedY + currentEffH / 2 - (oy + otherEffH / 2)) < snapThreshold) {
+                    finalY = Math.round(oy + (otherEffH - currentEffH) / 2);
+                    snappedY = true;
+                }
+            }
+        }
+        return { x: finalX, y: finalY };
+    }
+
+    function moveSelected(dx, dy) {
+        if (!monitors || selectedIndex < 0 || selectedIndex >= monitors.length) return;
+        var m = monitors[selectedIndex];
+        if (m.disabled) return;
+        var newX = (m.x || 0) + dx;
+        var newY = (m.y || 0) + dy;
+        var modeStr = m.width + "x" + m.height + "@" + m.refreshRate;
+        var posStr = newX + "x" + newY;
+        MonitorManager.applyMonitor(m.name, modeStr, posStr, m.scale, m.transform, m.disabled);
+        updateBounds();
+    }
+
+    Keys.onPressed: (event) => {
+        var delta = (event.modifiers & Qt.ShiftModifier) ? 10 : 1;
+        if (event.key === Qt.Key_Left) {
+            moveSelected(-delta, 0);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Right) {
+            moveSelected(delta, 0);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Up) {
+            moveSelected(0, -delta);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Down) {
+            moveSelected(0, delta);
+            event.accepted = true;
+        }
+    }
+
     onMonitorsChanged: updateBounds()
     onWidthChanged: updateBounds()
     onHeightChanged: updateBounds()
@@ -155,6 +246,7 @@ ConnectedRect {
 
                     onPressed: {
                         root.selectedIndex = monBox.index;
+                        root.forceActiveFocus();
                         startMonX = monBox.modelData.x || 0;
                         startMonY = monBox.modelData.y || 0;
                     }
@@ -164,9 +256,10 @@ ConnectedRect {
                             var newX = Math.round(root.minX + monBox.x / root.scaleFactor);
                             var newY = Math.round(root.minY + monBox.y / root.scaleFactor);
 
-                            // Snap to nearest 10px
-                            newX = Math.round(newX / 10) * 10;
-                            newY = Math.round(newY / 10) * 10;
+                            // Snap to other active monitor edges/centers
+                            var snapped = root.snapPosition(monBox.index, newX, newY, monBox.effW, monBox.effH);
+                            newX = snapped.x;
+                            newY = snapped.y;
 
                             var modeStr = monBox.modelData.width + "x" + monBox.modelData.height + "@" + monBox.modelData.refreshRate;
                             var posStr = newX + "x" + newY;

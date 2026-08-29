@@ -153,11 +153,6 @@ void CursorManager::applySystemWide(const QString& theme, int size) {
 
     // 6. ~/.Xresources & xrdb
     applyXresources(theme, size);
-
-    // 7. Bibata-Caelestia builder trigger if relevant
-    if (theme == QStringLiteral("Bibata-Caelestia")) {
-        applyBibataBuilder(size);
-    }
 }
 
 void CursorManager::applyGSettings(const QString& theme, int size) {
@@ -255,13 +250,6 @@ void CursorManager::applyXresources(const QString& theme, int size) {
     }
 
     QProcess::startDetached(QStringLiteral("xrdb"), {QStringLiteral("-merge"), xresourcesPath});
-}
-
-void CursorManager::applyBibataBuilder(int size) {
-    const QString builderPath = QStringLiteral("/usr/local/bin/bibata-caelestia-builder");
-    if (QFile::exists(builderPath)) {
-        QProcess::startDetached(QStringLiteral("sudo"), {builderPath, QStringLiteral("--size"), QString::number(size)});
-    }
 }
 
 static QImage parseXCursorImage(const QString& filePath, int targetSize) {
@@ -424,27 +412,7 @@ QImage CursorManager::loadCursorPreview(const QString& themeName, int targetSize
         }
     }
 
-    // 2. Try SVG templates if available
-    const QStringList svgCandidates = {
-        QDir::homePath() + QStringLiteral("/.config/caelestia/templates/bibata/left_ptr.svg"),
-        QDir::homePath() + QStringLiteral("/Projects/Bibata_Cursor/templates/left_ptr.svg"),
-        QDir::homePath() + QStringLiteral("/.local/share/icons/") + themeName + QStringLiteral("/left_ptr.svg")
-    };
-
-    for (const QString& svgPath : svgCandidates) {
-        if (QFile::exists(svgPath)) {
-            QSvgRenderer renderer(svgPath);
-            if (renderer.isValid()) {
-                QImage img(targetSize, targetSize, QImage::Format_ARGB32_Premultiplied);
-                img.fill(Qt::transparent);
-                QPainter p(&img);
-                renderer.render(&p);
-                return img;
-            }
-        }
-    }
-
-    // 3. Try XCursor left_ptr / default / arrow / pointer
+    // 2. Try XCursor left_ptr / default / arrow / pointer / top_left_arrow
     for (const QString& themeDir : searchDirs) {
         if (!QDir(themeDir).exists()) continue;
 
@@ -459,7 +427,23 @@ QImage CursorManager::loadCursorPreview(const QString& themeName, int targetSize
         }
     }
 
-    // 3. Fallback: Render clean pointer shape
+    // 3. Try theme-specific SVGs
+    for (const QString& themeDir : searchDirs) {
+        if (!QDir(themeDir).exists()) continue;
+        const QString svgFile = themeDir + QStringLiteral("/left_ptr.svg");
+        if (QFile::exists(svgFile)) {
+            QSvgRenderer renderer(svgFile);
+            if (renderer.isValid()) {
+                QImage img(targetSize, targetSize, QImage::Format_ARGB32_Premultiplied);
+                img.fill(Qt::transparent);
+                QPainter p(&img);
+                renderer.render(&p);
+                return img;
+            }
+        }
+    }
+
+    // 4. Fallback: Render clean pointer shape
     QImage fallback(targetSize, targetSize, QImage::Format_ARGB32_Premultiplied);
     fallback.fill(Qt::transparent);
     QPainter p(&fallback);

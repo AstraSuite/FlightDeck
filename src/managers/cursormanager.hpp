@@ -27,10 +27,10 @@ public:
     explicit CursorManager(QObject* parent = nullptr);
 
     QString currentTheme() const;
-    void setCurrentTheme(const QString& theme);
+    Q_INVOKABLE void setCurrentTheme(const QString& theme);
 
     int currentSize() const;
-    void setCurrentSize(int size);
+    Q_INVOKABLE void setCurrentSize(int size);
 
     QVariantList availableThemes() const;
     QList<int> availableSizes() const;
@@ -51,7 +51,6 @@ private:
     void applyGtkConfig(const QString& theme, int size);
     void applyDefaultIconTheme(const QString& theme);
     void applyXresources(const QString& theme, int size);
-    void applyBibataBuilder(int size);
 
     QString m_currentTheme;
     int m_currentSize = 24;

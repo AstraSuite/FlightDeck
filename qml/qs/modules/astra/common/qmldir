@@ -23,3 +23,5 @@ AppPickerDialog 1.0 AppPickerDialog.qml
 ClientPickerDialog 1.0 ClientPickerDialog.qml
 AppPickerPopup 1.0 AppPickerPopup.qml
 ClientPickerPopup 1.0 ClientPickerPopup.qml
+ColorPickerDialogRow 1.0 ColorPickerDialogRow.qml
+NavRow 1.0 NavRow.qml

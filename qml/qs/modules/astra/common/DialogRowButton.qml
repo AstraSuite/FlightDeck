@@ -20,21 +20,40 @@ Item {
     required property Component content
     required property string acceptLabel
     property string subtext: ""
+    property string varKey: ""
+    property bool showReset: false
     property Component trailingActions: null
     property bool first: false
-    property bool last: true
+    property bool last: false
     property bool acceptAllowed: true
     property bool openAllowed: true
     property bool rowDisabled: false
     property bool separateContent
-    property int horizontalContentMargin
-
+    property int horizontalContentMargin: 0
+    property real customOpenHeight: 0
     property real openWidth: Math.min((rootParent ? rootParent.width : 600) * 0.9, Tokens.sizes?.astra?.maxDialogWidth ?? 580)
-    property real openHeight: Math.min((rootParent ? rootParent.height : 600) * 0.9, Tokens.sizes?.astra?.maxDialogHeight ?? 650)
+    property real maxOpenHeight: Math.min((rootParent ? rootParent.height : 600) * 0.88, Tokens.sizes?.astra?.maxDialogHeight ?? 650)
+    property real openHeight: {
+        if (customOpenHeight > 0) {
+            return Math.min(customOpenHeight, maxOpenHeight);
+        }
+        if (separateContent) {
+            return Math.min(500, maxOpenHeight);
+        }
+        if (dialogContent && dialogContent.item && dialogContent.item.dialogLayout) {
+            var layoutH = dialogContent.item.dialogLayout.implicitHeight;
+            if (layoutH > 0) {
+                var contentH = layoutH + (Tokens.padding?.extraLarge ?? 28) + (Tokens.padding?.largeIncreased ?? 20);
+                return Math.min(Math.max(280, contentH), maxOpenHeight);
+            }
+        }
+        return Math.min(500, maxOpenHeight);
+    }
     property bool open
 
     signal accepted
     signal cancelled
+    signal reset
 
     function reparentWrapper(): void {
         const newParent = (open && rootParent) ? rootParent : root;
@@ -170,21 +189,15 @@ Item {
             icon: root.icon
             text: root.label
             subtext: root.subtext
+            varKey: root.varKey
+            showReset: root.showReset
+            onReset: root.reset()
+            trailingActions: root.trailingActions
             disabled: root.rowDisabled
             onClicked: {
                 if (root.openAllowed) {
                     root.open = true;
                 }
-            }
-
-            Loader {
-                id: trailingLoader
-                anchors.right: parent.right
-                anchors.rightMargin: Tokens.padding?.largeIncreased ?? 20
-                anchors.verticalCenter: parent.verticalCenter
-                z: 5
-                active: !!root.trailingActions
-                sourceComponent: root.trailingActions
             }
         }
 
@@ -198,16 +211,18 @@ Item {
             anchors.fill: parent
 
             opacity: 0
-            active: opacity > 0
-            asynchronous: true
+            active: root.open || opacity > 0
+            asynchronous: false
 
             sourceComponent: MouseArea {
                 id: contentMouseArea
                 property var host: root
+                readonly property alias dialogLayout: dialogLayout
 
                 onWheel: event => event.accepted = true
 
                 ColumnLayout {
+                    id: dialogLayout
                     anchors.fill: parent
                     anchors.margins: Tokens.padding?.extraLarge ?? 28
                     anchors.bottomMargin: Tokens.padding?.largeIncreased ?? 20

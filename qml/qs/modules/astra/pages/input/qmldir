@@ -1,0 +1,4 @@
+module qs.modules.astra.pages.input
+KeyboardSubPage 1.0 KeyboardSubPage.qml
+MouseSubPage 1.0 MouseSubPage.qml
+TouchpadSubPage 1.0 TouchpadSubPage.qml

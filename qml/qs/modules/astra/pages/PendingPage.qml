@@ -12,7 +12,7 @@ import FlightDeck.Hyprland 1.0
 PageBase {
     id: root
 
-    title: qsTr("Pending Changes")
+    title: qsTr("Pending changes")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

@@ -1,0 +1,6 @@
+module qs.modules.astra.pages.appearance
+WindowStylingSubPage 1.0 WindowStylingSubPage.qml
+GapsRoundingSubPage 1.0 GapsRoundingSubPage.qml
+DimmingSnappingSubPage 1.0 DimmingSnappingSubPage.qml
+BlurSubPage 1.0 BlurSubPage.qml
+ShadowsSubPage 1.0 ShadowsSubPage.qml
