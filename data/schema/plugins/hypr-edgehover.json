@@ -1,0 +1,36 @@
+{
+  "id": "hypr-edgehover",
+  "name": "hypr-edgehover",
+  "namespace": "plugin:hypr-edgehover",
+  "luaNamespace": "hypr_edgehover",
+  "label": "Hypr-EdgeHover Edge Forwarding",
+  "icon": "open_in_new",
+  "description": "Forwards cursor edge hover events and gestures across adjacent tiled window boundaries seamlessly.",
+  "repository": "https://github.com/gfhdhytghd/hypr-edgehover",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Edge Detection",
+      "options": [
+        {
+          "key": "plugin:hypr-edgehover:enabled",
+          "luaKey": "enabled",
+          "label": "Enable Edge Hover",
+          "description": "Forward cursor boundary interaction across neighboring windows.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hypr-edgehover:edge_thickness",
+          "luaKey": "edge_thickness",
+          "label": "Edge Thickness (px)",
+          "description": "Border activation width in pixels for edge detection.",
+          "type": "int",
+          "min": 1,
+          "max": 30,
+          "default": 6
+        }
+      ]
+    }
+  ]
+}

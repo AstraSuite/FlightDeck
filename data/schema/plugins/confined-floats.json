@@ -1,0 +1,36 @@
+{
+  "id": "confined-floats",
+  "name": "confined-floats",
+  "namespace": "plugin:confined-floats",
+  "luaNamespace": "confined_floats",
+  "label": "Confined Floating Windows",
+  "icon": "fit_screen",
+  "description": "Prevents floating windows from being dragged or spawned completely off-screen beyond monitor boundaries.",
+  "repository": "https://github.com/mennemann/hyprland-confined-floats",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Confinement Boundaries",
+      "options": [
+        {
+          "key": "plugin:confined-floats:margin",
+          "luaKey": "margin",
+          "label": "Monitor Border Margin",
+          "description": "Safety margin in pixels kept between floating windows and screen edges.",
+          "type": "int",
+          "min": 0,
+          "max": 100,
+          "default": 10
+        },
+        {
+          "key": "plugin:confined-floats:ignore_unfocused",
+          "luaKey": "ignore_unfocused",
+          "label": "Ignore Unfocused Windows",
+          "description": "Only clamp positions of currently focused windows.",
+          "type": "bool",
+          "default": false
+        }
+      ]
+    }
+  ]
+}

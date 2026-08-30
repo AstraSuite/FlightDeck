@@ -1,0 +1,72 @@
+{
+  "id": "borders-plus-plus",
+  "name": "borders-plus-plus",
+  "namespace": "plugin:borders-plus-plus",
+  "luaNamespace": "borders_plus_plus",
+  "label": "Borders++ Extra Window Borders",
+  "icon": "border_outer",
+  "description": "Draw multiple concentric outline borders around windows with individual colors and widths.",
+  "repository": "https://github.com/hyprwm/hyprland-plugins/tree/main/borders-plus-plus",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Border Configuration",
+      "options": [
+        {
+          "key": "plugin:borders-plus-plus:add_borders",
+          "luaKey": "add_borders",
+          "label": "Additional Borders Count",
+          "description": "Number of extra borders to draw around windows (0-9).",
+          "type": "int",
+          "min": 0,
+          "max": 9,
+          "default": 1
+        },
+        {
+          "key": "plugin:borders-plus-plus:col.border_1",
+          "luaKey": "col_border_1",
+          "label": "Border 1 Color",
+          "description": "Color for the first outer border.",
+          "type": "color",
+          "default": "rgb(ffffff)"
+        },
+        {
+          "key": "plugin:borders-plus-plus:border_size_1",
+          "luaKey": "border_size_1",
+          "label": "Border 1 Size",
+          "description": "Thickness in pixels of the first outer border.",
+          "type": "int",
+          "min": 1,
+          "max": 20,
+          "default": 2
+        },
+        {
+          "key": "plugin:borders-plus-plus:col.border_2",
+          "luaKey": "col_border_2",
+          "label": "Border 2 Color",
+          "description": "Color for the second outer border.",
+          "type": "color",
+          "default": "rgb(222222)"
+        },
+        {
+          "key": "plugin:borders-plus-plus:border_size_2",
+          "luaKey": "border_size_2",
+          "label": "Border 2 Size",
+          "description": "Thickness in pixels of the second outer border.",
+          "type": "int",
+          "min": 1,
+          "max": 20,
+          "default": 2
+        },
+        {
+          "key": "plugin:borders-plus-plus:natural_rounding",
+          "luaKey": "natural_rounding",
+          "label": "Natural Rounding",
+          "description": "Scale corner rounding naturally according to border thickness.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

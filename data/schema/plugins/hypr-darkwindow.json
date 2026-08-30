@@ -1,0 +1,34 @@
+{
+  "id": "hypr-darkwindow",
+  "name": "Hypr-DarkWindow",
+  "namespace": "plugin:darkwindow",
+  "luaNamespace": "darkwindow",
+  "label": "Hypr-DarkWindow Color Inverter",
+  "icon": "invert_colors",
+  "description": "Dynamically inverts colors of specific windows or turns bright light-themed apps into dark mode via shaders.",
+  "repository": "https://github.com/micha4w/Hypr-DarkWindow",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Inversion Settings",
+      "options": [
+        {
+          "key": "plugin:darkwindow:invert",
+          "luaKey": "invert",
+          "label": "Auto-Invert Window Match",
+          "description": "Regex pattern of window classes or titles to invert automatically on launch.",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "plugin:darkwindow:keep_fullscreen",
+          "luaKey": "keep_fullscreen",
+          "label": "Keep Inverted On Fullscreen",
+          "description": "Maintain shader color inversion when windows enter fullscreen mode.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

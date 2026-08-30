@@ -1,0 +1,34 @@
+{
+  "id": "pyprland",
+  "name": "pyprland",
+  "namespace": "plugin:pyprland",
+  "luaNamespace": "pyprland",
+  "label": "Pyprland Plugins Suite",
+  "icon": "extension",
+  "description": "Python-based Hyprland extension framework providing scratchpads, layout magnifiers, and sticky windows.",
+  "repository": "https://github.com/hyprland-community/pyprland",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Pyprland Integration",
+      "options": [
+        {
+          "key": "plugin:pyprland:expose_variables",
+          "luaKey": "expose_variables",
+          "label": "Expose Variables To IPC",
+          "description": "Share Hyprland runtime variables dynamically with pyprland plugins daemon.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:pyprland:toggle_dpms",
+          "luaKey": "toggle_dpms",
+          "label": "Automatic DPMS Control",
+          "description": "Allow pyprland extensions to manage display sleep and DPMS states.",
+          "type": "bool",
+          "default": false
+        }
+      ]
+    }
+  ]
+}

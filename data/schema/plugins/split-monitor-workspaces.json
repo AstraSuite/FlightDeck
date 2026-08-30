@@ -1,0 +1,52 @@
+{
+  "id": "split-monitor-workspaces",
+  "name": "split-monitor-workspaces",
+  "namespace": "plugin:split-monitor-workspaces",
+  "luaNamespace": "split_monitor_workspaces",
+  "label": "Split Monitor Workspaces",
+  "icon": "splitscreen",
+  "description": "Provides independent workspace sets for each physical monitor (AwesomeWM-like multi-monitor workspace behavior).",
+  "repository": "https://github.com/Duckonaut/split-monitor-workspaces",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Monitor Workspaces",
+      "options": [
+        {
+          "key": "plugin:split-monitor-workspaces:count",
+          "luaKey": "count",
+          "label": "Workspaces Per Monitor",
+          "description": "Number of dedicated workspaces allocated to each monitor.",
+          "type": "int",
+          "min": 1,
+          "max": 20,
+          "default": 10
+        },
+        {
+          "key": "plugin:split-monitor-workspaces:keep_focused",
+          "luaKey": "keep_focused",
+          "label": "Keep Monitor Focused",
+          "description": "Prevent cursor focus from jumping to another monitor when changing workspaces.",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "plugin:split-monitor-workspaces:enable_notifications",
+          "luaKey": "enable_notifications",
+          "label": "Switch Notifications",
+          "description": "Show system OSD notification when switching split workspaces.",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "plugin:split-monitor-workspaces:enable_persistent_workspaces",
+          "luaKey": "enable_persistent_workspaces",
+          "label": "Persistent Workspaces",
+          "description": "Keep all split workspaces created in waybar/dashboards even when empty.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

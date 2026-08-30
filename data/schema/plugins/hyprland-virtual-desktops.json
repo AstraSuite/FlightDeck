@@ -1,0 +1,62 @@
+{
+  "id": "hyprland-virtual-desktops",
+  "name": "hyprland-virtual-desktops",
+  "namespace": "plugin:virtual-desktops",
+  "luaNamespace": "virtual_desktops",
+  "label": "Virtual Desktops Manager",
+  "icon": "desktop_windows",
+  "description": "Provides named 2D grid virtual desktops, workspace matrices, and window sticky rules across monitors.",
+  "repository": "https://github.com/levnikmyskin/hyprland-virtual-desktops",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Desktop Matrix",
+      "options": [
+        {
+          "key": "plugin:virtual-desktops:names",
+          "luaKey": "names",
+          "label": "Desktop Names List",
+          "description": "Comma-separated list of named virtual desktops (e.g. 'Main, Web, Code, Chat').",
+          "type": "string",
+          "default": "1, 2, 3, 4"
+        },
+        {
+          "key": "plugin:virtual-desktops:rows",
+          "luaKey": "rows",
+          "label": "Grid Rows",
+          "description": "Number of vertical desktop rows in 2D navigation grid.",
+          "type": "int",
+          "min": 1,
+          "max": 5,
+          "default": 2
+        },
+        {
+          "key": "plugin:virtual-desktops:columns",
+          "luaKey": "columns",
+          "label": "Grid Columns",
+          "description": "Number of horizontal desktop columns in 2D navigation grid.",
+          "type": "int",
+          "min": 1,
+          "max": 6,
+          "default": 2
+        },
+        {
+          "key": "plugin:virtual-desktops:remember_layout",
+          "luaKey": "remember_layout",
+          "label": "Remember Layout Per Desktop",
+          "description": "Preserve tiling vs floating layouts independently per virtual desktop.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:virtual-desktops:notify_on_switch",
+          "luaKey": "notify_on_switch",
+          "label": "Notify On Switch",
+          "description": "Display desktop name notification when changing virtual desktops.",
+          "type": "bool",
+          "default": false
+        }
+      ]
+    }
+  ]
+}

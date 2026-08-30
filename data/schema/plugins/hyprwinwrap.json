@@ -1,0 +1,36 @@
+{
+  "id": "hyprwinwrap",
+  "name": "Hyprwinwrap",
+  "namespace": "plugin:hyprwinwrap",
+  "luaNamespace": "hyprwinwrap",
+  "label": "Hyprwinwrap Wallpaper Apps",
+  "icon": "wallpaper",
+  "description": "Embeds any interactive GUI application, terminal, or video player as an animated desktop wallpaper background.",
+  "repository": "https://github.com/gen3vra/hyprwinwrap",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Window Wallpaper Match",
+      "options": [
+        {
+          "key": "plugin:hyprwinwrap:class",
+          "luaKey": "class",
+          "label": "Target Window Class",
+          "description": "Exact window class name to pin behind all desktop windows as wallpaper.",
+          "type": "string",
+          "default": "window-bg"
+        },
+        {
+          "key": "plugin:hyprwinwrap:layer",
+          "luaKey": "layer",
+          "label": "Surface Layer",
+          "description": "Layer level in compositor surface stack (0 = background).",
+          "type": "int",
+          "min": 0,
+          "max": 3,
+          "default": 0
+        }
+      ]
+    }
+  ]
+}

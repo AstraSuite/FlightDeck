@@ -1,0 +1,87 @@
+{
+  "id": "hyprspace",
+  "name": "hyprspace",
+  "namespace": "plugin:overview",
+  "luaNamespace": "overview",
+  "label": "Hyprspace macOS Overview",
+  "icon": "space_dashboard",
+  "description": "macOS Mission Control-inspired workspace overview panel with live interactive window manipulation.",
+  "repository": "https://github.com/KZDKM/Hyprspace",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Overview Panel Appearance",
+      "options": [
+        {
+          "key": "plugin:overview:panelColor",
+          "luaKey": "panelColor",
+          "label": "Panel Background Color",
+          "description": "Color and transparency of the overview header strip.",
+          "type": "color",
+          "default": "rgba(282828ee)"
+        },
+        {
+          "key": "plugin:overview:workspaceActiveBorder",
+          "luaKey": "workspaceActiveBorder",
+          "label": "Active Workspace Border",
+          "description": "Border color highlighting the currently active workspace preview.",
+          "type": "color",
+          "default": "rgb(66ccff)"
+        },
+        {
+          "key": "plugin:overview:workspaceInactiveBorder",
+          "luaKey": "workspaceInactiveBorder",
+          "label": "Inactive Workspace Border",
+          "description": "Border color of background workspace thumbnails.",
+          "type": "color",
+          "default": "rgb(444444)"
+        },
+        {
+          "key": "plugin:overview:panelHeight",
+          "luaKey": "panelHeight",
+          "label": "Panel Height (px)",
+          "description": "Height in pixels of the workspace thumbnail strip.",
+          "type": "int",
+          "min": 80,
+          "max": 350,
+          "default": 160
+        },
+        {
+          "key": "plugin:overview:dragAlpha",
+          "luaKey": "dragAlpha",
+          "label": "Dragging Opacity",
+          "description": "Window opacity while dragging between workspaces in overview.",
+          "type": "float",
+          "min": 0.1,
+          "max": 1.0,
+          "step": 0.05,
+          "default": 0.6
+        },
+        {
+          "key": "plugin:overview:onBottom",
+          "luaKey": "onBottom",
+          "label": "Place Panel At Bottom",
+          "description": "Render the workspace strip at the bottom of the screen instead of top.",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "plugin:overview:showEmptyWorkspace",
+          "luaKey": "showEmptyWorkspace",
+          "label": "Show Empty Workspaces",
+          "description": "Display empty workspaces in the top overview strip.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:overview:exitOnClick",
+          "luaKey": "exitOnClick",
+          "label": "Exit Overview On Click",
+          "description": "Exit overview mode immediately when clicking a window or workspace.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

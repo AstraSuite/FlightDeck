@@ -1,0 +1,44 @@
+{
+  "id": "imgborders",
+  "name": "imgborders",
+  "namespace": "plugin:imgborders",
+  "luaNamespace": "imgborders",
+  "label": "Image Borders Window Frames",
+  "icon": "photo_frame",
+  "description": "Renders custom tiled graphic image patterns and 9-slice textures onto window borders.",
+  "repository": "https://codeberg.org/zacoons/imgborders",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Image Frame Settings",
+      "options": [
+        {
+          "key": "plugin:imgborders:image_path",
+          "luaKey": "image_path",
+          "label": "Border Pattern Image Path",
+          "description": "Absolute filesystem path to PNG/SVG texture image for borders.",
+          "type": "string",
+          "default": ""
+        },
+        {
+          "key": "plugin:imgborders:border_size",
+          "luaKey": "border_size",
+          "label": "Image Border Size (px)",
+          "description": "Border frame width in pixels.",
+          "type": "int",
+          "min": 1,
+          "max": 32,
+          "default": 6
+        },
+        {
+          "key": "plugin:imgborders:tile",
+          "luaKey": "tile",
+          "label": "Repeat Tile Pattern",
+          "description": "Tile image repeatedly along border rather than stretching.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

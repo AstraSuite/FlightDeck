@@ -1,0 +1,82 @@
+{
+  "id": "hyprexpo",
+  "name": "hyprexpo",
+  "namespace": "plugin:hyprexpo",
+  "luaNamespace": "hyprexpo",
+  "label": "HyprExpo Workspace Grid Overview",
+  "icon": "grid_view",
+  "description": "Provides an interactive grid overview of all workspaces with live thumbnails and touchpad gestures.",
+  "repository": "https://github.com/colonelpanic8/hyprexpo",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Grid Layout & Appearance",
+      "options": [
+        {
+          "key": "plugin:hyprexpo:columns",
+          "luaKey": "columns",
+          "label": "Grid Columns",
+          "description": "Number of columns in the workspace overview grid.",
+          "type": "int",
+          "min": 1,
+          "max": 6,
+          "default": 3
+        },
+        {
+          "key": "plugin:hyprexpo:gap_size",
+          "luaKey": "gap_size",
+          "label": "Workspace Gaps",
+          "description": "Spacing in pixels between workspace preview tiles.",
+          "type": "int",
+          "min": 0,
+          "max": 50,
+          "default": 8
+        },
+        {
+          "key": "plugin:hyprexpo:bg_col",
+          "luaKey": "bg_col",
+          "label": "Overview Background Color",
+          "description": "Color and alpha of the overview backdrop.",
+          "type": "color",
+          "default": "rgb(111111)"
+        },
+        {
+          "key": "plugin:hyprexpo:workspace_method",
+          "luaKey": "workspace_method",
+          "label": "Workspace Centering Method",
+          "description": "Positioning algorithm when opening overview (e.g. 'center current', 'first 1').",
+          "type": "string",
+          "default": "center current"
+        },
+        {
+          "key": "plugin:hyprexpo:enable_gesture",
+          "luaKey": "enable_gesture",
+          "label": "Enable Touchpad Gesture",
+          "description": "Open overview via 3-finger swipe gesture.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hyprexpo:gesture_fingers",
+          "luaKey": "gesture_fingers",
+          "label": "Gesture Fingers",
+          "description": "Finger count for the swipe gesture (3 or 4).",
+          "type": "int",
+          "min": 3,
+          "max": 4,
+          "default": 3
+        },
+        {
+          "key": "plugin:hyprexpo:gesture_distance",
+          "luaKey": "gesture_distance",
+          "label": "Gesture Distance",
+          "description": "Touchpad swipe distance required to trigger overview.",
+          "type": "int",
+          "min": 100,
+          "max": 1000,
+          "default": 300
+        }
+      ]
+    }
+  ]
+}

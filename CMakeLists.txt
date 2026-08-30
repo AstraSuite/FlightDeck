@@ -102,14 +102,15 @@ qt_add_resources(flightdeck "resources"
         assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
 )
 
+# Embed schema resources
+file(GLOB_RECURSE SCHEMA_FILES CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    "data/schema/*.json"
+    "data/schema/**/*.json"
+)
 qt_add_resources(flightdeck "schema_resources"
     PREFIX "/schema"
     BASE_DIR "data/schema"
-    FILES
-        data/schema/hyprland_options.json
-        data/schema/options.json
-        data/schema/plugins/hypr-dynamic-cursors.json
-        data/schema/caelestia_variables.json
+    FILES ${SCHEMA_FILES}
 )
 
 # Add QML files with CONFIGURE_DEPENDS
@@ -142,11 +143,7 @@ target_link_libraries(test_autostart PRIVATE
 qt_add_resources(test_autostart "test_schema_resources"
     PREFIX "/schema"
     BASE_DIR "data/schema"
-    FILES
-        data/schema/hyprland_options.json
-        data/schema/options.json
-        data/schema/plugins/hypr-dynamic-cursors.json
-        data/schema/caelestia_variables.json
+    FILES ${SCHEMA_FILES}
 )
 
 # Installation

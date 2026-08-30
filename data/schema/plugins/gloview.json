@@ -1,0 +1,54 @@
+{
+  "id": "gloview",
+  "name": "gloview",
+  "namespace": "plugin:gloview",
+  "luaNamespace": "gloview",
+  "label": "Gloview macOS Overview",
+  "icon": "view_comfy",
+  "description": "Full-screen interactive workspace and application overview with live window search.",
+  "repository": "https://github.com/fedsfarm/gloview",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Overview Configuration",
+      "options": [
+        {
+          "key": "plugin:gloview:columns",
+          "luaKey": "columns",
+          "label": "Grid Columns",
+          "description": "Number of workspace columns shown in grid view.",
+          "type": "int",
+          "min": 1,
+          "max": 6,
+          "default": 3
+        },
+        {
+          "key": "plugin:gloview:gap_size",
+          "luaKey": "gap_size",
+          "label": "Tile Gaps",
+          "description": "Spacing between preview tiles in pixels.",
+          "type": "int",
+          "min": 0,
+          "max": 50,
+          "default": 12
+        },
+        {
+          "key": "plugin:gloview:bg_color",
+          "luaKey": "bg_color",
+          "label": "Backdrop Dim Color",
+          "description": "Background tint and opacity overlay.",
+          "type": "color",
+          "default": "rgba(000000aa)"
+        },
+        {
+          "key": "plugin:gloview:active_border_color",
+          "luaKey": "active_border_color",
+          "label": "Active Window Border Color",
+          "description": "Outline border highlight for focused item.",
+          "type": "color",
+          "default": "rgba(66ccffff)"
+        }
+      ]
+    }
+  ]
+}

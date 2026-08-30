@@ -1,0 +1,51 @@
+{
+  "id": "hypr-kinetic-scroll",
+  "name": "hypr-kinetic-scroll",
+  "namespace": "plugin:hypr-kinetic-scroll",
+  "luaNamespace": "hypr_kinetic_scroll",
+  "label": "Kinetic Touchpad Scrolling",
+  "icon": "swap_vert",
+  "description": "Adds smooth compositor-level kinetic inertia and momentum deceleration to two-finger touchpad scrolling.",
+  "repository": "https://github.com/savonovv/hypr-kinetic-scroll",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Inertia Physics",
+      "options": [
+        {
+          "key": "plugin:hypr-kinetic-scroll:friction",
+          "luaKey": "friction",
+          "label": "Scroll Friction Coefficient",
+          "description": "Deceleration rate applied to inertial touchpad scrolling (higher = stops faster).",
+          "type": "float",
+          "min": 0.01,
+          "max": 0.2,
+          "step": 0.01,
+          "default": 0.05
+        },
+        {
+          "key": "plugin:hypr-kinetic-scroll:velocity_multiplier",
+          "luaKey": "velocity_multiplier",
+          "label": "Velocity Multiplier",
+          "description": "Gain scale applied to initial finger release flick velocity.",
+          "type": "float",
+          "min": 0.1,
+          "max": 5.0,
+          "step": 0.1,
+          "default": 1.0
+        },
+        {
+          "key": "plugin:hypr-kinetic-scroll:max_velocity",
+          "luaKey": "max_velocity",
+          "label": "Max Fling Velocity",
+          "description": "Maximum allowed scroll speed cap.",
+          "type": "float",
+          "min": 10.0,
+          "max": 200.0,
+          "step": 5.0,
+          "default": 50.0
+        }
+      ]
+    }
+  ]
+}

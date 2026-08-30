@@ -1,0 +1,64 @@
+{
+  "id": "hypr-hot-edge",
+  "name": "hypr-hot-edge",
+  "namespace": "plugin:hypr-hot-edge",
+  "luaNamespace": "hypr_hot_edge",
+  "label": "Hot Edge Workspace Trigger",
+  "icon": "swipe_right",
+  "description": "Slide-out hot edge triggers for showing side panel workspaces and quick-access utility tools.",
+  "repository": "https://github.com/claychinasky/hypr-hot-edge",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Hot Edge Trigger Settings",
+      "options": [
+        {
+          "key": "plugin:hypr-hot-edge:edge",
+          "luaKey": "edge",
+          "label": "Trigger Edge Location",
+          "description": "Which screen perimeter edge triggers the slide-out panel.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "right",
+              "label": "Right"
+            },
+            {
+              "id": "left",
+              "label": "Left"
+            },
+            {
+              "id": "top",
+              "label": "Top"
+            },
+            {
+              "id": "bottom",
+              "label": "Bottom"
+            }
+          ],
+          "default": "right"
+        },
+        {
+          "key": "plugin:hypr-hot-edge:trigger_distance",
+          "luaKey": "trigger_distance",
+          "label": "Trigger Zone Distance (px)",
+          "description": "Cursor hover pixel depth required from edge to activate panel.",
+          "type": "int",
+          "min": 1,
+          "max": 50,
+          "default": 10
+        },
+        {
+          "key": "plugin:hypr-hot-edge:timeout_ms",
+          "luaKey": "timeout_ms",
+          "label": "Activation Delay (ms)",
+          "description": "Hover dwell time in milliseconds before opening.",
+          "type": "int",
+          "min": 50,
+          "max": 1500,
+          "default": 250
+        }
+      ]
+    }
+  ]
+}

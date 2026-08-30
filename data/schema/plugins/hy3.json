@@ -1,0 +1,199 @@
+{
+  "id": "hy3",
+  "name": "hy3",
+  "namespace": "plugin:hy3",
+  "luaNamespace": "hy3",
+  "label": "hy3 Layout Engine",
+  "icon": "view_quilt",
+  "description": "An i3 / Sway-like manual and automatic tiling layout engine with dynamic tab groups.",
+  "repository": "https://github.com/outfoxxed/hy3",
+  "sections": [
+    {
+      "id": "general",
+      "label": "General Layout",
+      "options": [
+        {
+          "key": "plugin:hy3:no_gaps_when_only",
+          "luaKey": "no_gaps_when_only",
+          "label": "No Gaps When Only",
+          "description": "Disable window gaps when there is only one window on the workspace (0=disabled, 1=no gaps, 2=no gaps & border).",
+          "type": "choice",
+          "values": [
+            {
+              "id": "0",
+              "label": "0 - Disabled"
+            },
+            {
+              "id": "1",
+              "label": "1 - No gaps"
+            },
+            {
+              "id": "2",
+              "label": "2 - No gaps & no border"
+            }
+          ],
+          "default": "0"
+        },
+        {
+          "key": "plugin:hy3:node_collapse_threshold",
+          "luaKey": "node_collapse_threshold",
+          "label": "Node Collapse Threshold",
+          "description": "Minimum node count before container nodes collapse automatically.",
+          "type": "int",
+          "min": 1,
+          "max": 10,
+          "default": 1
+        }
+      ]
+    },
+    {
+      "id": "tabs",
+      "label": "Tab Group Styling",
+      "options": [
+        {
+          "key": "plugin:hy3:tabs:height",
+          "luaKey": "tabs.height",
+          "label": "Tab Bar Height",
+          "description": "Height in pixels for tab bars in tabbed groups.",
+          "type": "int",
+          "min": 10,
+          "max": 60,
+          "default": 20
+        },
+        {
+          "key": "plugin:hy3:tabs:padding",
+          "luaKey": "tabs.padding",
+          "label": "Tab Padding",
+          "description": "Horizontal padding between adjacent tab headers.",
+          "type": "int",
+          "min": 0,
+          "max": 20,
+          "default": 4
+        },
+        {
+          "key": "plugin:hy3:tabs:radius",
+          "luaKey": "tabs.radius",
+          "label": "Tab Corner Radius",
+          "description": "Corner rounding radius for individual tab headers.",
+          "type": "int",
+          "min": 0,
+          "max": 30,
+          "default": 6
+        },
+        {
+          "key": "plugin:hy3:tabs:border_width",
+          "luaKey": "tabs.border_width",
+          "label": "Tab Border Width",
+          "description": "Border outline width for tabs.",
+          "type": "int",
+          "min": 0,
+          "max": 10,
+          "default": 1
+        },
+        {
+          "key": "plugin:hy3:tabs:opacity",
+          "luaKey": "tabs.opacity",
+          "label": "Tab Opacity",
+          "description": "Alpha opacity multiplier for tabs.",
+          "type": "float",
+          "min": 0.0,
+          "max": 1.0,
+          "step": 0.05,
+          "default": 0.9
+        },
+        {
+          "key": "plugin:hy3:tabs:blur",
+          "luaKey": "tabs.blur",
+          "label": "Tab Blur",
+          "description": "Enable background blur under tab headers.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hy3:tabs:text_font",
+          "luaKey": "tabs.text_font",
+          "label": "Tab Font",
+          "description": "Font family used for rendering tab title text.",
+          "type": "string",
+          "default": "Sans"
+        },
+        {
+          "key": "plugin:hy3:tabs:text_height",
+          "luaKey": "tabs.text_height",
+          "label": "Tab Font Size",
+          "description": "Font point size for tab title text.",
+          "type": "int",
+          "min": 6,
+          "max": 30,
+          "default": 10
+        },
+        {
+          "key": "plugin:hy3:tabs:col.active",
+          "luaKey": "tabs.col_active",
+          "label": "Active Tab Background",
+          "description": "Background color of the active focused tab.",
+          "type": "color",
+          "default": "rgba(33ccffee)"
+        },
+        {
+          "key": "plugin:hy3:tabs:col.inactive",
+          "luaKey": "tabs.col_inactive",
+          "label": "Inactive Tab Background",
+          "description": "Background color of inactive tabs in the group.",
+          "type": "color",
+          "default": "rgba(222222aa)"
+        },
+        {
+          "key": "plugin:hy3:tabs:col.urgent",
+          "luaKey": "tabs.col_urgent",
+          "label": "Urgent Tab Background",
+          "description": "Background color of tabs with urgent alerts.",
+          "type": "color",
+          "default": "rgba(ff5555ee)"
+        }
+      ]
+    },
+    {
+      "id": "autotile",
+      "label": "Automatic Tiling",
+      "options": [
+        {
+          "key": "plugin:hy3:autotile:enable",
+          "luaKey": "autotile.enable",
+          "label": "Enable Autotile",
+          "description": "Automatically choose split orientation based on window aspect ratio.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hy3:autotile:ephemeral_groups",
+          "luaKey": "autotile.ephemeral_groups",
+          "label": "Ephemeral Groups",
+          "description": "Automatically ungroup tabbed containers when down to a single window.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hy3:autotile:trigger_width",
+          "luaKey": "autotile.trigger_width",
+          "label": "Trigger Width Threshold",
+          "description": "Width threshold in pixels to trigger horizontal autotiling.",
+          "type": "int",
+          "min": 100,
+          "max": 3840,
+          "default": 800
+        },
+        {
+          "key": "plugin:hy3:autotile:trigger_height",
+          "luaKey": "autotile.trigger_height",
+          "label": "Trigger Height Threshold",
+          "description": "Height threshold in pixels to trigger vertical autotiling.",
+          "type": "int",
+          "min": 100,
+          "max": 2160,
+          "default": 500
+        }
+      ]
+    }
+  ]
+}

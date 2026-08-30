@@ -1,0 +1,54 @@
+{
+  "id": "csgo-vulkan-fix",
+  "name": "csgo-vulkan-fix",
+  "namespace": "plugin:csgo-vulkan-fix",
+  "luaNamespace": "csgo_vulkan_fix",
+  "label": "CS2 / CS:GO Vulkan Resolution Fix",
+  "icon": "sports_esports",
+  "description": "Fixes custom stretched/black-bar 4:3 resolutions, cursor offset desync, and mode switching in Counter-Strike 2 on Wayland.",
+  "repository": "https://github.com/hyprwm/hyprland-plugins/tree/main/csgo-vulkan-fix",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Resolution & Mouse Fixes",
+      "options": [
+        {
+          "key": "plugin:csgo-vulkan-fix:res_w",
+          "luaKey": "res_w",
+          "label": "Target Game Width",
+          "description": "Horizontal resolution in pixels expected by the game engine (e.g. 1280, 1440, 1920).",
+          "type": "int",
+          "min": 640,
+          "max": 3840,
+          "default": 1920
+        },
+        {
+          "key": "plugin:csgo-vulkan-fix:res_h",
+          "luaKey": "res_h",
+          "label": "Target Game Height",
+          "description": "Vertical resolution in pixels expected by the game engine (e.g. 960, 1080, 1440).",
+          "type": "int",
+          "min": 480,
+          "max": 2160,
+          "default": 1080
+        },
+        {
+          "key": "plugin:csgo-vulkan-fix:class",
+          "luaKey": "class",
+          "label": "Game Window Class",
+          "description": "Window class pattern to apply Vulkan resolution scaling to.",
+          "type": "string",
+          "default": "cs2"
+        },
+        {
+          "key": "plugin:csgo-vulkan-fix:fix_mouse_offset",
+          "luaKey": "fix_mouse_offset",
+          "label": "Fix Mouse Coordinate Offset",
+          "description": "Correct cursor alignment discrepancies when playing at non-native stretched aspect ratios.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

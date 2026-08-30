@@ -1,0 +1,64 @@
+{
+  "id": "hyprcapture",
+  "name": "hyprcapture",
+  "namespace": "plugin:hyprcapture",
+  "luaNamespace": "hyprcapture",
+  "label": "HyprCapture Screenshot Tool",
+  "icon": "screenshot",
+  "description": "Integrated compositor-level region, window, and monitor capture tool with annotation support.",
+  "repository": "https://github.com/gfhdhytghd/HyprCapture",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Capture Settings",
+      "options": [
+        {
+          "key": "plugin:hyprcapture:save_path",
+          "luaKey": "save_path",
+          "label": "Screenshots Save Directory",
+          "description": "Target folder where captured screenshots are saved.",
+          "type": "string",
+          "default": "~/Pictures/Screenshots"
+        },
+        {
+          "key": "plugin:hyprcapture:format",
+          "luaKey": "format",
+          "label": "Image Format",
+          "description": "File format used when saving screenshots.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "png",
+              "label": "PNG (Lossless)"
+            },
+            {
+              "id": "jpeg",
+              "label": "JPEG (Compressed)"
+            },
+            {
+              "id": "webp",
+              "label": "WebP (Modern)"
+            }
+          ],
+          "default": "png"
+        },
+        {
+          "key": "plugin:hyprcapture:copy_to_clipboard",
+          "luaKey": "copy_to_clipboard",
+          "label": "Copy To Clipboard Automatically",
+          "description": "Copy newly taken screenshots into clipboard upon capture.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hyprcapture:notify",
+          "luaKey": "notify",
+          "label": "Desktop Notification",
+          "description": "Show system notification with preview upon capture.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

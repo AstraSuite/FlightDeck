@@ -1,0 +1,46 @@
+{
+  "id": "scrolloverview",
+  "name": "hyprland-scroll-overview",
+  "namespace": "plugin:scrolloverview",
+  "luaNamespace": "scrolloverview",
+  "label": "Niri Scroll Overview",
+  "icon": "view_carousel",
+  "description": "A horizontal scrolling ribbon window and workspace overview inspired by Niri layout.",
+  "repository": "https://github.com/yayuuu/hyprland-scroll-overview",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Ribbon Overview Settings",
+      "options": [
+        {
+          "key": "plugin:scrolloverview:columns",
+          "luaKey": "columns",
+          "label": "Visible Columns",
+          "description": "Number of workspace columns displayed simultaneously.",
+          "type": "int",
+          "min": 1,
+          "max": 6,
+          "default": 3
+        },
+        {
+          "key": "plugin:scrolloverview:gap_size",
+          "luaKey": "gap_size",
+          "label": "Preview Gaps",
+          "description": "Spacing in pixels between overview workspace tiles.",
+          "type": "int",
+          "min": 0,
+          "max": 50,
+          "default": 10
+        },
+        {
+          "key": "plugin:scrolloverview:active_border",
+          "luaKey": "active_border",
+          "label": "Active Workspace Border",
+          "description": "Outline border color for the focused workspace ribbon tile.",
+          "type": "color",
+          "default": "rgb(66ccff)"
+        }
+      ]
+    }
+  ]
+}

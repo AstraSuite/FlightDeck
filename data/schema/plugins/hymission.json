@@ -1,0 +1,44 @@
+{
+  "id": "hymission",
+  "name": "hymission",
+  "namespace": "plugin:hymission",
+  "luaNamespace": "hymission",
+  "label": "HyMission Mission Control",
+  "icon": "dashboard_customize",
+  "description": "KDE / macOS-style Mission Control workspace switcher with desktop thumbnails.",
+  "repository": "https://github.com/gfhdhytghd/hymission",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Mission Control Layout",
+      "options": [
+        {
+          "key": "plugin:hymission:overview_height",
+          "luaKey": "overview_height",
+          "label": "Thumbnail Bar Height",
+          "description": "Height in pixels for the top workspace thumbnail bar.",
+          "type": "int",
+          "min": 100,
+          "max": 300,
+          "default": 180
+        },
+        {
+          "key": "plugin:hymission:bg_col",
+          "luaKey": "bg_col",
+          "label": "Overlay Tint Color",
+          "description": "Backdrop color of the Mission Control view.",
+          "type": "color",
+          "default": "rgba(1e1e2ecc)"
+        },
+        {
+          "key": "plugin:hymission:active_border_color",
+          "luaKey": "active_border_color",
+          "label": "Active Workspace Border",
+          "description": "Border highlight for currently selected desktop.",
+          "type": "color",
+          "default": "rgba(89b4faff)"
+        }
+      ]
+    }
+  ]
+}

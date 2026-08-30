@@ -1,0 +1,73 @@
+{
+  "id": "hyprNStack",
+  "name": "hyprNStack",
+  "namespace": "plugin:hyprNStack",
+  "luaNamespace": "hyprNStack",
+  "label": "hyprNStack N-Column Tiling",
+  "icon": "view_column",
+  "description": "An N-Stack tiling layout engine allowing 1 to N customizable master/stack columns side-by-side.",
+  "repository": "https://github.com/zakk4223/hyprNStack",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Stack Layout Parameters",
+      "options": [
+        {
+          "key": "plugin:hyprNStack:layout:stacks",
+          "luaKey": "layout.stacks",
+          "label": "Total Stack Columns",
+          "description": "Number of vertical stack columns created alongside master column.",
+          "type": "int",
+          "min": 1,
+          "max": 6,
+          "default": 2
+        },
+        {
+          "key": "plugin:hyprNStack:layout:mfact",
+          "luaKey": "layout.mfact",
+          "label": "Master Split Ratio",
+          "description": "Proportion of total screen width reserved for master area (0.1 to 0.9).",
+          "type": "float",
+          "min": 0.1,
+          "max": 0.9,
+          "step": 0.05,
+          "default": 0.5
+        },
+        {
+          "key": "plugin:hyprNStack:layout:orientation",
+          "luaKey": "layout.orientation",
+          "label": "Master Orientation",
+          "description": "Position of the master window column relative to secondary stacks.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "left",
+              "label": "Left"
+            },
+            {
+              "id": "right",
+              "label": "Right"
+            },
+            {
+              "id": "top",
+              "label": "Top"
+            },
+            {
+              "id": "bottom",
+              "label": "Bottom"
+            }
+          ],
+          "default": "left"
+        },
+        {
+          "key": "plugin:hyprNStack:layout:new_is_master",
+          "luaKey": "layout.new_is_master",
+          "label": "New Windows As Master",
+          "description": "Newly opened windows become master windows automatically.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    }
+  ]
+}

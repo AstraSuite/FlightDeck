@@ -1,0 +1,142 @@
+{
+  "id": "hyprbars",
+  "name": "hyprbars",
+  "namespace": "plugin:hyprbars",
+  "luaNamespace": "hyprbars",
+  "label": "Hyprbars Window Titlebars",
+  "icon": "web_asset",
+  "description": "Brings back traditional desktop window titlebars with customizable action buttons and title text.",
+  "repository": "https://github.com/hyprwm/hyprland-plugins/tree/main/hyprbars",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Titlebar Styling",
+      "options": [
+        {
+          "key": "plugin:hyprbars:bar_height",
+          "luaKey": "bar_height",
+          "label": "Titlebar Height",
+          "description": "Height of the window titlebar in pixels.",
+          "type": "int",
+          "min": 10,
+          "max": 60,
+          "default": 24
+        },
+        {
+          "key": "plugin:hyprbars:bar_color",
+          "luaKey": "bar_color",
+          "label": "Titlebar Background Color",
+          "description": "Color for the window titlebar surface.",
+          "type": "color",
+          "default": "rgba(222222ee)"
+        },
+        {
+          "key": "plugin:hyprbars:bar_title_enabled",
+          "luaKey": "bar_title_enabled",
+          "label": "Show Title Text",
+          "description": "Display the window title text in the titlebar.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hyprbars:bar_text_size",
+          "luaKey": "bar_text_size",
+          "label": "Title Font Size",
+          "description": "Font size for the window title in points.",
+          "type": "int",
+          "min": 6,
+          "max": 30,
+          "default": 11
+        },
+        {
+          "key": "plugin:hyprbars:bar_text_font",
+          "luaKey": "bar_text_font",
+          "label": "Title Font Family",
+          "description": "Font family name used for titlebar text.",
+          "type": "string",
+          "default": "Sans"
+        },
+        {
+          "key": "plugin:hyprbars:bar_text_align",
+          "luaKey": "bar_text_align",
+          "label": "Title Alignment",
+          "description": "Horizontal alignment of window title text.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "left",
+              "label": "Left"
+            },
+            {
+              "id": "center",
+              "label": "Center"
+            }
+          ],
+          "default": "left"
+        },
+        {
+          "key": "plugin:hyprbars:bar_buttons_alignment",
+          "luaKey": "bar_buttons_alignment",
+          "label": "Button Alignment",
+          "description": "Which side of the titlebar action buttons appear on.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "left",
+              "label": "Left (macOS style)"
+            },
+            {
+              "id": "right",
+              "label": "Right (Windows/Linux style)"
+            }
+          ],
+          "default": "right"
+        },
+        {
+          "key": "plugin:hyprbars:bar_part_of_window",
+          "luaKey": "bar_part_of_window",
+          "label": "Part of Window Content",
+          "description": "Make the titlebar follow window geometry and scaling precisely.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hyprbars:bar_precedence_over_border",
+          "luaKey": "bar_precedence_over_border",
+          "label": "Precedence Over Border",
+          "description": "Render titlebar above the active window outline border.",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "plugin:hyprbars:bar_padding",
+          "luaKey": "bar_padding",
+          "label": "Bar Padding",
+          "description": "Margin padding around the titlebar edges.",
+          "type": "int",
+          "min": 0,
+          "max": 30,
+          "default": 8
+        },
+        {
+          "key": "plugin:hyprbars:bar_button_padding",
+          "luaKey": "bar_button_padding",
+          "label": "Button Padding",
+          "description": "Spacing between titlebar action buttons.",
+          "type": "int",
+          "min": 0,
+          "max": 20,
+          "default": 6
+        },
+        {
+          "key": "plugin:hyprbars:on_double_click",
+          "luaKey": "on_double_click",
+          "label": "Double Click Action",
+          "description": "Dispatcher command executed when double-clicking the titlebar.",
+          "type": "string",
+          "default": "hyprctl dispatch fullscreen 1"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "hyprRiver",
+  "name": "hyprRiver",
+  "namespace": "plugin:river",
+  "luaNamespace": "river",
+  "label": "River Layout Protocol",
+  "icon": "water",
+  "description": "Implements the river-layout-v3 protocol on Hyprland, allowing external River layout generators.",
+  "repository": "https://github.com/zakk4223/hyprRiver",
+  "sections": [
+    {
+      "id": "general",
+      "label": "River Layout Settings",
+      "options": [
+        {
+          "key": "plugin:river:layout:default_layout",
+          "luaKey": "layout.default_layout",
+          "label": "Default River Layout Provider",
+          "description": "Name of the river layout provider executable (e.g. rivertile).",
+          "type": "string",
+          "default": "rivertile"
+        },
+        {
+          "key": "plugin:river:layout:view_padding",
+          "luaKey": "layout.view_padding",
+          "label": "View Gap Padding",
+          "description": "Inner gap padding in pixels between river window views.",
+          "type": "int",
+          "min": 0,
+          "max": 40,
+          "default": 6
+        },
+        {
+          "key": "plugin:river:layout:outer_padding",
+          "luaKey": "layout.outer_padding",
+          "label": "Outer Screen Padding",
+          "description": "Outer boundary padding in pixels from monitor borders.",
+          "type": "int",
+          "min": 0,
+          "max": 50,
+          "default": 8
+        }
+      ]
+    }
+  ]
+}

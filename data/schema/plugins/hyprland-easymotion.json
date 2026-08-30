@@ -1,0 +1,62 @@
+{
+  "id": "hyprland-easymotion",
+  "name": "hyprland-easymotion",
+  "namespace": "plugin:easymotion",
+  "luaNamespace": "easymotion",
+  "label": "EasyMotion Window Jumping",
+  "icon": "keyboard_double_arrow_right",
+  "description": "Vim EasyMotion-like 2-character keyboard navigation labels for instantaneous window focus jumping.",
+  "repository": "https://github.com/zakk4223/hyprland-easymotion",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Label Styling",
+      "options": [
+        {
+          "key": "plugin:easymotion:textsize",
+          "luaKey": "textsize",
+          "label": "Label Font Size",
+          "description": "Font size for jump key character labels.",
+          "type": "int",
+          "min": 8,
+          "max": 48,
+          "default": 16
+        },
+        {
+          "key": "plugin:easymotion:textcolor",
+          "luaKey": "textcolor",
+          "label": "Label Text Color",
+          "description": "Color for the jump character text.",
+          "type": "color",
+          "default": "rgba(ffffffff)"
+        },
+        {
+          "key": "plugin:easymotion:bgcolor",
+          "luaKey": "bgcolor",
+          "label": "Label Background Color",
+          "description": "Background badge color for the jump label box.",
+          "type": "color",
+          "default": "rgba(000000ee)"
+        },
+        {
+          "key": "plugin:easymotion:blur",
+          "luaKey": "blur",
+          "label": "Label Background Blur",
+          "description": "Enable blurred translucent background behind labels.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:easymotion:rounding",
+          "luaKey": "rounding",
+          "label": "Label Corner Rounding",
+          "description": "Corner rounding radius of jump key labels.",
+          "type": "int",
+          "min": 0,
+          "max": 30,
+          "default": 6
+        }
+      ]
+    }
+  ]
+}

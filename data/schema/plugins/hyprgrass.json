@@ -1,0 +1,80 @@
+{
+  "id": "hyprgrass",
+  "name": "hyprgrass",
+  "namespace": "plugin:hyprgrass",
+  "luaNamespace": "hyprgrass",
+  "label": "hyprgrass Touchscreen Gestures",
+  "icon": "touch_app",
+  "description": "Enables comprehensive touchscreen gestures, edge swipes, and custom touch actions on Hyprland.",
+  "repository": "https://github.com/horriblename/hyprgrass",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Touch Gestures",
+      "options": [
+        {
+          "key": "plugin:hyprgrass:touch:workspace_swipe",
+          "luaKey": "touch.workspace_swipe",
+          "label": "Touch Workspace Swipe",
+          "description": "Enable switching workspaces with touchscreen swipe gestures.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:hyprgrass:touch:workspace_swipe_fingers",
+          "luaKey": "touch.workspace_swipe_fingers",
+          "label": "Swipe Finger Count",
+          "description": "Number of fingers required for touch workspace swipe.",
+          "type": "int",
+          "min": 1,
+          "max": 5,
+          "default": 3
+        },
+        {
+          "key": "plugin:hyprgrass:touch:workspace_swipe_edge",
+          "luaKey": "touch.workspace_swipe_edge",
+          "label": "Edge Swipe Direction",
+          "description": "Screen edge used for workspace swipe gesture.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "d",
+              "label": "Down"
+            },
+            {
+              "id": "u",
+              "label": "Up"
+            },
+            {
+              "id": "l",
+              "label": "Left"
+            },
+            {
+              "id": "r",
+              "label": "Right"
+            }
+          ],
+          "default": "d"
+        },
+        {
+          "key": "plugin:hyprgrass:touch:long_press_duration",
+          "luaKey": "touch.long_press_duration",
+          "label": "Long Press Duration (ms)",
+          "description": "Hold duration in milliseconds before long-press triggers.",
+          "type": "int",
+          "min": 100,
+          "max": 2000,
+          "default": 500
+        },
+        {
+          "key": "plugin:hyprgrass:touch:drag_lock",
+          "luaKey": "touch.drag_lock",
+          "label": "Drag Lock",
+          "description": "Keep dragging even after temporarily lifting finger.",
+          "type": "bool",
+          "default": false
+        }
+      ]
+    }
+  ]
+}

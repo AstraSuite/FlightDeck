@@ -1,0 +1,72 @@
+{
+  "id": "hyprglass",
+  "name": "hyprglass",
+  "namespace": "plugin:hyprglass",
+  "luaNamespace": "hyprglass",
+  "label": "Hyprglass Liquid Glass Shader",
+  "icon": "blur_on",
+  "description": "Realistic frosted liquid-glass refractive window shader effects for Hyprland.",
+  "repository": "https://github.com/hyprnux/hyprglass",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Refraction & Optics",
+      "options": [
+        {
+          "key": "plugin:hyprglass:blur_sigma",
+          "luaKey": "blur_sigma",
+          "label": "Blur Sigma Strength",
+          "description": "Gaussian blur dispersion radius for frosted glass effect.",
+          "type": "float",
+          "min": 1.0,
+          "max": 40.0,
+          "step": 0.5,
+          "default": 12.0
+        },
+        {
+          "key": "plugin:hyprglass:refraction_index",
+          "luaKey": "refraction_index",
+          "label": "Refraction Index",
+          "description": "Snell's law index of refraction (IOR) for glass distortion.",
+          "type": "float",
+          "min": 1.0,
+          "max": 2.5,
+          "step": 0.05,
+          "default": 1.5
+        },
+        {
+          "key": "plugin:hyprglass:specular_strength",
+          "luaKey": "specular_strength",
+          "label": "Specular Glare Strength",
+          "description": "Intensity of edge light reflections on the glass surface.",
+          "type": "float",
+          "min": 0.0,
+          "max": 1.0,
+          "step": 0.05,
+          "default": 0.5
+        },
+        {
+          "key": "plugin:hyprglass:dispersion",
+          "luaKey": "dispersion",
+          "label": "Chromatic Dispersion",
+          "description": "Prismatic RGB color separation around window borders.",
+          "type": "float",
+          "min": 0.0,
+          "max": 0.2,
+          "step": 0.01,
+          "default": 0.05
+        },
+        {
+          "key": "plugin:hyprglass:corner_radius",
+          "luaKey": "corner_radius",
+          "label": "Glass Corner Radius",
+          "description": "Edge curvature rounding radius in pixels.",
+          "type": "int",
+          "min": 0,
+          "max": 40,
+          "default": 14
+        }
+      ]
+    }
+  ]
+}

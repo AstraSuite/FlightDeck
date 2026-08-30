@@ -1,0 +1,64 @@
+{
+  "id": "hyprtrails",
+  "name": "hyprtrails",
+  "namespace": "plugin:hyprtrails",
+  "luaNamespace": "hyprtrails",
+  "label": "Hyprtrails Motion Trails",
+  "icon": "auto_awesome_motion",
+  "description": "Renders smooth glowing motion trail animations behind moving windows.",
+  "repository": "https://github.com/hyprwm/hyprland-plugins/tree/main/hyprtrails",
+  "sections": [
+    {
+      "id": "general",
+      "label": "Trail Configuration",
+      "options": [
+        {
+          "key": "plugin:hyprtrails:color",
+          "luaKey": "color",
+          "label": "Trail Color",
+          "description": "Tint and alpha color of window movement trails.",
+          "type": "color",
+          "default": "rgba(a6e3a1aa)"
+        },
+        {
+          "key": "plugin:hyprtrails:bezier",
+          "luaKey": "bezier",
+          "label": "Animation Bezier",
+          "description": "Bezier curve name used for trail fading.",
+          "type": "string",
+          "default": "linear"
+        },
+        {
+          "key": "plugin:hyprtrails:history_points",
+          "luaKey": "history_points",
+          "label": "History Points",
+          "description": "Number of position history frames recorded in the trail.",
+          "type": "int",
+          "min": 5,
+          "max": 100,
+          "default": 20
+        },
+        {
+          "key": "plugin:hyprtrails:history_step",
+          "luaKey": "history_step",
+          "label": "History Step",
+          "description": "Interval between recorded position history points.",
+          "type": "int",
+          "min": 1,
+          "max": 10,
+          "default": 2
+        },
+        {
+          "key": "plugin:hyprtrails:points_per_step",
+          "luaKey": "points_per_step",
+          "label": "Points Per Step",
+          "description": "Interpolated curve subdivisions per history step.",
+          "type": "int",
+          "min": 1,
+          "max": 10,
+          "default": 2
+        }
+      ]
+    }
+  ]
+}
