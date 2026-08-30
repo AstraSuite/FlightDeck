@@ -60,9 +60,10 @@ void HyprlandSchema::loadSchema() {
     // 1. Hyprland Options Catalog
     QStringList candidatePaths = {
         QStringLiteral(":/schema/hyprland_options.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/hyprland_options.json"),
+        QStringLiteral("/usr/local/share/flightdeck/schema/hyprland_options.json"),
         appDir + QStringLiteral("/../data/schema/hyprland_options.json"),
-        appDir + QStringLiteral("/data/schema/hyprland_options.json"),
-        QStringLiteral("/usr/share/flightdeck/schema/hyprland_options.json")
+        appDir + QStringLiteral("/data/schema/hyprland_options.json")
     };
 
     QByteArray catalogData;
@@ -84,9 +85,10 @@ void HyprlandSchema::loadSchema() {
     // 2. Options Groups
     QStringList groupPaths = {
         QStringLiteral(":/schema/options.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/options.json"),
+        QStringLiteral("/usr/local/share/flightdeck/schema/options.json"),
         appDir + QStringLiteral("/../data/schema/options.json"),
-        appDir + QStringLiteral("/data/schema/options.json"),
-        QStringLiteral("/usr/share/flightdeck/schema/options.json")
+        appDir + QStringLiteral("/data/schema/options.json")
     };
 
     QByteArray groupsData;
@@ -111,9 +113,10 @@ void HyprlandSchema::loadSchema() {
 
     QStringList caelestiaPaths = {
         QStringLiteral(":/schema/caelestia_variables.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/caelestia_variables.json"),
+        QStringLiteral("/usr/local/share/flightdeck/schema/caelestia_variables.json"),
         appDir + QStringLiteral("/../data/schema/caelestia_variables.json"),
-        appDir + QStringLiteral("/data/schema/caelestia_variables.json"),
-        QStringLiteral("/usr/share/flightdeck/schema/caelestia_variables.json")
+        appDir + QStringLiteral("/data/schema/caelestia_variables.json")
     };
 
     QByteArray caelestiaData;
@@ -166,9 +169,10 @@ void HyprlandSchema::loadSchema() {
     // 4. Load plugin schemas
     QStringList pluginDirs = {
         QStringLiteral(":/schema/plugins"),
+        QStringLiteral("/usr/share/flightdeck/schema/plugins"),
+        QStringLiteral("/usr/local/share/flightdeck/schema/plugins"),
         appDir + QStringLiteral("/../data/schema/plugins"),
-        appDir + QStringLiteral("/data/schema/plugins"),
-        QStringLiteral("/usr/share/flightdeck/schema/plugins")
+        appDir + QStringLiteral("/data/schema/plugins")
     };
 
     m_supportedPlugins.clear();
@@ -204,6 +208,45 @@ void HyprlandSchema::loadSchema() {
                             if (!key.isEmpty()) {
                                 m_rawCatalog[key] = optObj.toVariantMap();
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Direct known fallback plugin files (including embedded QRC paths)
+    QStringList directPluginFiles = {
+        QStringLiteral(":/schema/plugins/hypr-dynamic-cursors.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/plugins/hypr-dynamic-cursors.json"),
+        QStringLiteral("/usr/local/share/flightdeck/schema/plugins/hypr-dynamic-cursors.json"),
+        appDir + QStringLiteral("/../data/schema/plugins/hypr-dynamic-cursors.json"),
+        appDir + QStringLiteral("/data/schema/plugins/hypr-dynamic-cursors.json")
+    };
+    for (const auto& directFile : directPluginFiles) {
+        QFile file(directFile);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) continue;
+        QJsonDocument pDoc = QJsonDocument::fromJson(file.readAll());
+        if (!pDoc.isObject()) continue;
+        QJsonObject pObj = pDoc.object();
+        QString pluginId = pObj.value(QStringLiteral("id")).toString();
+        if (pluginId.isEmpty() || m_pluginSchemas.contains(pluginId)) continue;
+
+        QVariantMap pluginMap = pObj.toVariantMap();
+        m_pluginSchemas[pluginId] = pluginMap;
+        m_supportedPlugins.append(pluginMap);
+
+        if (pObj.contains(QStringLiteral("sections"))) {
+            QJsonArray sections = pObj.value(QStringLiteral("sections")).toArray();
+            for (const auto& secVal : sections) {
+                QJsonObject secObj = secVal.toObject();
+                if (secObj.contains(QStringLiteral("options"))) {
+                    QJsonArray opts = secObj.value(QStringLiteral("options")).toArray();
+                    for (const auto& optVal : opts) {
+                        QJsonObject optObj = optVal.toObject();
+                        QString key = optObj.value(QStringLiteral("key")).toString();
+                        if (!key.isEmpty()) {
+                            m_rawCatalog[key] = optObj.toVariantMap();
                         }
                     }
                 }

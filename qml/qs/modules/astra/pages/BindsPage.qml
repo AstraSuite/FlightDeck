@@ -29,12 +29,12 @@ PageBase {
             text: qsTr("Custom Keybinds")
         }
 
-        // Add Keybind via DialogRowButton (standalone card)
+        // Add Keybind via DialogRowButton (connected to custom keybinds list below)
         DialogRowButton {
             id: addBindBtn
             rootParent: root.modalOverlay
             first: true
-            last: true
+            last: FlightDeckWriter.customBinds.length === 0
             icon: "add_circle"
             label: qsTr("Add Keybind")
             header: qsTr("Add Custom Keybind")
@@ -309,7 +309,7 @@ PageBase {
                 required property int index
 
                 rootParent: root.modalOverlay
-                first: index === 0
+                first: false
                 last: index === FlightDeckWriter.customBinds.length - 1
                 icon: "keyboard"
 

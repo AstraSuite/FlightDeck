@@ -27,12 +27,12 @@ PageBase {
             text: qsTr("Window Rules")
         }
 
-        // Add Window Rule via DialogRowButton
+        // Add Window Rule via DialogRowButton (connected to rules list below)
         DialogRowButton {
             id: addRuleBtn
             rootParent: root.modalOverlay
             first: true
-            last: true
+            last: FlightDeckWriter.windowRules.length === 0
             icon: "add_circle"
             label: qsTr("Add Window Rule")
             header: qsTr("Add New Window Rule")
@@ -353,10 +353,6 @@ PageBase {
             }
         }
 
-        SectionHeader {
-            text: qsTr("Configured Rules (%1)").arg(FlightDeckWriter.windowRules.length)
-        }
-
         // Each Configured Rule is its own DialogRowButton
         Repeater {
             model: FlightDeckWriter.windowRules
@@ -369,7 +365,7 @@ PageBase {
                 readonly property bool isReadOnly: editRuleRow.modelData ? (editRuleRow.modelData.isReadOnly || false) : false
 
                 rootParent: root.modalOverlay
-                first: index === 0
+                first: false
                 last: index === FlightDeckWriter.windowRules.length - 1
                 icon: editRuleRow.isReadOnly ? "tune" : "web_asset"
 

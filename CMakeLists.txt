@@ -163,3 +163,7 @@ install(FILES assets/flightdeck.desktop
 install(FILES assets/icons/flightdeck.svg
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
 )
+
+install(DIRECTORY data/schema/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/flightdeck/schema
+)

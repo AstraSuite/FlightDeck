@@ -26,12 +26,12 @@ PageBase {
             text: qsTr("Layer Rule Management")
         }
 
-        // Add Layer Rule via DialogRowButton (always rounded with first: true, last: true)
+        // Add Layer Rule via DialogRowButton (connected to layer rules list below)
         DialogRowButton {
             id: addLayerBtn
             rootParent: root.modalOverlay
             first: true
-            last: true
+            last: FlightDeckWriter.layerRules.length === 0
             icon: "add_circle"
             label: qsTr("Add Layer Rule")
             header: qsTr("Add New Layer Rule")
@@ -229,10 +229,6 @@ PageBase {
             }
         }
 
-        SectionHeader {
-            text: qsTr("Configured Layer Rules (%1)").arg(FlightDeckWriter.layerRules.length)
-        }
-
         // Each Configured Layer Rule is its own DialogRowButton
         Repeater {
             model: FlightDeckWriter.layerRules
@@ -245,7 +241,7 @@ PageBase {
                 readonly property bool isReadOnly: editLayerRow.modelData ? (editLayerRow.modelData.isReadOnly || false) : false
 
                 rootParent: root.modalOverlay
-                first: index === 0
+                first: false
                 last: index === FlightDeckWriter.layerRules.length - 1
                 icon: editLayerRow.isReadOnly ? "tune" : "layers"
 

@@ -241,9 +241,10 @@ void CaelestiaVars::loadDefaults() {
     const QString appDir = QCoreApplication::applicationDirPath();
     QStringList candidatePaths = {
         QStringLiteral(":/schema/caelestia_variables.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/caelestia_variables.json"),
+        QStringLiteral("/usr/local/share/flightdeck/schema/caelestia_variables.json"),
         appDir + QStringLiteral("/../data/schema/caelestia_variables.json"),
-        appDir + QStringLiteral("/data/schema/caelestia_variables.json"),
-        QStringLiteral("/usr/share/flightdeck/schema/caelestia_variables.json")
+        appDir + QStringLiteral("/data/schema/caelestia_variables.json")
     };
 
     QByteArray schemaData;
