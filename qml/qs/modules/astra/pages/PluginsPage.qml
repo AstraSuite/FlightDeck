@@ -62,7 +62,7 @@ StackPage {
                         visible: HyprlandSchema.installedPlugins.length === 0
                         first: true
                         last: true
-                        label: qsTr("No Installed Plugins Detected")
+                        text: qsTr("No Installed Plugins Detected")
                         subtext: qsTr("Plugins installed via hyprpm or active in Hyprland will appear here with dedicated configuration pages.")
                     }
 

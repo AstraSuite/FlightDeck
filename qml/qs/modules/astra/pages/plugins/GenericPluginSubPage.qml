@@ -116,6 +116,7 @@ PageBase {
                         Component {
                             id: choiceComp
                             SelectRow {
+                                id: selRow
                                 first: optLoader.isFirst
                                 last: optLoader.isLast
                                 label: optLoader.opt.label ?? optLoader.optKey
@@ -131,7 +132,7 @@ PageBase {
                                 active: {
                                     const cur = CaelestiaVars.pendingVars[optLoader.optKey] ?? CaelestiaVars.currentVars[optLoader.optKey] ?? HyprlandSchema.getDefault(optLoader.optKey, optLoader.optDef ?? "");
                                     for (var i = 0; i < menuItems.length; i++) {
-                                        if (menuItems[i].itemKey === cur) return menuItems[i];
+                                        if (menuItems[i].activeText === cur || menuItems[i].text === cur) return menuItems[i];
                                     }
                                     return menuItems[0] || null;
                                 }
@@ -139,21 +140,24 @@ PageBase {
                                     const res = [];
                                     const vals = optLoader.opt.values ?? [];
                                     for (var i = 0; i < vals.length; i++) {
-                                        res.push(menuItemComp.createObject(null, {
-                                            itemKey: vals[i].id,
-                                            label: vals[i].label ?? vals[i].id,
-                                            targetKey: optLoader.optKey
-                                        }));
+                                        const valId = vals[i].id;
+                                        const valLabel = vals[i].label ?? vals[i].id;
+                                        const targetK = optLoader.optKey;
+                                        const item = menuItemComp.createObject(selRow, {
+                                            text: valLabel,
+                                            activeText: valId
+                                        });
+                                        item.clicked.connect(() => {
+                                            CaelestiaVars.set(targetK, valId);
+                                        });
+                                        res.push(item);
                                     }
                                     return res;
                                 }
 
                                 Component {
                                     id: menuItemComp
-                                    MenuItem {
-                                        required property string targetKey
-                                        onTriggered: CaelestiaVars.set(targetKey, itemKey)
-                                    }
+                                    MenuItem {}
                                 }
                             }
                         }
@@ -163,9 +167,9 @@ PageBase {
                             OptionRow {
                                 first: optLoader.isFirst
                                 last: optLoader.isLast
-                                label: optLoader.opt.label ?? optLoader.optKey
+                                text: optLoader.opt.label ?? optLoader.optKey
                                 subtext: optLoader.opt.description ?? ""
-                                currentText: String(CaelestiaVars.pendingVars[optLoader.optKey] ?? CaelestiaVars.currentVars[optLoader.optKey] ?? HyprlandSchema.getDefault(optLoader.optKey, optLoader.optDef ?? ""))
+                                currentValue: String(CaelestiaVars.pendingVars[optLoader.optKey] ?? CaelestiaVars.currentVars[optLoader.optKey] ?? HyprlandSchema.getDefault(optLoader.optKey, optLoader.optDef ?? ""))
                             }
                         }
                     }
