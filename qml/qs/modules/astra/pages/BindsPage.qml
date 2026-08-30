@@ -18,6 +18,73 @@ PageBase {
 
     title: qsTr("Keybinds")
 
+    headerContent: Component {
+        SearchBar {
+            topPadding: Tokens.padding.small
+            bottomPadding: Tokens.padding.small
+
+            placeholderText: qsTr("Search keybinds")
+            font: Tokens.font.body.medium
+
+            bg.color: Colours.tPalette.m3surfaceContainerLowest
+            bg.border.color: Colours.palette.m3outlineVariant
+            searchIcon.fontStyle: Tokens.font.icon.medium
+            searchIcon.anchors.leftMargin: Tokens.padding.largeIncreased
+            clearIcon.font: Tokens.font.icon.medium
+            clearIcon.padding: Tokens.padding.extraSmall
+
+            onTextChanged: root.searchText = text
+        }
+    }
+    headerContentWidth: 240
+
+    property string searchText: ""
+
+    function keybindMatches(key, label, value) {
+        const q = root.searchText.trim().toLowerCase();
+        if (q === "") return true;
+        const terms = q.split(/\s+/).filter(t => t.length > 0);
+        const hay = (String(label || "") + " " + String(key || "") + " " + String(value || "")).toLowerCase();
+        for (let i = 0; i < terms.length; i++) {
+            if (hay.indexOf(terms[i]) === -1) return false;
+        }
+        return true;
+    }
+
+    readonly property var filteredCustomBinds: {
+        const q = root.searchText.trim();
+        if (q === "") return FlightDeckWriter.customBinds;
+        const out = [];
+        for (let i = 0; i < FlightDeckWriter.customBinds.length; i++) {
+            const b = FlightDeckWriter.customBinds[i];
+            const value = (b.dispatcher || "exec") + " " + (b.args || "");
+            if (root.keybindMatches(b.key, b.key, value)) out.push(b);
+        }
+        return out;
+    }
+
+    readonly property var filteredKeybindSections: {
+        const q = root.searchText.trim();
+        const src = (CaelestiaVars.keybindSections && CaelestiaVars.keybindSections.length > 0) ? CaelestiaVars.keybindSections : HyprlandSchema.keybindSections;
+        if (q === "") return src;
+        const out = [];
+        for (let s = 0; s < src.length; s++) {
+            const sec = src[s];
+            const opts = sec.options || [];
+            const matched = [];
+            for (let o = 0; o < opts.length; o++) {
+                const opt = opts[o];
+                let v = CaelestiaVars.pendingVars[opt.key] ?? CaelestiaVars.currentVars[opt.key] ?? CaelestiaVars.getDefault(opt.key, "");
+                v = Array.isArray(v) ? v.join(", ") : String(v || "");
+                if (root.keybindMatches(opt.key || "", opt.label || "", (sec.label || "") + " " + v)) matched.push(opt);
+            }
+            if (matched.length > 0) {
+                out.push({ "label": sec.label || "", "options": matched });
+            }
+        }
+        return out;
+    }
+
     ColumnLayout {
         anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
         anchors.top: parent ? parent.top : undefined
@@ -26,6 +93,7 @@ PageBase {
 
         SectionHeader {
             first: true
+            visible: root.searchText.trim() === "" || root.filteredCustomBinds.length > 0
             text: qsTr("Custom Keybinds")
         }
 
@@ -33,6 +101,7 @@ PageBase {
         DialogRowButton {
             id: addBindBtn
             rootParent: root.modalOverlay
+            visible: root.searchText.trim() === ""
             first: true
             last: FlightDeckWriter.customBinds.length === 0
             icon: "add_circle"
@@ -301,7 +370,7 @@ PageBase {
 
         // Each Custom Bind is its own DialogRowButton
         Repeater {
-            model: FlightDeckWriter.customBinds
+            model: root.filteredCustomBinds
 
             delegate: DialogRowButton {
                 id: editBindRow
@@ -309,8 +378,8 @@ PageBase {
                 required property int index
 
                 rootParent: root.modalOverlay
-                first: false
-                last: index === FlightDeckWriter.customBinds.length - 1
+                first: root.searchText.trim() !== "" && editBindRow.index === 0
+                last: index === root.filteredCustomBinds.length - 1
                 icon: "keyboard"
 
                 label: editBindRow.modelData.key || qsTr("Keybind")
@@ -620,7 +689,7 @@ PageBase {
         }
 
         Repeater {
-            model: (CaelestiaVars.keybindSections && CaelestiaVars.keybindSections.length > 0) ? CaelestiaVars.keybindSections : HyprlandSchema.keybindSections
+            model: root.filteredKeybindSections
 
             delegate: ColumnLayout {
                 id: secCol
@@ -650,6 +719,32 @@ PageBase {
                         label: kbRow.modelData.label || kbRow.modelData.key
                         varKey: kbRow.modelData.key
                     }
+                }
+            }
+        }
+
+        // Empty search state
+        Item {
+            visible: root.searchText.trim().length > 0 && root.filteredCustomBinds.length === 0 && root.filteredKeybindSections.length === 0
+            Layout.fillWidth: true
+            Layout.preferredHeight: 120
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: "search_off"
+                    color: Colours.palette.m3outline
+                    fontStyle: Tokens.font.icon.large
+                }
+
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: qsTr("No keybinds found for \"%1\"").arg(root.searchText.trim())
+                    color: Colours.palette.m3outline
+                    font: Tokens.font.body.medium
                 }
             }
         }

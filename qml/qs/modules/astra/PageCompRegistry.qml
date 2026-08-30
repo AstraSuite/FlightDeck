@@ -111,16 +111,7 @@ QtObject {
             }
         },
 
-        // 10: Pending Changes
-        Component {
-            StackPage {
-                Component {
-                    PendingPage {}
-                }
-            }
-        },
-
-        // 11: Settings
+        // 10: Settings
         Component {
             StackPage {
                 Component {
@@ -129,7 +120,7 @@ QtObject {
             }
         },
 
-        // 12: About
+        // 11: About
         Component {
             StackPage {
                 Component {

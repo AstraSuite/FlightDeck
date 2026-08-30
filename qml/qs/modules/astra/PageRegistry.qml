@@ -86,12 +86,6 @@ QtObject {
             category: "system"
         },
         {
-            label: qsTr("Pending changes"),
-            icon: "difference",
-            description: qsTr("Review diffs and apply live to Hyprland"),
-            category: "system"
-        },
-        {
             label: qsTr("System & compositor"),
             icon: "settings",
             description: qsTr("XWayland, default apps, compositor behavior, and theme sync"),

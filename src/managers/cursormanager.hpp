@@ -28,6 +28,7 @@ public:
 
     QString currentTheme() const;
     Q_INVOKABLE void setCurrentTheme(const QString& theme);
+    Q_INVOKABLE void resetTheme();
 
     int currentSize() const;
     Q_INVOKABLE void setCurrentSize(int size);
@@ -47,6 +48,7 @@ signals:
     void themesChanged();
 
 private:
+    void applyAll(const QString& theme, int size);
     void applyGSettings(const QString& theme, int size);
     void applyGtkConfig(const QString& theme, int size);
     void applyDefaultIconTheme(const QString& theme);

@@ -11,6 +11,5 @@ LayerRulesPage 1.0 LayerRulesPage.qml
 PluginsPage 1.0 PluginsPage.qml
 AutostartPage 1.0 AutostartPage.qml
 ProfilesPage 1.0 ProfilesPage.qml
-PendingPage 1.0 PendingPage.qml
 FlightDeckSettingsPage 1.0 FlightDeckSettingsPage.qml
 AboutPage 1.0 AboutPage.qml

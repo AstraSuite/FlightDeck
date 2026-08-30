@@ -158,8 +158,7 @@ Row {
         id: menu
 
         attachTo: expandBtn
-        attachSideY: root.menuOnTop ? Menu.Top : Menu.Bottom
-        thisSideY: root.menuOnTop ? Menu.Bottom : Menu.Top
-        marginY: root.Tokens.spacing.small * (root.menuOnTop ? -1 : 1)
+        forceUp: root.menuOnTop
+        marginY: root.Tokens.spacing.small * (menu.opensUpward ? -1 : 1)
     }
 }

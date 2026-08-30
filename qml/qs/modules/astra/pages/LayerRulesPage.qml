@@ -188,7 +188,6 @@ PageBase {
                             SelectRow {
                                 first: true
                                 last: addLayerBtn.animType !== "popin"
-                                menuOnTop: true
                                 label: qsTr("Animation Type")
                                 subtext: qsTr("Layer entrance and exit motion effect")
                                 menuItems: [
@@ -460,7 +459,6 @@ PageBase {
                                 SelectRow {
                                     first: true
                                     last: editLayerRow.animType !== "popin"
-                                    menuOnTop: true
                                     label: qsTr("Animation Type")
                                     subtext: qsTr("Layer entrance and exit motion effect")
                                     menuItems: [

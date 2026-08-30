@@ -860,9 +860,9 @@ QtObject {
             type: "action"
         },
 
-        // Autostart (PageIdx: 8)
+        // Autostart (PageIdx: 9)
         {
-            pageIdx: 8,
+            pageIdx: 9,
             category: "Autostart",
             title: "Add Application Autostart",
             breadcrumb: "Autostart › Applications",
@@ -871,34 +871,14 @@ QtObject {
             type: "action"
         },
 
-        // Profiles (PageIdx: 9)
+        // Profiles (PageIdx: 10)
         {
-            pageIdx: 9,
+            pageIdx: 10,
             category: "Profiles & backup",
             title: "Create Snapshot",
             breadcrumb: "Profiles & backup › Snapshots",
             subtext: "Backup current configuration variables to named profile",
             icon: "save",
-            type: "action"
-        },
-
-        // Pending Changes (PageIdx: 10)
-        {
-            pageIdx: 10,
-            category: "Pending changes",
-            title: "Apply & Save to Disk",
-            breadcrumb: "Pending changes › Actions",
-            subtext: "Write all pending changes to hypr-vars.lua and astra-flightdeck.lua",
-            icon: "save",
-            type: "action"
-        },
-        {
-            pageIdx: 10,
-            category: "Pending changes",
-            title: "Test Live (IPC)",
-            breadcrumb: "Pending changes › Actions",
-            subtext: "Send pending settings directly to Hyprland runtime without saving to disk",
-            icon: "play_arrow",
             type: "action"
         },
 

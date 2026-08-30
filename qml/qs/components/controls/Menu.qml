@@ -21,11 +21,32 @@ Popup {
 
     required property Item attachTo
     property int attachSideX: Menu.Right
-    property int attachSideY: Menu.Bottom
+    property int attachSideY: root.opensUpward ? Menu.Top : Menu.Bottom
     property int thisSideX: Menu.Right
-    property int thisSideY: Menu.Top
+    property int thisSideY: root.opensUpward ? Menu.Bottom : Menu.Top
     property real marginX: 0
     property real marginY: 0
+
+    // When true (default), the menu opens upward instead of downward when the
+    // attached item runs out of room below it inside the window.
+    property bool autoDirection: true
+    // Force the menu to always open upward, regardless of available space.
+    property bool forceUp: false
+    property int __directionDirty: 0
+
+    readonly property bool opensUpward: {
+        root.__directionDirty;
+        if (root.forceUp) return true;
+        if (!root.autoDirection) return false;
+        const btn = root.attachTo;
+        if (!btn || !btn.window || !btn.window.contentItem) return false;
+        const content = btn.window.contentItem;
+        if (content.height <= 0) return false;
+        const anchor = btn.mapToItem(content, 0, 0);
+        if (anchor === null || anchor === undefined) return false;
+        const below = content.height - (anchor.y + btn.height);
+        return below < anchor.y;
+    }
 
     property list<MenuItem> items
     property MenuItem active: items.length > 0 ? items[0] : null
@@ -68,6 +89,7 @@ Popup {
     onClosed: root.expanded = false
     onExpandedChanged: {
         if (root.expanded && !root.visible) {
+            root.__directionDirty++;
             root.open();
         } else if (!root.expanded && root.visible) {
             root.close();

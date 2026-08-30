@@ -73,7 +73,10 @@ PageBase {
             text: AirlockManager.lastMessage
             color: Colours.palette.m3primary
             font: Tokens.font.body.medium
+            Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
+            wrapMode: Text.WordWrap
+            horizontalAlignment: Text.AlignHCenter
         }
 
         Item {

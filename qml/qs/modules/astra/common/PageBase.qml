@@ -18,6 +18,8 @@ Item {
     readonly property bool isPageBase: true
     property bool isSubPage
     property bool scrollable: true
+    property Component headerContent: null
+    property real headerContentWidth: 0
     readonly property int cappedWidth: Math.min(Tokens.sizes.astra.maxContentWidth, width)
     readonly property alias flickable: flickable
     readonly property alias modalOverlay: overlayLayer
@@ -244,6 +246,15 @@ Item {
                     font: Tokens.font.title.large
                     color: Colours.palette.m3onSurface
                     elide: Text.ElideRight
+                }
+
+                Loader {
+                    visible: active
+                    active: root.headerContent !== null
+                    sourceComponent: root.headerContent
+
+                    Layout.preferredWidth: root.headerContentWidth > 0 ? root.headerContentWidth : (item ? item.implicitWidth : 0)
+                    Layout.preferredHeight: item ? item.implicitHeight : 0
                 }
             }
         }

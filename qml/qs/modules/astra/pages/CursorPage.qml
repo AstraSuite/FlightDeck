@@ -36,6 +36,32 @@ PageBase {
             acceptLabel: qsTr("Apply")
             separateContent: true
             horizontalContentMargin: -Tokens.padding.small
+            showReset: true
+
+            subtext: {
+                const theme = CursorManager.currentTheme;
+                let type = "";
+                for (let i = 0; i < CursorManager.availableThemes.length; i++) {
+                    if (CursorManager.availableThemes[i].name === theme) {
+                        type = CursorManager.availableThemes[i].isHyprcursor ? qsTr("Hyprcursor") : qsTr("XCursor");
+                        break;
+                    }
+                }
+                return type !== "" ? qsTr("Active: %1 (%2)").arg(theme).arg(type) : qsTr("Active: %1").arg(theme);
+            }
+
+            trailingActions: Component {
+                Image {
+                    source: "image://cursor/" + CursorManager.currentTheme
+                    sourceSize.width: 28
+                    sourceSize.height: 28
+                    Layout.preferredWidth: 28
+                    Layout.preferredHeight: 28
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    asynchronous: true
+                }
+            }
 
             property string selectedTheme: CursorManager.currentTheme
 
@@ -52,6 +78,8 @@ PageBase {
                     CursorManager.setCurrentTheme(selectedTheme);
                 }
             }
+
+            onReset: CursorManager.resetTheme()
 
             content: Component {
                 VerticalFadeListView {

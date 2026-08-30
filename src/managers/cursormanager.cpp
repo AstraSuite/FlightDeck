@@ -49,6 +49,15 @@ void CursorManager::setCurrentTheme(const QString& theme) {
     emit themeChanged();
 }
 
+void CursorManager::resetTheme() {
+    auto* vars = Caelestia::CaelestiaVars::instance();
+    vars->remove(QStringLiteral("cursorTheme"));
+    const QString defaultTheme = vars->getDefault(QStringLiteral("cursorTheme"), QStringLiteral("sweet-cursors")).toString();
+    m_currentTheme = defaultTheme;
+    applyAll(m_currentTheme, m_currentSize);
+    emit themeChanged();
+}
+
 int CursorManager::currentSize() const {
     return m_currentSize;
 }
@@ -135,6 +144,10 @@ void CursorManager::applySystemWide(const QString& theme, int size) {
     Caelestia::CaelestiaVars::instance()->set(QStringLiteral("cursorSize"), size);
     Caelestia::CaelestiaVars::instance()->save();
 
+    applyAll(theme, size);
+}
+
+void CursorManager::applyAll(const QString& theme, int size) {
     // 2. Hyprland compositor live cursor (cache-bust cycle across all instances)
     Hyprland::HyprlandSocket::instance()->setCursorAll(theme, size);
     Hyprland::HyprlandSocket::instance()->keyword(QStringLiteral("env"), QStringLiteral("HYPRCURSOR_THEME,%1").arg(theme));

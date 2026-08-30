@@ -138,7 +138,6 @@ PageBase {
 
         OptionRow {
             last: true
-            menuOnTop: true
             varKey: "forceDefaultWallpaper"
             text: qsTr("Force Default Wallpaper")
             subtext: qsTr("Default anime wallpaper selection")

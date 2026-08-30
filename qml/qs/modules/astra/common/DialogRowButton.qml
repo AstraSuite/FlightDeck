@@ -219,11 +219,11 @@ Item {
                 to: "closed"
 
                 SequentialAnimation {
-                    Anim {
-                        properties: "x,y"
-                    }
                     ScriptAction {
                         script: root.reparentWrapper()
+                    }
+                    Anim {
+                        properties: "x,y"
                     }
                 }
                 PropertyAction {
