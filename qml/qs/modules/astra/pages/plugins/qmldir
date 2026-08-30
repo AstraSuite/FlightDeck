@@ -1,3 +1,5 @@
 module qs.modules.astra.pages.plugins
 
 DynamicCursorsSubPage 1.0 DynamicCursorsSubPage.qml
+GenericPluginSubPage 1.0 GenericPluginSubPage.qml
+
