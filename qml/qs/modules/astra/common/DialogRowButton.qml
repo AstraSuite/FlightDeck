@@ -74,6 +74,7 @@ Item {
         color: root.open ? Colours.palette.m3surfaceContainerHighest : Colours.tPalette.m3surfaceContainer
 
         Behavior on color {
+            enabled: root.Component.status === Component.Ready
             CAnim {}
         }
     }
@@ -223,6 +224,16 @@ Item {
             bottomRightRadius: dialogBg.bottomRightRadius
             level: 4
             opacity: 0
+        }
+
+        ConnectedRect {
+            id: fallbackBg
+            anchors.fill: parent
+            first: root.first
+            last: root.last
+            visible: !root.open && opacity > 0
+            opacity: 1 - elevation.opacity
+            color: Colours.tPalette.m3surfaceContainer
         }
 
         BlobRect {
