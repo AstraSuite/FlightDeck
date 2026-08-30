@@ -19,6 +19,7 @@ class HyprlandSchema : public QObject {
     Q_PROPERTY(QVariantList keybindSections READ keybindSections NOTIFY schemaLoaded)
     Q_PROPERTY(QVariantList caelestiaSections READ caelestiaSections NOTIFY schemaLoaded)
     Q_PROPERTY(QVariantList supportedPlugins READ supportedPlugins NOTIFY schemaLoaded)
+    Q_PROPERTY(QVariantList installedPlugins READ installedPlugins NOTIFY installedPluginsChanged)
 
 public:
     static HyprlandSchema* instance();
@@ -32,6 +33,7 @@ public:
     QVariantList keybindSections() const;
     QVariantList caelestiaSections() const;
     QVariantList supportedPlugins() const;
+    QVariantList installedPlugins() const;
 
     Q_INVOKABLE bool hasOption(const QString& key) const;
     Q_INVOKABLE QVariantMap getOption(const QString& key) const;
@@ -49,11 +51,14 @@ public:
     Q_INVOKABLE QString toShortKey(const QString& key) const;
 
     Q_INVOKABLE QVariantMap pluginSchema(const QString& pluginId) const;
+    Q_INVOKABLE bool isPluginInstalled(const QString& pluginIdOrName) const;
+    Q_INVOKABLE void refreshInstalledPlugins();
 
     QString serializeToLuaConfig(const QVariantMap& options) const;
 
 signals:
     void schemaLoaded();
+    void installedPluginsChanged();
 
 private:
     void loadSchema();
@@ -64,6 +69,7 @@ private:
     QVariantList m_keybindSections;
     QVariantList m_caelestiaSections;
     QVariantList m_supportedPlugins;
+    QVariantList m_installedPlugins;
     QVariantMap m_pluginSchemas;
     QHash<QString, QString> m_aliasToHyprKey;
     QHash<QString, QString> m_hyprKeyToAlias;

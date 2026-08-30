@@ -1,4 +1,5 @@
 #include "hyprlandschema.hpp"
+#include "hyprlandsocket.hpp"
 #include <QCoreApplication>
 #include <QFile>
 #include <QDir>
@@ -7,6 +8,8 @@
 #include <QJsonArray>
 #include <QDebug>
 #include <QRegularExpression>
+#include <QProcess>
+#include <QSet>
 
 namespace FlightDeck::Hyprland {
 
@@ -24,8 +27,7 @@ HyprlandSchema* HyprlandSchema::create(QQmlEngine*, QJSEngine*) {
 }
 
 HyprlandSchema::HyprlandSchema(QObject* parent)
-    : QObject(parent)
-{
+    : QObject(parent) {
     loadSchema();
     buildAliases();
 }
@@ -50,8 +52,107 @@ QVariantList HyprlandSchema::supportedPlugins() const {
     return m_supportedPlugins;
 }
 
+QVariantList HyprlandSchema::installedPlugins() const {
+    return m_installedPlugins;
+}
+
 QVariantMap HyprlandSchema::pluginSchema(const QString& pluginId) const {
     return m_pluginSchemas.value(pluginId).toMap();
+}
+
+bool HyprlandSchema::isPluginInstalled(const QString& pluginIdOrName) const {
+    const QString target = pluginIdOrName.toLower().trimmed();
+    if (target.isEmpty()) return false;
+
+    for (const auto& pVal : m_installedPlugins) {
+        QVariantMap pMap = pVal.toMap();
+        QString id = pMap.value(QStringLiteral("id")).toString().toLower();
+        QString name = pMap.value(QStringLiteral("name")).toString().toLower();
+        QString luaNs = pMap.value(QStringLiteral("luaNamespace")).toString().toLower();
+        QString ns = pMap.value(QStringLiteral("namespace")).toString().toLower();
+
+        if (id == target || name == target || luaNs == target || ns == target ||
+            id.contains(target) || name.contains(target) || target.contains(name) || target.contains(id)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void HyprlandSchema::refreshInstalledPlugins() {
+    QSet<QString> installedIdentifiers;
+
+    // 1. Query loaded plugins from Hyprland socket
+    QString resp = HyprlandSocket::instance()->send(QStringLiteral("j/plugins list"));
+    if (!resp.isEmpty()) {
+        QJsonDocument doc = QJsonDocument::fromJson(resp.toUtf8());
+        if (doc.isArray()) {
+            QJsonArray arr = doc.array();
+            for (const auto& item : arr) {
+                if (item.isObject()) {
+                    QString name = item.toObject().value(QStringLiteral("name")).toString().trimmed();
+                    if (!name.isEmpty()) {
+                        QString lower = name.toLower();
+                        installedIdentifiers.insert(lower);
+                        installedIdentifiers.insert(QString(lower).replace(QLatin1Char('_'), QLatin1Char('-')));
+                        installedIdentifiers.insert(QString(lower).replace(QLatin1Char('-'), QLatin1Char('_')));
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Query hyprpm list for installed repositories/plugins
+    QProcess proc;
+    proc.start(QStringLiteral("hyprpm"), {QStringLiteral("list")});
+    if (proc.waitForFinished(1000)) {
+        QString out = QString::fromUtf8(proc.readAllStandardOutput());
+        const auto lines = out.split(QLatin1Char('\n'));
+        for (const auto& line : lines) {
+            QString trimmed = line.trimmed();
+            if (trimmed.startsWith(QStringLiteral("Plugin ")) || trimmed.startsWith(QStringLiteral("│ Plugin "))) {
+                QString name = trimmed.section(QLatin1Char(' '), -1).trimmed();
+                if (!name.isEmpty()) {
+                    QString lower = name.toLower();
+                    installedIdentifiers.insert(lower);
+                    installedIdentifiers.insert(QString(lower).replace(QLatin1Char('_'), QLatin1Char('-')));
+                    installedIdentifiers.insert(QString(lower).replace(QLatin1Char('-'), QLatin1Char('_')));
+                }
+            } else if (trimmed.startsWith(QStringLiteral("→ Repository "))) {
+                QString repoName = trimmed.mid(13).section(QLatin1Char(' '), 0, 0).trimmed();
+                if (!repoName.isEmpty()) {
+                    QString lower = repoName.toLower();
+                    installedIdentifiers.insert(lower);
+                    installedIdentifiers.insert(QString(lower).replace(QLatin1Char('_'), QLatin1Char('-')));
+                    installedIdentifiers.insert(QString(lower).replace(QLatin1Char('-'), QLatin1Char('_')));
+                }
+            }
+        }
+    }
+
+    // 3. Filter supported plugins into installed list
+    QVariantList newInstalled;
+    for (const auto& pVal : m_supportedPlugins) {
+        QVariantMap pMap = pVal.toMap();
+        QString id = pMap.value(QStringLiteral("id")).toString().toLower();
+        QString name = pMap.value(QStringLiteral("name")).toString().toLower();
+        QString luaNs = pMap.value(QStringLiteral("luaNamespace")).toString().toLower();
+
+        bool isInstalled = installedIdentifiers.contains(id) ||
+                           installedIdentifiers.contains(name) ||
+                           installedIdentifiers.contains(luaNs) ||
+                           installedIdentifiers.contains(QString(id).replace(QLatin1Char('_'), QLatin1Char('-'))) ||
+                           installedIdentifiers.contains(QString(name).replace(QLatin1Char('_'), QLatin1Char('-')));
+
+        if (isInstalled) {
+            newInstalled.append(pMap);
+        }
+    }
+
+    if (m_installedPlugins != newInstalled) {
+        m_installedPlugins = newInstalled;
+        emit installedPluginsChanged();
+    }
 }
 
 void HyprlandSchema::loadSchema() {
@@ -254,6 +355,7 @@ void HyprlandSchema::loadSchema() {
         }
     }
 
+    refreshInstalledPlugins();
     emit schemaLoaded();
 }
 

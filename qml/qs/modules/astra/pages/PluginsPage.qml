@@ -15,6 +15,8 @@ import FlightDeck.Hyprland 1.0
 StackPage {
     id: root
 
+    property var selectedPluginData: null
+
     pages: [
         Component {
             PageBase {
@@ -30,27 +32,38 @@ StackPage {
 
                     SectionHeader {
                         first: true
-                        text: qsTr("Installed & Supported Plugins")
+                        text: qsTr("Installed Plugins")
                     }
 
                     Repeater {
-                        model: HyprlandSchema.supportedPlugins
+                        model: HyprlandSchema.installedPlugins
 
                         NavRow {
                             required property var modelData
                             required property int index
 
                             first: index === 0
-                            last: index === HyprlandSchema.supportedPlugins.length - 1
+                            last: index === HyprlandSchema.installedPlugins.length - 1
                             label: modelData.label ?? modelData.name
                             subtext: modelData.description ?? ""
                             icon: modelData.icon ?? "extension"
                             onClicked: {
                                 if (modelData.id === "hypr-dynamic-cursors" || modelData.name === "dynamic-cursors") {
                                     root.nState.openSubPage(1);
+                                } else {
+                                    root.selectedPluginData = modelData;
+                                    root.nState.openSubPage(2);
                                 }
                             }
                         }
+                    }
+
+                    OptionRow {
+                        visible: HyprlandSchema.installedPlugins.length === 0
+                        first: true
+                        last: true
+                        label: qsTr("No Installed Plugins Detected")
+                        subtext: qsTr("Plugins installed via hyprpm or active in Hyprland will appear here with dedicated configuration pages.")
                     }
 
                     Item {
@@ -63,6 +76,13 @@ StackPage {
 
         Component {
             DynamicCursorsSubPage {
+                nState: root.nState
+            }
+        },
+
+        Component {
+            GenericPluginSubPage {
+                pluginData: root.selectedPluginData
                 nState: root.nState
             }
         }
