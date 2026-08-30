@@ -192,18 +192,21 @@ DialogRowButton {
                 Keys.onPressed: (event) => {
                     if (!root.recording) return;
                     let k = event.key;
-                    if (k === Qt.Key_Escape) {
-                        root.recording = false;
-                        HyprlandState.stopCapture();
-                        event.accepted = true;
-                        return;
-                    }
 
                     let mods = [];
                     if (event.modifiers & Qt.ControlModifier) mods.push("CTRL");
                     if (event.modifiers & Qt.ShiftModifier) mods.push("SHIFT");
                     if (event.modifiers & Qt.AltModifier) mods.push("ALT");
                     if (event.modifiers & Qt.MetaModifier) mods.push("SUPER");
+
+                    if (k === Qt.Key_Escape) {
+                        if (mods.length === 0) {
+                            root.recording = false;
+                            HyprlandState.stopCapture();
+                            event.accepted = true;
+                            return;
+                        }
+                    }
 
                     let keyStr = "";
                     if (k >= Qt.Key_A && k <= Qt.Key_Z) {
@@ -212,6 +215,7 @@ DialogRowButton {
                         keyStr = String.fromCharCode(k);
                     } else {
                         let map = {
+                            [Qt.Key_Escape]: "Escape",
                             [Qt.Key_Return]: "Return",
                             [Qt.Key_Enter]: "Return",
                             [Qt.Key_Space]: "Space",

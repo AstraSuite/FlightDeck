@@ -158,15 +158,13 @@ QVariantMap HyprlandState::getOption(const QString& key) const {
 void HyprlandState::startCapture() {
     auto socket = HyprlandSocket::instance();
     if (!socket) return;
-    socket->send(QStringLiteral("/keyword submap flightdeck_capture"));
-    socket->send(QStringLiteral("/keyword bind , XF86LaunchA, submap, reset"));
-    socket->dispatch(QStringLiteral("submap"), QStringLiteral("flightdeck_capture"));
+    socket->evalLua(QStringLiteral("hl.define_submap(\"flightdeck_capture\", function() hl.bind(\"catchall\", function() end) end); hl.dispatch(hl.dsp.submap(\"flightdeck_capture\"))"));
 }
 
 void HyprlandState::stopCapture() {
     auto socket = HyprlandSocket::instance();
     if (!socket) return;
-    socket->dispatch(QStringLiteral("submap"), QStringLiteral("reset"));
+    socket->evalLua(QStringLiteral("hl.dispatch(hl.dsp.submap(\"reset\"))"));
 }
 
 } // namespace FlightDeck::Hyprland

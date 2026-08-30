@@ -1,0 +1,5 @@
+module qs.modules.astra.pages.binds
+
+CustomBindsSubPage 1.0 CustomBindsSubPage.qml
+CaelestiaBindsSubPage 1.0 CaelestiaBindsSubPage.qml
+CustomBindDialog 1.0 CustomBindDialog.qml
