@@ -102,6 +102,7 @@ qt_add_resources(flightdeck "resources"
         assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
         data/schema/hyprland_options.json
         data/schema/options.json
+        data/schema/plugins/hypr-dynamic-cursors.json
 )
 
 # Add QML files with CONFIGURE_DEPENDS

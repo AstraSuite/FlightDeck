@@ -88,33 +88,102 @@ Item {
         onClicked: root.open = false
     }
 
+    Connections {
+        target: dialogTransition
+        function onRunningChanged() {
+            if (!dialogTransition.running && !root.open) {
+                dialogWrapper.parent = root;
+                dialogWrapper.x = 0;
+                dialogWrapper.y = 0;
+                dialogWrapper.width = Qt.binding(() => root.width);
+                dialogWrapper.height = Qt.binding(() => openButton.implicitHeight);
+            }
+        }
+    }
+
     Item {
         id: dialogWrapper
 
         z: 1
+        x: 0
+        y: 0
         width: root.width
         height: openButton.implicitHeight
 
-        states: State {
-            name: "open"
-            when: root.open
+        states: [
+            State {
+                name: "open"
+                when: root.open
 
-            PropertyChanges {
-                backdrop.enabled: true
-                elevation.opacity: 1
-                openButton.opacity: 0
-                dialogContent.opacity: 1
-                dialogBg.radius: Tokens.rounding?.extraLargeIncreased ?? 32
-                dialogBg.topLeftRadius: Tokens.rounding?.extraLargeIncreased ?? 32
-                dialogBg.topRightRadius: Tokens.rounding?.extraLargeIncreased ?? 32
-                dialogBg.bottomLeftRadius: Tokens.rounding?.extraLargeIncreased ?? 32
-                dialogBg.bottomRightRadius: Tokens.rounding?.extraLargeIncreased ?? 32
-                dialogWrapper.x: root.rootParent ? (root.rootParent.width - root.openWidth) / 2 : 0
-                dialogWrapper.y: root.rootParent ? (root.rootParent.height - root.openHeight) / 2 : 0
-                dialogWrapper.width: root.openWidth
-                dialogWrapper.height: root.openHeight
+                PropertyChanges {
+                    target: backdrop
+                    enabled: true
+                }
+                PropertyChanges {
+                    target: elevation
+                    opacity: 1
+                }
+                PropertyChanges {
+                    target: openButton
+                    opacity: 0
+                }
+                PropertyChanges {
+                    target: dialogContent
+                    opacity: 1
+                }
+                PropertyChanges {
+                    target: dialogBg
+                    radius: Tokens.rounding?.extraLargeIncreased ?? 32
+                    topLeftRadius: Tokens.rounding?.extraLargeIncreased ?? 32
+                    topRightRadius: Tokens.rounding?.extraLargeIncreased ?? 32
+                    bottomLeftRadius: Tokens.rounding?.extraLargeIncreased ?? 32
+                    bottomRightRadius: Tokens.rounding?.extraLargeIncreased ?? 32
+                }
+                PropertyChanges {
+                    target: dialogWrapper
+                    x: root.rootParent ? (root.rootParent.width - root.openWidth) / 2 : 0
+                    y: root.rootParent ? (root.rootParent.height - root.openHeight) / 2 : 0
+                    width: root.openWidth
+                    height: root.openHeight
+                }
+            },
+            State {
+                name: "closed"
+                when: !root.open
+
+                PropertyChanges {
+                    target: backdrop
+                    enabled: false
+                }
+                PropertyChanges {
+                    target: elevation
+                    opacity: 0
+                }
+                PropertyChanges {
+                    target: openButton
+                    opacity: 1
+                }
+                PropertyChanges {
+                    target: dialogContent
+                    opacity: 0
+                }
+                PropertyChanges {
+                    target: dialogBg
+                    radius: Tokens.rounding?.extraSmall ?? 4
+                    topLeftRadius: root.first ? (Tokens.rounding?.extraLarge ?? 28) : (Tokens.rounding?.extraSmall ?? 4)
+                    topRightRadius: root.first ? (Tokens.rounding?.extraLarge ?? 28) : (Tokens.rounding?.extraSmall ?? 4)
+                    bottomLeftRadius: root.last ? (Tokens.rounding?.extraLarge ?? 28) : (Tokens.rounding?.extraSmall ?? 4)
+                    bottomRightRadius: root.last ? (Tokens.rounding?.extraLarge ?? 28) : (Tokens.rounding?.extraSmall ?? 4)
+                }
+                PropertyChanges {
+                    target: dialogWrapper
+                    x: 0
+                    y: 0
+                    width: root.width
+                    height: openButton.implicitHeight
+                }
             }
-        }
+        ]
 
         transitions: Transition {
             id: dialogTransition
@@ -181,7 +250,7 @@ Item {
 
             anchors.left: parent.left
             anchors.right: parent.right
-            height: Math.min(implicitHeight, parent.height) // Clamp to parent height due to overshoot anim
+            height: implicitHeight
             color: "transparent"
 
             first: root.first

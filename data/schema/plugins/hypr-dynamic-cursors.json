@@ -1,0 +1,371 @@
+{
+  "id": "hypr-dynamic-cursors",
+  "name": "dynamic-cursors",
+  "namespace": "plugin:dynamic-cursors",
+  "luaNamespace": "dynamic_cursors",
+  "label": "Dynamic Cursors",
+  "icon": "mouse",
+  "description": "Simulates realistic physics, tilting, rotation, stretching, and shake-to-find magnification for your cursor.",
+  "repository": "https://github.com/VirtCode/hypr-dynamic-cursors",
+  "sections": [
+    {
+      "id": "general",
+      "label": "General Settings",
+      "options": [
+        {
+          "key": "plugin:dynamic-cursors:enabled",
+          "luaKey": "enabled",
+          "label": "Enable Dynamic Cursors",
+          "description": "Global toggle for the dynamic cursors plugin.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:dynamic-cursors:mode",
+          "luaKey": "mode",
+          "label": "Simulation Mode",
+          "description": "Sets the cursor simulation physics mode.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "tilt",
+              "label": "Tilt (Air drag simulation)"
+            },
+            {
+              "id": "rotate",
+              "label": "Rotate (Stick dragging simulation)"
+            },
+            {
+              "id": "stretch",
+              "label": "Stretch (Comic motion squish/stretch)"
+            },
+            {
+              "id": "none",
+              "label": "None (Shake-to-find only)"
+            }
+          ],
+          "default": "tilt"
+        },
+        {
+          "key": "plugin:dynamic-cursors:threshold",
+          "luaKey": "threshold",
+          "label": "Angle Threshold",
+          "description": "Minimum angle difference in degrees after which the shape is changed.",
+          "type": "int",
+          "min": 1,
+          "max": 45,
+          "step": 1,
+          "default": 2
+        },
+        {
+          "key": "plugin:dynamic-cursors:ignore_warps",
+          "luaKey": "ignore_warps",
+          "label": "Ignore Cursor Warps",
+          "description": "Prevents sudden rotation/tilt when cursor is teleported or warped.",
+          "type": "bool",
+          "default": true
+        }
+      ]
+    },
+    {
+      "id": "shake",
+      "label": "Shake to Find",
+      "options": [
+        {
+          "key": "plugin:dynamic-cursors:shake:enabled",
+          "luaKey": "shake:enabled",
+          "label": "Enable Shake to Find",
+          "description": "Magnifies the cursor when it is shaken rapidly.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:dynamic-cursors:shake:threshold",
+          "luaKey": "shake:threshold",
+          "label": "Shake Sensitivity Threshold",
+          "description": "Controls how easily a shake is detected (lower values trigger sooner).",
+          "type": "float",
+          "min": 1.0,
+          "max": 20.0,
+          "step": 0.5,
+          "default": 6.0
+        },
+        {
+          "key": "plugin:dynamic-cursors:shake:base",
+          "luaKey": "shake:base",
+          "label": "Base Magnification",
+          "description": "Initial magnification multiplier immediately when shake is triggered.",
+          "type": "float",
+          "min": 1.5,
+          "max": 10.0,
+          "step": 0.5,
+          "default": 4.0
+        },
+        {
+          "key": "plugin:dynamic-cursors:shake:speed",
+          "luaKey": "shake:speed",
+          "label": "Magnification Growth Speed",
+          "description": "Magnification increase rate per second while continuing to shake.",
+          "type": "float",
+          "min": 0.0,
+          "max": 10.0,
+          "step": 0.5,
+          "default": 4.0
+        },
+        {
+          "key": "plugin:dynamic-cursors:shake:influence",
+          "luaKey": "shake:influence",
+          "label": "Shake Intensity Influence",
+          "description": "How much growth speed is boosted by current shake vigor.",
+          "type": "float",
+          "min": 0.0,
+          "max": 5.0,
+          "step": 0.1,
+          "default": 0.0
+        },
+        {
+          "key": "plugin:dynamic-cursors:shake:limit",
+          "luaKey": "shake:limit",
+          "label": "Max Magnification Limit",
+          "description": "Maximum magnification limit (0 disables ceiling).",
+          "type": "float",
+          "min": 0.0,
+          "max": 20.0,
+          "step": 1.0,
+          "default": 0.0
+        },
+        {
+          "key": "plugin:dynamic-cursors:shake:timeout",
+          "luaKey": "shake:timeout",
+          "label": "Magnification Timeout",
+          "description": "Duration in milliseconds the cursor stays enlarged after shake stops.",
+          "type": "int",
+          "min": 500,
+          "max": 10000,
+          "step": 250,
+          "default": 2000
+        },
+        {
+          "key": "plugin:dynamic-cursors:shake:effects",
+          "luaKey": "shake:effects",
+          "label": "Show Effects While Shaking",
+          "description": "Keeps tilt/rotate active while the cursor is magnified.",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "plugin:dynamic-cursors:shake:ipc",
+          "luaKey": "shake:ipc",
+          "label": "Emit Shake IPC Events",
+          "description": "Sends Hyprland IPC event notifications during shake start/stop.",
+          "type": "bool",
+          "default": false
+        }
+      ]
+    },
+    {
+      "id": "tilt",
+      "label": "Tilt Mode Physics",
+      "options": [
+        {
+          "key": "plugin:dynamic-cursors:tilt:limit",
+          "luaKey": "tilt:limit",
+          "label": "Speed Limit (px/s)",
+          "description": "Speed in pixels/sec at which maximum tilt angle is reached.",
+          "type": "int",
+          "min": 500,
+          "max": 20000,
+          "step": 500,
+          "default": 5000
+        },
+        {
+          "key": "plugin:dynamic-cursors:tilt:activation",
+          "luaKey": "tilt:activation",
+          "label": "Tilt Activation Curve",
+          "description": "Mathematical curve mapping velocity to tilt angle.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "linear",
+              "label": "Linear"
+            },
+            {
+              "id": "quadratic",
+              "label": "Quadratic (Realistic air drag)"
+            },
+            {
+              "id": "negative_quadratic",
+              "label": "Negative Quadratic (Aggressive response)"
+            }
+          ],
+          "default": "negative_quadratic"
+        },
+        {
+          "key": "plugin:dynamic-cursors:tilt:window",
+          "luaKey": "tilt:window",
+          "label": "Velocity Sample Window",
+          "description": "Time window in milliseconds over which velocity is calculated.",
+          "type": "int",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "default": 100
+        },
+        {
+          "key": "plugin:dynamic-cursors:tilt:full",
+          "luaKey": "tilt:full",
+          "label": "Maximum Tilt Angle",
+          "description": "Full tilt angle in degrees for each side.",
+          "type": "int",
+          "min": 10,
+          "max": 90,
+          "step": 5,
+          "default": 60
+        }
+      ]
+    },
+    {
+      "id": "rotate",
+      "label": "Rotate Mode Physics",
+      "options": [
+        {
+          "key": "plugin:dynamic-cursors:rotate:length",
+          "luaKey": "rotate:length",
+          "label": "Stick Length (px)",
+          "description": "Length of simulated stick used for drag rotation (best set to your cursor size).",
+          "type": "int",
+          "min": 5,
+          "max": 100,
+          "step": 1,
+          "default": 20
+        },
+        {
+          "key": "plugin:dynamic-cursors:rotate:offset",
+          "luaKey": "rotate:offset",
+          "label": "Angle Offset (\u00b0)",
+          "description": "Clockwise offset in degrees applied to all cursor shapes.",
+          "type": "float",
+          "min": -180.0,
+          "max": 180.0,
+          "step": 5.0,
+          "default": 0.0
+        }
+      ]
+    },
+    {
+      "id": "stretch",
+      "label": "Stretch Mode Physics",
+      "options": [
+        {
+          "key": "plugin:dynamic-cursors:stretch:limit",
+          "luaKey": "stretch:limit",
+          "label": "Speed Limit (px/s)",
+          "description": "Speed in pixels/sec at which maximum stretch is reached.",
+          "type": "int",
+          "min": 500,
+          "max": 20000,
+          "step": 500,
+          "default": 3000
+        },
+        {
+          "key": "plugin:dynamic-cursors:stretch:activation",
+          "luaKey": "stretch:activation",
+          "label": "Stretch Activation Curve",
+          "description": "Curve mapping velocity to stretch multiplier.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "linear",
+              "label": "Linear"
+            },
+            {
+              "id": "quadratic",
+              "label": "Quadratic"
+            },
+            {
+              "id": "negative_quadratic",
+              "label": "Negative Quadratic"
+            }
+          ],
+          "default": "quadratic"
+        },
+        {
+          "key": "plugin:dynamic-cursors:stretch:window",
+          "luaKey": "stretch:window",
+          "label": "Velocity Sample Window",
+          "description": "Time window in milliseconds over which velocity is calculated.",
+          "type": "int",
+          "min": 10,
+          "max": 500,
+          "step": 10,
+          "default": 100
+        }
+      ]
+    },
+    {
+      "id": "hyprcursor",
+      "label": "Hyprcursor Integration",
+      "options": [
+        {
+          "key": "plugin:dynamic-cursors:hyprcursor:enabled",
+          "luaKey": "hyprcursor:enabled",
+          "label": "Enable Hyprcursor High-Res Support",
+          "description": "Enables dedicated Hyprcursor high-resolution magnification.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:dynamic-cursors:hyprcursor:nearest",
+          "luaKey": "hyprcursor:nearest",
+          "label": "Pixelated Nearest-Neighbor Scaling",
+          "description": "Scaling filter used when magnifying beyond source texture size.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "0",
+              "label": "None (Smooth bilinear)"
+            },
+            {
+              "id": "1",
+              "label": "Standard (Nearest neighbor when enlarged)"
+            },
+            {
+              "id": "2",
+              "label": "Full (Always nearest neighbor)"
+            }
+          ],
+          "default": "1"
+        },
+        {
+          "key": "plugin:dynamic-cursors:hyprcursor:resolution",
+          "luaKey": "hyprcursor:resolution",
+          "label": "Target Render Resolution",
+          "description": "Resolution in pixels to load magnified shapes (-1 for auto).",
+          "type": "int",
+          "min": -1,
+          "max": 256,
+          "step": 16,
+          "default": -1
+        },
+        {
+          "key": "plugin:dynamic-cursors:hyprcursor:fallback",
+          "luaKey": "hyprcursor:fallback",
+          "label": "Fallback Shape",
+          "description": "Shape fallback when clientside cursors are magnified.",
+          "type": "choice",
+          "values": [
+            {
+              "id": "clientside",
+              "label": "Clientside"
+            },
+            {
+              "id": "none",
+              "label": "None"
+            }
+          ],
+          "default": "clientside"
+        }
+      ]
+    }
+  ]
+}

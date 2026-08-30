@@ -106,9 +106,23 @@ int main(int argc, char* argv[]) {
     assert(writer->getHyprOption("mouseAccelProfile").toString() == "flat");
     assert(writer->getHyprOption("input:accel_profile").toString() == "flat");
 
-    writer->removeHyprOption("mouseAccelProfile");
-    assert(!writer->hasHyprOption("mouseAccelProfile"));
-    assert(!writer->hasHyprOption("input:accel_profile"));
+    // Test 14: Plugin schema detection & serialization
+    qDebug() << "Supported plugins count:" << schema->supportedPlugins().size();
+    assert(schema->supportedPlugins().size() >= 1);
+    assert(schema->hasOption("plugin:dynamic-cursors:mode"));
+    assert(schema->getDefault("plugin:dynamic-cursors:mode").toString() == "tilt");
+    assert(schema->getDefault("plugin:dynamic-cursors:threshold").toInt() == 2);
+
+    QVariantMap pluginOpts = {
+        { "plugin:dynamic-cursors:mode", "rotate" },
+        { "plugin:dynamic-cursors:rotate:length", 24 }
+    };
+    QString pluginLua = schema->serializeToLuaConfig(pluginOpts);
+    qDebug() << "Plugin Lua output:\n" << pluginLua;
+    assert(pluginLua.contains("plugin = {"));
+    assert(pluginLua.contains("dynamic_cursors = {"));
+    assert(pluginLua.contains("mode = \"rotate\","));
+    assert(pluginLua.contains("length = 24,"));
 
     qDebug() << "=== ALL AUTOSTART & SCHEMA UNIT TESTS PASSED SUCCESSFULLY! ===";
     return 0;

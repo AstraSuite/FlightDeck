@@ -1,5 +1,6 @@
 #include "hyprlandschema.hpp"
 #include <QFile>
+#include <QDir>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -34,6 +35,14 @@ int HyprlandSchema::optionCount() const {
 
 QVariantList HyprlandSchema::groups() const {
     return m_groups;
+}
+
+QVariantList HyprlandSchema::supportedPlugins() const {
+    return m_supportedPlugins;
+}
+
+QVariantMap HyprlandSchema::pluginSchema(const QString& pluginId) const {
+    return m_pluginSchemas.value(pluginId).toMap();
 }
 
 void HyprlandSchema::loadSchema() {
@@ -77,6 +86,52 @@ void HyprlandSchema::loadSchema() {
         QJsonDocument doc = QJsonDocument::fromJson(groupsData);
         if (doc.isObject() && doc.object().contains(QStringLiteral("groups"))) {
             m_groups = doc.object().value(QStringLiteral("groups")).toArray().toVariantList();
+        }
+    }
+
+    // Load plugin schemas
+    QStringList pluginDirs = {
+        QStringLiteral(":/schema/plugins"),
+        QStringLiteral("/home/dim/Projects/AstraSuite/FlightDeck/data/schema/plugins")
+    };
+
+    m_supportedPlugins.clear();
+    m_pluginSchemas.clear();
+
+    for (const auto& dirPath : pluginDirs) {
+        QDir dir(dirPath);
+        if (!dir.exists()) continue;
+        const auto files = dir.entryInfoList({QStringLiteral("*.json")}, QDir::Files);
+        for (const auto& fileInfo : files) {
+            QFile file(fileInfo.absoluteFilePath());
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) continue;
+            QJsonDocument pDoc = QJsonDocument::fromJson(file.readAll());
+            if (!pDoc.isObject()) continue;
+            QJsonObject pObj = pDoc.object();
+            QString pluginId = pObj.value(QStringLiteral("id")).toString();
+            if (pluginId.isEmpty() || m_pluginSchemas.contains(pluginId)) continue;
+
+            QVariantMap pluginMap = pObj.toVariantMap();
+            m_pluginSchemas[pluginId] = pluginMap;
+            m_supportedPlugins.append(pluginMap);
+
+            // Register all plugin options into m_rawCatalog
+            if (pObj.contains(QStringLiteral("sections"))) {
+                QJsonArray sections = pObj.value(QStringLiteral("sections")).toArray();
+                for (const auto& secVal : sections) {
+                    QJsonObject secObj = secVal.toObject();
+                    if (secObj.contains(QStringLiteral("options"))) {
+                        QJsonArray opts = secObj.value(QStringLiteral("options")).toArray();
+                        for (const auto& optVal : opts) {
+                            QJsonObject optObj = optVal.toObject();
+                            QString key = optObj.value(QStringLiteral("key")).toString();
+                            if (!key.isEmpty()) {
+                                m_rawCatalog[key] = optObj.toVariantMap();
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -16,6 +16,7 @@ class HyprlandSchema : public QObject {
 
     Q_PROPERTY(int optionCount READ optionCount NOTIFY schemaLoaded)
     Q_PROPERTY(QVariantList groups READ groups NOTIFY schemaLoaded)
+    Q_PROPERTY(QVariantList supportedPlugins READ supportedPlugins NOTIFY schemaLoaded)
 
 public:
     static HyprlandSchema* instance();
@@ -26,6 +27,7 @@ public:
 
     int optionCount() const;
     QVariantList groups() const;
+    QVariantList supportedPlugins() const;
 
     Q_INVOKABLE bool hasOption(const QString& key) const;
     Q_INVOKABLE QVariantMap getOption(const QString& key) const;
@@ -42,6 +44,8 @@ public:
     Q_INVOKABLE QString toHyprKey(const QString& key) const;
     Q_INVOKABLE QString toShortKey(const QString& key) const;
 
+    Q_INVOKABLE QVariantMap pluginSchema(const QString& pluginId) const;
+
     QString serializeToLuaConfig(const QVariantMap& options) const;
 
 signals:
@@ -53,6 +57,8 @@ private:
 
     QVariantMap m_rawCatalog;
     QVariantList m_groups;
+    QVariantList m_supportedPlugins;
+    QVariantMap m_pluginSchemas;
     QHash<QString, QString> m_aliasToHyprKey;
     QHash<QString, QString> m_hyprKeyToAlias;
 };
