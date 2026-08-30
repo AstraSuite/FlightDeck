@@ -93,6 +93,7 @@ public:
 
     static QString flightDeckFilePath();
     static QString astraHelmFilePath();
+    QString formatLua() const;
 
 signals:
     void dirtyChanged();
@@ -108,7 +109,6 @@ signals:
 
 private:
     void loadFromFile();
-    QString formatLua() const;
 
     bool m_isDirty = false;
     QVariantList m_monitors;

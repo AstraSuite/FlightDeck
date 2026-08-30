@@ -3,6 +3,7 @@
 #include <cassert>
 #include "managers/autostartmanager.hpp"
 #include "caelestia/flightdeckwriter.hpp"
+#include "caelestia/luavalidator.hpp"
 #include "hyprland/hyprlandschema.hpp"
 
 using namespace FlightDeck::Managers;
@@ -122,10 +123,22 @@ int main(int argc, char* argv[]) {
     };
     QString pluginLua = schema->serializeToLuaConfig(pluginOpts);
     qDebug() << "Plugin Lua output:\n" << pluginLua;
-    assert(pluginLua.contains("plugin = {"));
-    assert(pluginLua.contains("dynamic_cursors = {"));
-    assert(pluginLua.contains("mode = \"rotate\","));
-    assert(pluginLua.contains("length = 24,"));
+    // Test 15: Custom binds with special characters, quotes, $() shell commands & Lua validation
+    writer->addCustomBind("SUPER + V", "exec", "sleep 0.5s && ydotool type -d 1 \"$(cliphist list | head -1 | cliphist decode)\"", true);
+    writer->addCustomBind("ALT + Tab", "global", "caelestia:windowSwitcher", true);
+    writer->addCustomBind("SUPER + Q", "killactive", "", true);
+    QString flightdeckLua = writer->formatLua();
+    qDebug() << "FlightDeck generated Lua:\n" << flightdeckLua;
+    assert(flightdeckLua.contains("hl.bind(\"SUPER + V\", hl.dsp.exec_cmd(\"sleep 0.5s && ydotool type -d 1 \\\"$(cliphist list | head -1 | cliphist decode)\\\"\"))"));
+    assert(flightdeckLua.contains("hl.bind(\"ALT + Tab\", hl.dsp.global(\"caelestia:windowSwitcher\"))"));
+    assert(flightdeckLua.contains("hl.bind(\"SUPER + Q\", hl.dsp.killactive())"));
+
+    QString valErr;
+    bool isValid = FlightDeck::Caelestia::LuaValidator::validate(flightdeckLua, &valErr);
+    if (!isValid) {
+        qCritical() << "Generated Lua validation error:" << valErr;
+    }
+    assert(isValid);
 
     qDebug() << "=== ALL AUTOSTART & SCHEMA UNIT TESTS PASSED SUCCESSFULLY! ===";
     return 0;

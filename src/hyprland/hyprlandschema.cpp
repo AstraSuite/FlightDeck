@@ -524,6 +524,28 @@ static void insertNestedOption(QVariantMap& tree, const QStringList& pathParts, 
     tree[head] = subTree;
 }
 
+static QString escapeLuaString(const QString& str) {
+    QString res;
+    res.reserve(str.size() + 16);
+    for (int i = 0; i < str.size(); ++i) {
+        QChar c = str.at(i);
+        if (c == QLatin1Char('\\')) {
+            res += QStringLiteral("\\\\");
+        } else if (c == QLatin1Char('"')) {
+            res += QStringLiteral("\\\"");
+        } else if (c == QLatin1Char('\n')) {
+            res += QStringLiteral("\\n");
+        } else if (c == QLatin1Char('\r')) {
+            res += QStringLiteral("\\r");
+        } else if (c == QLatin1Char('\t')) {
+            res += QStringLiteral("\\t");
+        } else {
+            res += c;
+        }
+    }
+    return res;
+}
+
 static QString formatLuaValue(const QVariant& val) {
     if (val.typeId() == QMetaType::Bool) {
         return val.toBool() ? QStringLiteral("true") : QStringLiteral("false");
@@ -543,7 +565,7 @@ static QString formatLuaValue(const QVariant& val) {
     if (ok && !str.startsWith(QStringLiteral("0x")) && !str.startsWith(QStringLiteral("+")) && !str.contains(QStringLiteral(" "))) {
         return str;
     }
-    return QStringLiteral("\"%1\"").arg(str);
+    return QStringLiteral("\"%1\"").arg(escapeLuaString(str));
 }
 
 static QString formatLuaTree(const QVariantMap& tree, int indentLevel) {

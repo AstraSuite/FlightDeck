@@ -791,6 +791,28 @@ void CaelestiaVars::setBinds(const QString& key, const QStringList& binds) {
     }
 }
 
+static QString escapeLuaString(const QString& str) {
+    QString res;
+    res.reserve(str.size() + 16);
+    for (int i = 0; i < str.size(); ++i) {
+        QChar c = str.at(i);
+        if (c == QLatin1Char('\\')) {
+            res += QStringLiteral("\\\\");
+        } else if (c == QLatin1Char('"')) {
+            res += QStringLiteral("\\\"");
+        } else if (c == QLatin1Char('\n')) {
+            res += QStringLiteral("\\n");
+        } else if (c == QLatin1Char('\r')) {
+            res += QStringLiteral("\\r");
+        } else if (c == QLatin1Char('\t')) {
+            res += QStringLiteral("\\t");
+        } else {
+            res += c;
+        }
+    }
+    return res;
+}
+
 QString CaelestiaVars::formatLua() const {
     QVariantMap fullVars = m_savedVars;
     for (auto it = m_pendingVars.constBegin(); it != m_pendingVars.constEnd(); ++it) {
@@ -814,7 +836,7 @@ QString CaelestiaVars::formatLua() const {
                 QStringList items;
                 const QStringList rawList = val.toStringList();
                 for (const QString& s : rawList) {
-                    items.append(QStringLiteral("\"") + s + QStringLiteral("\""));
+                    items.append(QStringLiteral("\"") + escapeLuaString(s) + QStringLiteral("\""));
                 }
                 valStr = QStringLiteral("{ ") + items.join(QStringLiteral(", ")) + QStringLiteral(" }");
             } else if (key == QStringLiteral("windowOpacity")) {
@@ -837,7 +859,7 @@ QString CaelestiaVars::formatLua() const {
                     // String contains lua variable concatenation
                     valStr = s;
                 } else {
-                    valStr = QStringLiteral("\"") + s + QStringLiteral("\"");
+                    valStr = QStringLiteral("\"") + escapeLuaString(s) + QStringLiteral("\"");
                 }
             }
 
