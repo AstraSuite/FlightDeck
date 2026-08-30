@@ -714,6 +714,13 @@ static void parseNestedLuaTable(const QString& tableBody, const QString& prefix,
                 }
             }
 
+            // Ignore pure Caelestia variables (e.g. "cursorTheme") that may have been
+            // mistakenly written to this file in the past; only native Hyprland/plugin
+            // options (namespaced with ':') belong here.
+            if (!canonKey.contains(QLatin1Char(':'))) {
+                continue;
+            }
+
             if (valStr.startsWith(QLatin1Char('"')) && valStr.endsWith(QLatin1Char('"'))) {
                 outOptions[canonKey] = unescapeLuaString(valStr.mid(1, valStr.length() - 2));
             } else if (valStr == QStringLiteral("true")) {

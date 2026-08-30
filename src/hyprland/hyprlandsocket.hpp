@@ -27,6 +27,11 @@ public:
     QString send(const QString& command, int timeoutMs = 2000) const;
     QJsonDocument queryJson(const QString& command, int timeoutMs = 2000) const;
 
+    // Apply the cursor theme/size across every active Hyprland instance, cycling
+    // through a fallback theme first to force wlroots to bust its internal cursor
+    // cache (mirrors Bibata's reload_system_cursors behaviour).
+    bool setCursorAll(const QString& theme, int size);
+
     bool keyword(const QString& key, const QVariant& value);
     bool keywordBatch(const QList<QPair<QString, QVariant>>& commands);
     bool evalLua(const QString& luaCode);
@@ -38,6 +43,9 @@ public:
 
 signals:
     void commandFailed(const QString& command, const QString& error);
+
+private:
+    QString sendToPath(const QString& path, const QString& command, int timeoutMs) const;
 };
 
 } // namespace FlightDeck::Hyprland

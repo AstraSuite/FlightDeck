@@ -19,6 +19,16 @@ namespace FlightDeck::Caelestia {
 
 static QString unescapeLuaString(const QString& str);
 
+// Determine whether a key resolves to a genuine native Hyprland / plugin option
+// (e.g. "input:touchpad:tap-to-click", "plugin:dynamic-cursors:mode") as opposed to
+// a pure Caelestia variable (e.g. "cursorTheme", "kbTerminal") that has no real
+// Hyprland counterpart. Caelestia-only variables must never be persisted into
+// astra-flightdeck.lua.
+static bool isNativeHyprOption(const QString& key) {
+    const QString canonical = FlightDeck::Hyprland::HyprlandSchema::instance()->toHyprKey(key);
+    return canonical.contains(QLatin1Char(':'));
+}
+
 CaelestiaVars* CaelestiaVars::instance() {
     static CaelestiaVars inst;
     return &inst;
@@ -585,7 +595,7 @@ void CaelestiaVars::applyKeywordToHyprland(const QString& key, const QVariant& v
     auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
     QString canonicalKey = schema->toHyprKey(key);
 
-    if (schema->hasOption(canonicalKey)) {
+    if (schema->hasOption(canonicalKey) && isNativeHyprOption(canonicalKey)) {
         FlightDeckWriter::instance()->setHyprOption(canonicalKey, value);
 
         QString valStr;
@@ -595,6 +605,9 @@ void CaelestiaVars::applyKeywordToHyprland(const QString& key, const QVariant& v
             valStr = value.toString();
         }
         socket->send(QStringLiteral("keyword %1 %2").arg(canonicalKey, valStr));
+    } else if (schema->hasOption(canonicalKey)) {
+        // Pure Caelestia variable (e.g. keyboard binds, cursor theme) - no native
+        // Hyprland option. Only persist into hypr-vars.lua, never astra-flightdeck.lua.
     } else {
         socket->keyword(key, value);
     }
@@ -695,7 +708,7 @@ void CaelestiaVars::set(const QString& key, const QVariant& value) {
     syncAlias(QStringLiteral("activeWindowBorderColour"), QStringLiteral("activeWindowBorderColor"));
     syncAlias(QStringLiteral("inactiveWindowBorderColour"), QStringLiteral("inactiveWindowBorderColor"));
 
-    if (schema->hasOption(canonicalKey)) {
+    if (schema->hasOption(canonicalKey) && isNativeHyprOption(canonicalKey)) {
         FlightDeckWriter::instance()->setHyprOption(canonicalKey, value);
     }
 

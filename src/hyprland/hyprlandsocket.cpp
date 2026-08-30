@@ -9,6 +9,8 @@
 #include <QJsonParseError>
 #include <QLocalSocket>
 #include <QProcessEnvironment>
+#include <QSet>
+#include <QThread>
 #include <QDebug>
 #include <unistd.h>
 
@@ -57,7 +59,10 @@ QString HyprlandSocket::send(const QString& command, int timeoutMs) const {
     if (path.isEmpty() || !QFile::exists(path)) {
         return {};
     }
+    return sendToPath(path, command, timeoutMs);
+}
 
+QString HyprlandSocket::sendToPath(const QString& path, const QString& command, int timeoutMs) const {
     QLocalSocket socket;
     socket.connectToServer(path);
     if (!socket.waitForConnected(timeoutMs)) {
@@ -161,7 +166,51 @@ bool HyprlandSocket::dispatch(const QString& dispatcher, const QString& args) {
 }
 
 bool HyprlandSocket::setCursor(const QString& theme, int size) {
-    return dispatch(QStringLiteral("setcursor"), QStringLiteral("%1 %2").arg(theme).arg(size));
+    const QString resp = send(QStringLiteral("setcursor %1 %2").arg(theme).arg(size));
+    return !resp.isEmpty() && resp.trimmed().compare(QLatin1String("ok"), Qt::CaseInsensitive) == 0;
+}
+
+bool HyprlandSocket::setCursorAll(const QString& theme, int size) {
+    // Enumerate every active Hyprland instance socket under the runtime dir, plus the
+    // current default instance. Each instance is handled through its own socket.
+    const QString runtime = qEnvironmentVariable("XDG_RUNTIME_DIR", QStringLiteral("/run/user/%1").arg(getuid()));
+
+    QStringList socketPaths;
+    QSet<QString> seenSigs;
+
+    QDir hyprDir(runtime + QStringLiteral("/hypr"));
+    if (hyprDir.exists()) {
+        const auto entries = hyprDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QString& sig : entries) {
+            if (seenSigs.contains(sig)) continue;
+            seenSigs.insert(sig);
+            const QString sock = hyprDir.filePath(sig) + QStringLiteral("/.socket.sock");
+            if (QFile::exists(sock)) socketPaths.append(sock);
+        }
+    }
+
+    // Ensure the default (current) instance is included even if it wasn't enumerated.
+    const QString currentSig = instanceSignature();
+    if (!currentSig.isEmpty() && !seenSigs.contains(currentSig)) {
+        const QString sock = runtime + QStringLiteral("/hypr/") + currentSig + QStringLiteral("/.socket.sock");
+        if (QFile::exists(sock)) socketPaths.append(sock);
+    }
+
+    if (socketPaths.isEmpty()) {
+        return setCursor(theme, size);
+    }
+
+    const QString cycleCmd = QStringLiteral("setcursor %1 %2");
+    bool anyApplied = false;
+    for (const QString& sock : socketPaths) {
+        // Cycle to a fallback theme first to force Hyprland/wlroots to bust the
+        // internal cursor cache, then apply the real theme/size.
+        sendToPath(sock, cycleCmd.arg(QStringLiteral("Adwaita"), QString::number(size)), 2000);
+        QThread::msleep(50);
+        const QString resp = sendToPath(sock, cycleCmd.arg(theme, QString::number(size)), 2000);
+        anyApplied = anyApplied || !resp.isEmpty();
+    }
+    return anyApplied;
 }
 
 bool HyprlandSocket::reload() {
