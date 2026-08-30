@@ -3,6 +3,7 @@
 #include <cassert>
 #include "managers/autostartmanager.hpp"
 #include "caelestia/flightdeckwriter.hpp"
+#include "hyprland/hyprlandschema.hpp"
 
 using namespace FlightDeck::Managers;
 
@@ -72,6 +73,32 @@ int main(int argc, char* argv[]) {
     QVariantMap parsedReadOnly = mgr.parseCommand("gnome-keyring-daemon --start", false, true);
     assert(parsedReadOnly["isReadOnly"].toBool() == true);
 
-    qDebug() << "=== ALL AUTOSTART UNIT TESTS PASSED SUCCESSFULLY! ===";
+    // Test 11: HyprlandSchema option catalog & serialization
+    auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
+    qDebug() << "HyprlandSchema total options:" << schema->optionCount();
+    assert(schema->optionCount() >= 300);
+    assert(schema->hasOption("general:border_size"));
+    assert(schema->hasOption("input:touchpad:tap-to-click"));
+    assert(schema->getType("input:touchpad:tap-to-click") == "bool");
+    assert(schema->getDefault("general:border_size").toInt() == 1);
+    assert(schema->toHyprKey("mouseAccelProfile") == "input:accel_profile");
+
+    // Test 12: Dynamic serialization
+    QVariantMap testOpts = {
+        { "input:accel_profile", "adaptive" },
+        { "input:touchpad:tap-to-click", true },
+        { "general:snap:window_gap", 10 }
+    };
+    QString serializedLua = schema->serializeToLuaConfig(testOpts);
+    qDebug() << "Serialized dynamic Lua config:\n" << serializedLua;
+    assert(serializedLua.contains("hl.config({"));
+    assert(serializedLua.contains("input = {"));
+    assert(serializedLua.contains("touchpad = {"));
+    assert(serializedLua.contains("tap_to_click = true,"));
+    assert(serializedLua.contains("accel_profile = \"adaptive\","));
+    assert(serializedLua.contains("snap = {"));
+    assert(serializedLua.contains("window_gap = 10,"));
+
+    qDebug() << "=== ALL AUTOSTART & SCHEMA UNIT TESTS PASSED SUCCESSFULLY! ===";
     return 0;
 }

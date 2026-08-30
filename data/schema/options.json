@@ -1,0 +1,4378 @@
+{
+  "groups": [
+    {
+      "id": "general",
+      "label": "General",
+      "icon": "sliders-horizontal-arrow-symbolic",
+      "sections": [
+        {
+          "id": "general:border_size",
+          "label": "Border Size",
+          "options": [
+            {
+              "key": "general:border_size",
+              "label": "Border Size",
+              "description": "Size of the border around windows",
+              "type": "int",
+              "default": 1,
+              "min": 0,
+              "max": 20
+            }
+          ]
+        },
+        {
+          "id": "general:gaps_in",
+          "label": "Gaps In",
+          "options": [
+            {
+              "key": "general:gaps_in",
+              "label": "Gaps In",
+              "description": "Gaps between windows",
+              "type": "int",
+              "default": 5
+            }
+          ]
+        },
+        {
+          "id": "general:gaps_out",
+          "label": "Gaps Out",
+          "options": [
+            {
+              "key": "general:gaps_out",
+              "label": "Gaps Out",
+              "description": "Gaps between windows and monitor edges",
+              "type": "int",
+              "default": 20
+            }
+          ]
+        },
+        {
+          "id": "general:float_gaps",
+          "label": "Float Gaps",
+          "options": [
+            {
+              "key": "general:float_gaps",
+              "label": "Float Gaps",
+              "description": "Gaps between windows and monitor edges for floating windows",
+              "type": "int",
+              "default": 0
+            }
+          ]
+        },
+        {
+          "id": "general:gaps_workspaces",
+          "label": "Gaps Workspaces",
+          "options": [
+            {
+              "key": "general:gaps_workspaces",
+              "label": "Gaps Workspaces",
+              "description": "Gaps between workspaces. Stacks with gaps_out.",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "general:col.inactive_border",
+          "label": "Inactive Border Color",
+          "options": [
+            {
+              "key": "general:col.inactive_border",
+              "label": "Inactive Border Color",
+              "description": "Border color for inactive windows",
+              "type": "color",
+              "default": "0xff444444"
+            }
+          ]
+        },
+        {
+          "id": "general:col.active_border",
+          "label": "Active Border Color",
+          "options": [
+            {
+              "key": "general:col.active_border",
+              "label": "Active Border Color",
+              "description": "Border color for the active window",
+              "type": "color",
+              "default": "0xffffffff"
+            }
+          ]
+        },
+        {
+          "id": "general:col.nogroup_border",
+          "label": "Nogroup Border Color",
+          "options": [
+            {
+              "key": "general:col.nogroup_border",
+              "label": "Nogroup Border Color",
+              "description": "Inactive border color for window that cannot be added to a group",
+              "type": "color",
+              "default": "0xffffaaff"
+            }
+          ]
+        },
+        {
+          "id": "general:col.nogroup_border_active",
+          "label": "Nogroup Border Active Color",
+          "options": [
+            {
+              "key": "general:col.nogroup_border_active",
+              "label": "Nogroup Border Active Color",
+              "description": "Active border color for window that cannot be added to a group",
+              "type": "color",
+              "default": "0xffff00ff"
+            }
+          ]
+        },
+        {
+          "id": "general:layout",
+          "label": "Layout",
+          "options": [
+            {
+              "key": "general:layout",
+              "label": "Layout",
+              "description": "Which layout to use. [dwindle/master/scrolling/monocle/lua:<name>]",
+              "type": "string",
+              "default": "dwindle"
+            }
+          ]
+        },
+        {
+          "id": "general:no_focus_fallback",
+          "label": "No Focus Fallback",
+          "options": [
+            {
+              "key": "general:no_focus_fallback",
+              "label": "No Focus Fallback",
+              "description": "If true, will not fall back to the next available window when moving focus in a direction where no window was found",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "general:resize_on_border",
+          "label": "Resize On Border",
+          "options": [
+            {
+              "key": "general:resize_on_border",
+              "label": "Resize On Border",
+              "description": "Enables resizing windows by clicking and dragging on borders and gaps",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "general:extend_border_grab_area",
+          "label": "Extend Border Grab Area",
+          "options": [
+            {
+              "key": "general:extend_border_grab_area",
+              "label": "Extend Border Grab Area",
+              "description": "Extends the area around the border where you can click and drag on, only used when general:resize_on_border is on.",
+              "type": "int",
+              "default": 15,
+              "min": 0,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "general:hover_icon_on_border",
+          "label": "Hover Icon On Border",
+          "options": [
+            {
+              "key": "general:hover_icon_on_border",
+              "label": "Hover Icon On Border",
+              "description": "Show a cursor icon when hovering over borders, only used when general:resize_on_border is on.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "general:allow_tearing",
+          "label": "Allow Tearing",
+          "options": [
+            {
+              "key": "general:allow_tearing",
+              "label": "Allow Tearing",
+              "description": "Master switch for allowing tearing to occur.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "general:snap",
+          "label": "Snap",
+          "options": [
+            {
+              "key": "general:snap:enabled",
+              "label": "Enabled",
+              "description": "Enable snapping for floating windows",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "general:snap:window_gap",
+              "label": "Window Gap",
+              "description": "Minimum gap in pixels between windows before snapping",
+              "type": "int",
+              "default": 10,
+              "min": 0,
+              "max": 100
+            },
+            {
+              "key": "general:snap:monitor_gap",
+              "label": "Monitor Gap",
+              "description": "Minimum gap in pixels between window and monitor edges before snapping",
+              "type": "int",
+              "default": 10,
+              "min": 0,
+              "max": 100
+            },
+            {
+              "key": "general:snap:border_overlap",
+              "label": "Border Overlap",
+              "description": "If true, windows snap such that only one border's worth of space is between them",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "general:snap:respect_gaps",
+              "label": "Respect Gaps",
+              "description": "If true, snapping will respect gaps between windows",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "general:modal_parent_blocking",
+          "label": "Modal Parent Blocking",
+          "options": [
+            {
+              "key": "general:modal_parent_blocking",
+              "label": "Modal Parent Blocking",
+              "description": "If true, parent windows of modals will not be interactive.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "general:locale",
+          "label": "Locale",
+          "options": [
+            {
+              "key": "general:locale",
+              "label": "Locale",
+              "description": "Overrides the system locale",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "decoration",
+      "label": "Decoration",
+      "icon": "appearance-symbolic",
+      "sections": [
+        {
+          "id": "decoration:rounding",
+          "label": "Rounding",
+          "options": [
+            {
+              "key": "decoration:rounding",
+              "label": "Rounding",
+              "description": "Rounded corners' radius (in layout px)",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 100
+            }
+          ]
+        },
+        {
+          "id": "decoration:rounding_power",
+          "label": "Rounding Power",
+          "options": [
+            {
+              "key": "decoration:rounding_power",
+              "label": "Rounding Power",
+              "description": "Rounding power of corners (2 is a circle)",
+              "type": "float",
+              "default": 2.0,
+              "min": 1.0,
+              "max": 10.0,
+              "step": 0.1
+            }
+          ]
+        },
+        {
+          "id": "decoration:active_opacity",
+          "label": "Active Opacity",
+          "options": [
+            {
+              "key": "decoration:active_opacity",
+              "label": "Active Opacity",
+              "description": "Opacity of active windows.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "decoration:inactive_opacity",
+          "label": "Inactive Opacity",
+          "options": [
+            {
+              "key": "decoration:inactive_opacity",
+              "label": "Inactive Opacity",
+              "description": "Opacity of inactive windows.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "decoration:fullscreen_opacity",
+          "label": "Fullscreen Opacity",
+          "options": [
+            {
+              "key": "decoration:fullscreen_opacity",
+              "label": "Fullscreen Opacity",
+              "description": "Opacity of fullscreen windows.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "decoration:shadow",
+          "label": "Shadow",
+          "options": [
+            {
+              "key": "decoration:shadow:enabled",
+              "label": "Enabled",
+              "description": "Enable drop shadows on windows",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "decoration:shadow:range",
+              "label": "Range",
+              "description": "Shadow range (size) in layout px",
+              "type": "int",
+              "default": 4,
+              "min": 0,
+              "max": 100
+            },
+            {
+              "key": "decoration:shadow:render_power",
+              "label": "Render Power",
+              "description": "In what power to render the falloff (more power, the faster the falloff)",
+              "type": "int",
+              "default": 3,
+              "min": 1,
+              "max": 4
+            },
+            {
+              "key": "decoration:shadow:sharp",
+              "label": "Sharp",
+              "description": "Whether the shadow should be sharp or not.",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "decoration:shadow:color",
+              "label": "Color",
+              "description": "Shadow's color. Alpha dictates shadow's opacity.",
+              "type": "color",
+              "default": "0xee1a1a1a"
+            },
+            {
+              "key": "decoration:shadow:color_inactive",
+              "label": "Color Inactive",
+              "description": "Inactive shadow color. (if not set, will fall back to col.shadow)",
+              "type": "color",
+              "default": "-1"
+            },
+            {
+              "key": "decoration:shadow:offset",
+              "label": "Offset",
+              "description": "Shadow's rendering offset.",
+              "type": "vec2",
+              "default": "0 0"
+            },
+            {
+              "key": "decoration:shadow:scale",
+              "label": "Scale",
+              "description": "Shadow's scale.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.05,
+              "max": 2.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "decoration:glow",
+          "label": "Glow",
+          "options": [
+            {
+              "key": "decoration:glow:enabled",
+              "label": "Enabled",
+              "description": "Enable inner glow on windows",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "decoration:glow:range",
+              "label": "Range",
+              "description": "Glow range (size) in layout px",
+              "type": "int",
+              "default": 10,
+              "min": 0,
+              "max": 100
+            },
+            {
+              "key": "decoration:glow:render_power",
+              "label": "Render Power",
+              "description": "In what power to render the falloff (more power, the faster the falloff)",
+              "type": "int",
+              "default": 3,
+              "min": 1,
+              "max": 4
+            },
+            {
+              "key": "decoration:glow:color",
+              "label": "Color",
+              "description": "Glow's color. Alpha dictates glow's opacity.",
+              "type": "color",
+              "default": "0xee33ccff"
+            },
+            {
+              "key": "decoration:glow:color_inactive",
+              "label": "Color Inactive",
+              "description": "Inactive glow color. (if not set, will fall back to decoration:glow:color)",
+              "type": "color",
+              "default": "-1"
+            }
+          ]
+        },
+        {
+          "id": "decoration:dim_modal",
+          "label": "Dim Modal",
+          "options": [
+            {
+              "key": "decoration:dim_modal",
+              "label": "Dim Modal",
+              "description": "Enables dimming of parents of modal windows",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "decoration:dim_inactive",
+          "label": "Dim Inactive",
+          "options": [
+            {
+              "key": "decoration:dim_inactive",
+              "label": "Dim Inactive",
+              "description": "Enables dimming of inactive windows",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "decoration:dim_strength",
+          "label": "Dim Strength",
+          "options": [
+            {
+              "key": "decoration:dim_strength",
+              "label": "Dim Strength",
+              "description": "How much inactive windows should be dimmed",
+              "type": "float",
+              "default": 0.5,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "decoration:dim_special",
+          "label": "Dim Special",
+          "options": [
+            {
+              "key": "decoration:dim_special",
+              "label": "Dim Special",
+              "description": "How much to dim the rest of the screen by when a special workspace is open.",
+              "type": "float",
+              "default": 0.2,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "decoration:dim_around",
+          "label": "Dim Around",
+          "options": [
+            {
+              "key": "decoration:dim_around",
+              "label": "Dim Around",
+              "description": "How much the dimaround window rule should dim by.",
+              "type": "float",
+              "default": 0.4,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "decoration:screen_shader",
+          "label": "Screen Shader",
+          "options": [
+            {
+              "key": "decoration:screen_shader",
+              "label": "Screen Shader",
+              "description": "A path to a custom shader to be applied at the end of rendering.",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "decoration:border_part_of_window",
+          "label": "Border Part Of Window",
+          "options": [
+            {
+              "key": "decoration:border_part_of_window",
+              "label": "Border Part Of Window",
+              "description": "Whether the border should be treated as a part of the window.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "decoration:blur",
+          "label": "Blur",
+          "options": [
+            {
+              "key": "decoration:blur:enabled",
+              "label": "Enabled",
+              "description": "Enable window background blur",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "decoration:blur:size",
+              "label": "Size",
+              "description": "Blur size (distance)",
+              "type": "int",
+              "default": 8,
+              "min": 0,
+              "max": 100
+            },
+            {
+              "key": "decoration:blur:passes",
+              "label": "Passes",
+              "description": "The amount of passes to perform",
+              "type": "int",
+              "default": 1,
+              "min": 0,
+              "max": 10
+            },
+            {
+              "key": "decoration:blur:ignore_opacity",
+              "label": "Ignore Opacity",
+              "description": "Make the blur layer ignore the opacity of the window",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "decoration:blur:new_optimizations",
+              "label": "New Optimizations",
+              "description": "Whether to enable further optimizations to the blur.",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "decoration:blur:xray",
+              "label": "Xray",
+              "description": "If enabled, floating windows will ignore tiled windows in their blur.",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "decoration:blur:noise",
+              "label": "Noise",
+              "description": "How much noise to apply.",
+              "type": "float",
+              "default": 0.0117,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:contrast",
+              "label": "Contrast",
+              "description": "Contrast modulation for blur.",
+              "type": "float",
+              "default": 0.8916,
+              "min": 0.0,
+              "max": 2.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:brightness",
+              "label": "Brightness",
+              "description": "Brightness modulation for blur.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 2.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:vibrancy",
+              "label": "Vibrancy",
+              "description": "Increase saturation of blurred colors.",
+              "type": "float",
+              "default": 0.1696,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:vibrancy_darkness",
+              "label": "Vibrancy Darkness",
+              "description": "How strong the effect of vibrancy is on dark areas.",
+              "type": "float",
+              "default": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:special",
+              "label": "Special",
+              "description": "Whether to blur behind the special workspace (note: expensive)",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "decoration:blur:popups",
+              "label": "Popups",
+              "description": "Whether to blur popups (e.g. right-click menus)",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "decoration:blur:popups_ignorealpha",
+              "label": "Popups Ignorealpha",
+              "description": "Works like ignorealpha in layer rules. If pixel opacity is below set value, will not blur.",
+              "type": "float",
+              "default": 0.2,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:input_methods",
+              "label": "Input Methods",
+              "description": "Whether to blur input methods (e.g. fcitx5)",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "decoration:blur:input_methods_ignorealpha",
+              "label": "Input Methods Ignorealpha",
+              "description": "Works like ignorealpha in layer rules. If pixel opacity is below set value, will not blur.",
+              "type": "float",
+              "default": 0.2,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:glass:refraction",
+              "label": "Refraction",
+              "description": "Maximum refraction displacement for glass blur types in pixels",
+              "type": "float",
+              "default": 20.0,
+              "min": 0.0,
+              "max": 20.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:glass:size",
+              "label": "Size",
+              "description": "Pattern size for glass blur types in pixels",
+              "type": "float",
+              "default": 40.0,
+              "min": 4.0,
+              "max": 512.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:glass:roughness",
+              "label": "Roughness",
+              "description": "Strength of the glass relief shading",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:acrylic:refraction",
+              "label": "Refraction",
+              "description": "Maximum acrylic lens displacement in pixels",
+              "type": "float",
+              "default": 24.0,
+              "min": 0.0,
+              "max": 48.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:acrylic:bulb",
+              "label": "Bulb",
+              "description": "Width of the curved acrylic edge in pixels",
+              "type": "float",
+              "default": 48.0,
+              "min": 4.0,
+              "max": 256.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:acrylic:clarity",
+              "label": "Clarity",
+              "description": "Amount of sharp backdrop transmitted through the acrylic surface",
+              "type": "float",
+              "default": 0.82,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:acrylic:aberration",
+              "label": "Aberration",
+              "description": "Relative chromatic separation in the acrylic lens",
+              "type": "float",
+              "default": 0.025,
+              "min": 0.0,
+              "max": 0.25,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:acrylic:tint",
+              "label": "Tint",
+              "description": "Acrylic tint color. Alpha controls optical absorption.",
+              "type": "color",
+              "default": "0x14eef5ff"
+            },
+            {
+              "key": "decoration:blur:drops:speed",
+              "label": "Speed",
+              "description": "Animation speed for drops blur. 0 disables the animation. Enabling will significantly increase GPU usage.",
+              "type": "float",
+              "default": 3.0,
+              "min": 0.0,
+              "max": 10.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:heat_shimmer:speed",
+              "label": "Speed",
+              "description": "Animation speed for heat shimmer blur. 0 disables the animation. Enabling will increase GPU usage.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:aurora:speed",
+              "label": "Speed",
+              "description": "Animation speed for aurora blur. 0 freezes the animation. Enabling will increase GPU usage.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:aurora:intensity",
+              "label": "Intensity",
+              "description": "Strength of the aurora color contribution",
+              "type": "float",
+              "default": 0.35,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:aurora:color1",
+              "label": "Color1",
+              "description": "First aurora curtain color. Alpha controls its contribution.",
+              "type": "color",
+              "default": "0x29f0a0ff"
+            },
+            {
+              "key": "decoration:blur:aurora:color2",
+              "label": "Color2",
+              "description": "Second aurora curtain color. Alpha controls its contribution.",
+              "type": "color",
+              "default": "0x7a4dffff"
+            },
+            {
+              "key": "decoration:blur:haze:intensity",
+              "label": "Intensity",
+              "description": "Strength of the haze pearlescent sheen",
+              "type": "float",
+              "default": 0.35,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:haze:iridescence",
+              "label": "Iridescence",
+              "description": "Strength of the haze pearlescent color shift",
+              "type": "float",
+              "default": 0.7,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:ripple:strength",
+              "label": "Strength",
+              "description": "Maximum refraction displacement of click ripples in pixels",
+              "type": "float",
+              "default": 30.0,
+              "min": 0.0,
+              "max": 32.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:ripple:radius",
+              "label": "Radius",
+              "description": "Maximum radius of click ripples in pixels",
+              "type": "float",
+              "default": 400.0,
+              "min": 1.0,
+              "max": 1000.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:ripple:width",
+              "label": "Width",
+              "description": "Width of click ripple waves in pixels",
+              "type": "float",
+              "default": 32.0,
+              "min": 1.0,
+              "max": 200.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:ripple:duration",
+              "label": "Duration",
+              "description": "Duration of click ripples in seconds",
+              "type": "float",
+              "default": 0.45,
+              "min": 0.05,
+              "max": 5.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:water:strength",
+              "label": "Strength",
+              "description": "Maximum refraction displacement and injection strength for water blur in pixels",
+              "type": "float",
+              "default": 32.0,
+              "min": 0.0,
+              "max": 32.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:water:radius",
+              "label": "Radius",
+              "description": "Pointer radius for water blur in pixels",
+              "type": "float",
+              "default": 20.0,
+              "min": 1.0,
+              "max": 1000.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:water:speed",
+              "label": "Speed",
+              "description": "Propagation speed for water blur",
+              "type": "float",
+              "default": 0.76,
+              "min": 0.0,
+              "max": 10.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:water:damping",
+              "label": "Damping",
+              "description": "Decay damping for water blur",
+              "type": "float",
+              "default": 0.95,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:water:duration",
+              "label": "Duration",
+              "description": "Maximum water blur animation duration in seconds",
+              "type": "float",
+              "default": 12.0,
+              "min": 0.5,
+              "max": 60.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:blur:fluid_jar:color",
+              "label": "Color",
+              "description": "Fluid color for fluid jar blur",
+              "type": "color",
+              "default": "0xcc3399ff"
+            },
+            {
+              "key": "decoration:blur:fluid_jar:speed",
+              "label": "Speed",
+              "description": "Animation speed for fluid jar blur",
+              "type": "float",
+              "default": 3.7,
+              "min": 0.0,
+              "max": 10.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:fluid_jar:fill_amount",
+              "label": "Fill Amount",
+              "description": "Fill amount for fluid jar blur",
+              "type": "float",
+              "default": 0.5,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:blur:fluid_jar:mass",
+              "label": "Mass",
+              "description": "Inertial mass for fluid jar blur",
+              "type": "float",
+              "default": 1.4,
+              "min": 0.1,
+              "max": 10.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:fluid_jar:precision",
+              "label": "Precision",
+              "description": "Fluid simulation precision multiplier. 2x is a good compromise. 4x is expensive. 8x is extreme and unnecessary.",
+              "type": "float",
+              "default": 2.0,
+              "min": 0.5,
+              "max": 8.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:fluid_jar:turbulence",
+              "label": "Turbulence",
+              "description": "Interior fluid turbulence multiplier",
+              "type": "float",
+              "default": 1.2,
+              "min": 0.0,
+              "max": 5.0,
+              "step": 0.1
+            },
+            {
+              "key": "decoration:blur:fluid_jar:distortion",
+              "label": "Distortion",
+              "description": "Fluid refraction distortion multiplier",
+              "type": "float",
+              "default": 8.0,
+              "min": 0.0,
+              "max": 10.0,
+              "step": 0.1
+            }
+          ]
+        },
+        {
+          "id": "decoration:motion_blur",
+          "label": "Motion Blur",
+          "options": [
+            {
+              "key": "decoration:motion_blur:enabled",
+              "label": "Enabled",
+              "description": "Enable motion blur for moving and resizing windows",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "decoration:motion_blur:samples",
+              "label": "Samples",
+              "description": "Amount of samples used for motion blur",
+              "type": "int",
+              "default": 7,
+              "min": 1,
+              "max": 64
+            }
+          ]
+        },
+        {
+          "id": "decoration:wobble",
+          "label": "Wobble",
+          "options": [
+            {
+              "key": "decoration:wobble:enabled",
+              "label": "Enabled",
+              "description": "Enable wobble deformation for moving and resizing windows",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "decoration:wobble:mesh",
+              "label": "Mesh",
+              "description": "Amount of wobble mesh vertices per edge",
+              "type": "int",
+              "default": 12,
+              "min": 2,
+              "max": 32
+            },
+            {
+              "key": "decoration:wobble:stiffness",
+              "label": "Stiffness",
+              "description": "Spring stiffness for wobble deformation",
+              "type": "float",
+              "default": 200.0,
+              "min": 0.0001,
+              "max": 1000.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:wobble:damping",
+              "label": "Damping",
+              "description": "Spring damping for wobble deformation",
+              "type": "float",
+              "default": 12.0,
+              "min": 0.0,
+              "max": 1000.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:wobble:mass",
+              "label": "Mass",
+              "description": "Spring mass for wobble deformation",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0001,
+              "max": 1000.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:wobble:intensity",
+              "label": "Intensity",
+              "description": "Wobble deformation impulse multiplier",
+              "type": "float",
+              "default": 0.2,
+              "min": 0.0,
+              "max": 2.0,
+              "step": 0.05
+            },
+            {
+              "key": "decoration:wobble:value_epsilon",
+              "label": "Value Epsilon",
+              "description": "Position epsilon below which wobble is considered stable",
+              "type": "float",
+              "default": 0.25,
+              "min": 0.0,
+              "max": 100.0,
+              "step": 0.5
+            },
+            {
+              "key": "decoration:wobble:velocity_epsilon",
+              "label": "Velocity Epsilon",
+              "description": "Velocity epsilon below which wobble is considered stable",
+              "type": "float",
+              "default": 2.0,
+              "min": 0.0,
+              "max": 1000.0,
+              "step": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "animations",
+      "label": "Animations",
+      "icon": "media-playback-start-symbolic",
+      "sections": [
+        {
+          "id": "animations:enabled",
+          "label": "Enabled",
+          "options": [
+            {
+              "key": "animations:enabled",
+              "label": "Enabled",
+              "description": "Enable animations",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "animations:workspace_wraparound",
+          "label": "Workspace Wraparound",
+          "options": [
+            {
+              "key": "animations:workspace_wraparound",
+              "label": "Workspace Wraparound",
+              "description": "Changes the direction of slide animations between the first and last workspaces",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "input",
+      "label": "Input",
+      "icon": "input-keyboard-symbolic",
+      "sections": [
+        {
+          "id": "input:kb_model",
+          "label": "KB Model",
+          "options": [
+            {
+              "key": "input:kb_model",
+              "label": "KB Model",
+              "description": "Appropriate XKB keymap parameter.",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "input:kb_layout",
+          "label": "KB Layout",
+          "options": [
+            {
+              "key": "input:kb_layout",
+              "label": "KB Layout",
+              "description": "Appropriate XKB keymap parameter",
+              "type": "string",
+              "default": "us"
+            }
+          ]
+        },
+        {
+          "id": "input:kb_variant",
+          "label": "KB Variant",
+          "options": [
+            {
+              "key": "input:kb_variant",
+              "label": "KB Variant",
+              "description": "Appropriate XKB keymap parameter",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "input:kb_options",
+          "label": "KB Options",
+          "options": [
+            {
+              "key": "input:kb_options",
+              "label": "KB Options",
+              "description": "Appropriate XKB keymap parameter",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "input:kb_rules",
+          "label": "KB Rules",
+          "options": [
+            {
+              "key": "input:kb_rules",
+              "label": "KB Rules",
+              "description": "Appropriate XKB keymap parameter",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "input:kb_file",
+          "label": "KB File",
+          "options": [
+            {
+              "key": "input:kb_file",
+              "label": "KB File",
+              "description": "Appropriate XKB keymap file",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "input:numlock_by_default",
+          "label": "Numlock By Default",
+          "options": [
+            {
+              "key": "input:numlock_by_default",
+              "label": "Numlock By Default",
+              "description": "Engage numlock by default.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:resolve_binds_by_sym",
+          "label": "Resolve Binds By Sym",
+          "options": [
+            {
+              "key": "input:resolve_binds_by_sym",
+              "label": "Resolve Binds By Sym",
+              "description": "Determines how keybinds act when multiple layouts are used.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:repeat_rate",
+          "label": "Repeat Rate",
+          "options": [
+            {
+              "key": "input:repeat_rate",
+              "label": "Repeat Rate",
+              "description": "The repeat rate for held-down keys, in repeats per second.",
+              "type": "int",
+              "default": 25,
+              "min": 0,
+              "max": 200
+            }
+          ]
+        },
+        {
+          "id": "input:repeat_delay",
+          "label": "Repeat Delay",
+          "options": [
+            {
+              "key": "input:repeat_delay",
+              "label": "Repeat Delay",
+              "description": "Delay before a held-down key is repeated, in milliseconds.",
+              "type": "int",
+              "default": 600,
+              "min": 0,
+              "max": 2000
+            }
+          ]
+        },
+        {
+          "id": "input:sensitivity",
+          "label": "Sensitivity",
+          "options": [
+            {
+              "key": "input:sensitivity",
+              "label": "Sensitivity",
+              "description": "Sets the mouse input sensitivity. Value is clamped to the range -1.0 to 1.0.",
+              "type": "float",
+              "default": 0.0,
+              "min": -1.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "input:accel_profile",
+          "label": "Accel Profile",
+          "options": [
+            {
+              "key": "input:accel_profile",
+              "label": "Accel Profile",
+              "description": "Sets the cursor acceleration profile. [adaptive/flat/custom]",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "input:force_no_accel",
+          "label": "Force No Accel",
+          "options": [
+            {
+              "key": "input:force_no_accel",
+              "label": "Force No Accel",
+              "description": "Force no cursor acceleration.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:rotation",
+          "label": "Rotation",
+          "options": [
+            {
+              "key": "input:rotation",
+              "label": "Rotation",
+              "description": "Sets the rotation of a device in degrees clockwise. Value is clamped to the range 0 to 359.",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 359
+            }
+          ]
+        },
+        {
+          "id": "input:left_handed",
+          "label": "Left Handed",
+          "options": [
+            {
+              "key": "input:left_handed",
+              "label": "Left Handed",
+              "description": "Switches RMB and LMB",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:scroll_points",
+          "label": "Scroll Points",
+          "options": [
+            {
+              "key": "input:scroll_points",
+              "label": "Scroll Points",
+              "description": "Sets the scroll acceleration profile, when accel_profile is set to custom.",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "input:scroll_method",
+          "label": "Scroll Method",
+          "options": [
+            {
+              "key": "input:scroll_method",
+              "label": "Scroll Method",
+              "description": "Sets the scroll method. [2fg/edge/on_button_down/no_scroll]",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "input:scroll_button",
+          "label": "Scroll Button",
+          "options": [
+            {
+              "key": "input:scroll_button",
+              "label": "Scroll Button",
+              "description": "Sets the scroll button. 0 means default.",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 300
+            }
+          ]
+        },
+        {
+          "id": "input:scroll_button_lock",
+          "label": "Scroll Button Lock",
+          "options": [
+            {
+              "key": "input:scroll_button_lock",
+              "label": "Scroll Button Lock",
+              "description": "If the scroll button lock is enabled, the button does not need to be held down.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:scroll_factor",
+          "label": "Scroll Factor",
+          "options": [
+            {
+              "key": "input:scroll_factor",
+              "label": "Scroll Factor",
+              "description": "Multiplier added to scroll movement for external mice.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 2.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "input:natural_scroll",
+          "label": "Natural Scroll",
+          "options": [
+            {
+              "key": "input:natural_scroll",
+              "label": "Natural Scroll",
+              "description": "Inverts scrolling direction.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:follow_mouse_threshold",
+          "label": "Follow Mouse Threshold",
+          "options": [
+            {
+              "key": "input:follow_mouse_threshold",
+              "label": "Follow Mouse Threshold",
+              "description": "The smallest distance in logical pixels the mouse needs to travel for the window under it to get focused.",
+              "type": "float",
+              "default": 0.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "input:mouse_refocus",
+          "label": "Mouse Refocus",
+          "options": [
+            {
+              "key": "input:mouse_refocus",
+              "label": "Mouse Refocus",
+              "description": "If disabled, mouse focus won't switch to the hovered window unless the mouse crosses a window boundary when follow_mouse=1.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "input:special_fallthrough",
+          "label": "Special Fallthrough",
+          "options": [
+            {
+              "key": "input:special_fallthrough",
+              "label": "Special Fallthrough",
+              "description": "If enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:touchpad",
+          "label": "Touchpad",
+          "options": [
+            {
+              "key": "input:touchpad:disable_while_typing",
+              "label": "Disable While Typing",
+              "description": "Disable the touchpad while typing.",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "input:touchpad:natural_scroll",
+              "label": "Natural Scroll",
+              "description": "Inverts scrolling direction.",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "input:touchpad:scroll_factor",
+              "label": "Scroll Factor",
+              "description": "Multiplier applied to the amount of scroll movement.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 2.0,
+              "step": 0.05
+            },
+            {
+              "key": "input:touchpad:middle_button_emulation",
+              "label": "Middle Button Emulation",
+              "description": "Sending LMB and RMB simultaneously will be interpreted as a middle click.",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "input:touchpad:tap_button_map",
+              "label": "Tap Button Map",
+              "description": "Sets the tap button mapping for touchpad button emulation. [lrm/lmr]",
+              "type": "string",
+              "default": ""
+            },
+            {
+              "key": "input:touchpad:clickfinger_behavior",
+              "label": "Clickfinger Behavior",
+              "description": "Button presses with 1, 2, or 3 fingers will be mapped to LMB, RMB, and MMB respectively.",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "input:touchpad:tap-to-click",
+              "label": "Tap To Click",
+              "description": "Tapping on the touchpad with 1, 2, or 3 fingers will send LMB, RMB, and MMB respectively.",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "input:touchpad:drag_lock",
+              "label": "Drag Lock",
+              "description": "When enabled, lifting the finger off while dragging will not drop the dragged item.",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 2
+            },
+            {
+              "key": "input:touchpad:tap-and-drag",
+              "label": "Tap And Drag",
+              "description": "Sets the tap and drag mode for the touchpad",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "input:touchpad:flip_x",
+              "label": "Flip X",
+              "description": "Inverts the horizontal movement of the touchpad",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "input:touchpad:flip_y",
+              "label": "Flip Y",
+              "description": "Inverts the vertical movement of the touchpad",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:touchdevice",
+          "label": "Touchdevice",
+          "options": [
+            {
+              "key": "input:touchdevice:transform",
+              "label": "Transform",
+              "description": "Transform the input from touchdevices.",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 6
+            },
+            {
+              "key": "input:touchdevice:output",
+              "label": "Output",
+              "description": "The monitor to bind touch devices.",
+              "type": "string",
+              "default": "[[Auto]]"
+            },
+            {
+              "key": "input:touchdevice:enabled",
+              "label": "Enabled",
+              "description": "Whether input is enabled for touch devices.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "input:virtualkeyboard",
+          "label": "Virtualkeyboard",
+          "options": [
+            {
+              "key": "input:virtualkeyboard:release_pressed_on_close",
+              "label": "Release Pressed On Close",
+              "description": "Release all pressed keys by virtual keyboard on close.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input:tablet",
+          "label": "Tablet",
+          "options": [
+            {
+              "key": "input:tablet:transform",
+              "label": "Transform",
+              "description": "Transform the input from tablets.",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 6
+            },
+            {
+              "key": "input:tablet:output",
+              "label": "Output",
+              "description": "The monitor to bind tablets.",
+              "type": "string",
+              "default": ""
+            },
+            {
+              "key": "input:tablet:region_position",
+              "label": "Region Position",
+              "description": "Position of the mapped region in monitor layout.",
+              "type": "vec2",
+              "default": "0 0"
+            },
+            {
+              "key": "input:tablet:absolute_region_position",
+              "label": "Absolute Region Position",
+              "description": "Whether to treat the region_position as an absolute position in monitor layout.",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "input:tablet:region_size",
+              "label": "Region Size",
+              "description": "Size of the mapped region.",
+              "type": "vec2",
+              "default": "0 0"
+            },
+            {
+              "key": "input:tablet:relative_input",
+              "label": "Relative Input",
+              "description": "Whether the input should be relative",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "input:tablet:left_handed",
+              "label": "Left Handed",
+              "description": "If enabled, the tablet will be rotated 180 degrees",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "input:tablet:active_area_size",
+              "label": "Active Area Size",
+              "description": "Size of tablet's active area in mm",
+              "type": "vec2",
+              "default": "0 0"
+            },
+            {
+              "key": "input:tablet:active_area_position",
+              "label": "Active Area Position",
+              "description": "Position of the active area in mm",
+              "type": "vec2",
+              "default": "0 0"
+            }
+          ]
+        },
+        {
+          "id": "input:tablettool",
+          "label": "Tablettool",
+          "options": [
+            {
+              "key": "input:tablettool:pressure_range_min",
+              "label": "Pressure Range Min",
+              "description": "Set the minimum pressure range for the tool, a negative number will set the default minimum pressure value. This is usually 0.0",
+              "type": "float",
+              "default": -1.0,
+              "min": -1.0,
+              "max": 1.0,
+              "step": 0.05
+            },
+            {
+              "key": "input:tablettool:pressure_range_max",
+              "label": "Pressure Range Max",
+              "description": "Set the maximum pressure range for the tool, a negative number will set the default maximum pressure value. This is usually 1.0",
+              "type": "float",
+              "default": -1.0,
+              "min": -1.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gestures",
+      "label": "Gestures",
+      "icon": "input-touchpad-symbolic",
+      "sections": [
+        {
+          "id": "gestures:workspace_swipe_distance",
+          "label": "Workspace Swipe Distance",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_distance",
+              "label": "Workspace Swipe Distance",
+              "description": "In px, the distance of the touchpad gesture",
+              "type": "int",
+              "default": 300,
+              "min": 0,
+              "max": 2000
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_touch",
+          "label": "Workspace Swipe Touch",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_touch",
+              "label": "Workspace Swipe Touch",
+              "description": "Enable workspace swiping from the edge of a touchscreen",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_invert",
+          "label": "Workspace Swipe Invert",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_invert",
+              "label": "Workspace Swipe Invert",
+              "description": "Invert the direction (touchpad only)",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_touch_invert",
+          "label": "Workspace Swipe Touch Invert",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_touch_invert",
+              "label": "Workspace Swipe Touch Invert",
+              "description": "Invert the direction (touchscreen only)",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_min_speed_to_force",
+          "label": "Workspace Swipe Min Speed To Force",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_min_speed_to_force",
+              "label": "Workspace Swipe Min Speed To Force",
+              "description": "Minimum speed in px per timepoint to force the change ignoring cancel_ratio.",
+              "type": "int",
+              "default": 30,
+              "min": 0,
+              "max": 200
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_cancel_ratio",
+          "label": "Workspace Swipe Cancel Ratio",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_cancel_ratio",
+              "label": "Workspace Swipe Cancel Ratio",
+              "description": "How much the swipe has to proceed in order to commence it.",
+              "type": "float",
+              "default": 0.5,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_create_new",
+          "label": "Workspace Swipe Create New",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_create_new",
+              "label": "Workspace Swipe Create New",
+              "description": "Whether a swipe right on the last workspace should create a new one.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_direction_lock",
+          "label": "Workspace Swipe Direction Lock",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_direction_lock",
+              "label": "Workspace Swipe Direction Lock",
+              "description": "If enabled, switching direction will be locked when you swipe past the direction_lock_threshold.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_direction_lock_threshold",
+          "label": "Workspace Swipe Direction Lock Threshold",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_direction_lock_threshold",
+              "label": "Workspace Swipe Direction Lock Threshold",
+              "description": "In px, the distance to swipe before direction lock activates.",
+              "type": "int",
+              "default": 10,
+              "min": 0,
+              "max": 200
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_forever",
+          "label": "Workspace Swipe Forever",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_forever",
+              "label": "Workspace Swipe Forever",
+              "description": "If enabled, swiping will not clamp at the neighboring workspaces but continue to the further ones.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "gestures:workspace_swipe_use_r",
+          "label": "Workspace Swipe Use R",
+          "options": [
+            {
+              "key": "gestures:workspace_swipe_use_r",
+              "label": "Workspace Swipe Use R",
+              "description": "If enabled, swiping will use the r prefix instead of the m prefix for finding workspaces.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "gestures:close_max_timeout",
+          "label": "Close Max Timeout",
+          "options": [
+            {
+              "key": "gestures:close_max_timeout",
+              "label": "Close Max Timeout",
+              "description": "Timeout for closing windows with the close gesture, in ms.",
+              "type": "int",
+              "default": 1000,
+              "min": 10,
+              "max": 2000
+            }
+          ]
+        },
+        {
+          "id": "gestures:scrolling",
+          "label": "Scrolling",
+          "options": [
+            {
+              "key": "gestures:scrolling:move_snap_to_grid",
+              "label": "Move Snap To Grid",
+              "description": "When releasing the scroll move gesture, whether it shoud try to snap to the grid.",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "gestures:scrolling:move_snap_cursor",
+              "label": "Move Snap Cursor",
+              "description": "When releasing the scroll move gesture, whether it shoud snap the cursor to the newly focused window.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "group",
+      "label": "Window Groups",
+      "icon": "view-grid-symbolic",
+      "sections": [
+        {
+          "id": "group:insert_after_current",
+          "label": "Insert After Current",
+          "options": [
+            {
+              "key": "group:insert_after_current",
+              "label": "Insert After Current",
+              "description": "Whether new windows in a group spawn after current or at group tail",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "group:focus_removed_window",
+          "label": "Focus Removed Window",
+          "options": [
+            {
+              "key": "group:focus_removed_window",
+              "label": "Focus Removed Window",
+              "description": "Whether Hyprland should focus on the window that has just been moved out of the group",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "group:merge_groups_on_drag",
+          "label": "Merge Groups On Drag",
+          "options": [
+            {
+              "key": "group:merge_groups_on_drag",
+              "label": "Merge Groups On Drag",
+              "description": "Whether window groups can be dragged into other groups",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "group:merge_groups_on_groupbar",
+          "label": "Merge Groups On Groupbar",
+          "options": [
+            {
+              "key": "group:merge_groups_on_groupbar",
+              "label": "Merge Groups On Groupbar",
+              "description": "Whether one group will be merged with another when dragged into its groupbar",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "group:col.border_active",
+          "label": "Border Active Color",
+          "options": [
+            {
+              "key": "group:col.border_active",
+              "label": "Border Active Color",
+              "description": "Active group border color",
+              "type": "color",
+              "default": "0x66ffff00"
+            }
+          ]
+        },
+        {
+          "id": "group:col.border_inactive",
+          "label": "Border Inactive Color",
+          "options": [
+            {
+              "key": "group:col.border_inactive",
+              "label": "Border Inactive Color",
+              "description": "Inactive group border color",
+              "type": "color",
+              "default": "0x66777700"
+            }
+          ]
+        },
+        {
+          "id": "group:col.border_locked_inactive",
+          "label": "Border Locked Inactive Color",
+          "options": [
+            {
+              "key": "group:col.border_locked_inactive",
+              "label": "Border Locked Inactive Color",
+              "description": "Inactive locked group border color",
+              "type": "color",
+              "default": "0x66ff5500"
+            }
+          ]
+        },
+        {
+          "id": "group:col.border_locked_active",
+          "label": "Border Locked Active Color",
+          "options": [
+            {
+              "key": "group:col.border_locked_active",
+              "label": "Border Locked Active Color",
+              "description": "Active locked group border color",
+              "type": "color",
+              "default": "0x66775500"
+            }
+          ]
+        },
+        {
+          "id": "group:auto_group",
+          "label": "Auto Group",
+          "options": [
+            {
+              "key": "group:auto_group",
+              "label": "Auto Group",
+              "description": "Automatically group new windows",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "group:merge_floated_into_tiled_on_groupbar",
+          "label": "Merge Floated Into Tiled On Groupbar",
+          "options": [
+            {
+              "key": "group:merge_floated_into_tiled_on_groupbar",
+              "label": "Merge Floated Into Tiled On Groupbar",
+              "description": "Whether dragging a floating window into a tiled window groupbar will merge them",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "group:group_on_movetoworkspace",
+          "label": "Group On Movetoworkspace",
+          "options": [
+            {
+              "key": "group:group_on_movetoworkspace",
+              "label": "Group On Movetoworkspace",
+              "description": "Whether using movetoworkspace[silent] will merge the window into the workspace's solitary unlocked group",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "group:groupbar",
+          "label": "Groupbar",
+          "options": [
+            {
+              "key": "group:groupbar:enabled",
+              "label": "Enabled",
+              "description": "Enables groupbars",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "group:groupbar:disable_when_only",
+              "label": "Disable When Only",
+              "description": "Disable if contains single window. Considered only if enabled == true",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "group:groupbar:font_family",
+              "label": "Font Family",
+              "description": "Font used to display groupbar titles",
+              "type": "string",
+              "default": "[[EMPTY]]"
+            },
+            {
+              "key": "group:groupbar:font_weight_active",
+              "label": "Font Weight Active",
+              "description": "Weight of the font used to display active groupbar titles",
+              "type": "string"
+            },
+            {
+              "key": "group:groupbar:font_weight_inactive",
+              "label": "Font Weight Inactive",
+              "description": "Weight of the font used to display inactive groupbar titles",
+              "type": "string"
+            },
+            {
+              "key": "group:groupbar:font_size",
+              "label": "Font Size",
+              "description": "Font size of groupbar title",
+              "type": "int",
+              "default": 8,
+              "min": 2,
+              "max": 64
+            },
+            {
+              "key": "group:groupbar:gradients",
+              "label": "Gradients",
+              "description": "Enables gradients",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "group:groupbar:height",
+              "label": "Height",
+              "description": "Height of the groupbar",
+              "type": "int",
+              "default": 14,
+              "min": 1,
+              "max": 64
+            },
+            {
+              "key": "group:groupbar:indicator_gap",
+              "label": "Indicator Gap",
+              "description": "Height of the gap between the groupbar indicator and title",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 64
+            },
+            {
+              "key": "group:groupbar:indicator_height",
+              "label": "Indicator Height",
+              "description": "Height of the groupbar indicator",
+              "type": "int",
+              "default": 3,
+              "min": 0,
+              "max": 64
+            },
+            {
+              "key": "group:groupbar:stacked",
+              "label": "Stacked",
+              "description": "Render the groupbar as a vertical stack",
+              "type": "bool",
+              "default": false
+            },
+            {
+              "key": "group:groupbar:priority",
+              "label": "Priority",
+              "description": "Sets the decoration priority for groupbars",
+              "type": "int",
+              "default": 3,
+              "min": 0,
+              "max": 6
+            },
+            {
+              "key": "group:groupbar:render_titles",
+              "label": "Render Titles",
+              "description": "Whether to render titles in the group bar decoration",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "group:groupbar:scrolling",
+              "label": "Scrolling",
+              "description": "Whether scrolling in the groupbar changes group active window",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "group:groupbar:middle_click_close",
+              "label": "Middle Click Close",
+              "description": "Whether middle clicking the groupbar closes the clicked window",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "group:groupbar:rounding",
+              "label": "Rounding",
+              "description": "How much to round the groupbar",
+              "type": "int",
+              "default": 1,
+              "min": 0,
+              "max": 40
+            },
+            {
+              "key": "group:groupbar:rounding_power",
+              "label": "Rounding Power",
+              "description": "Rounding power of groupbar corners (2 is a circle)",
+              "type": "float",
+              "default": 2.0,
+              "min": 1.0,
+              "max": 10.0,
+              "step": 0.1
+            },
+            {
+              "key": "group:groupbar:gradient_rounding",
+              "label": "Gradient Rounding",
+              "description": "How much to round the groupbar gradient",
+              "type": "int",
+              "default": 2,
+              "min": 0,
+              "max": 40
+            },
+            {
+              "key": "group:groupbar:gradient_rounding_power",
+              "label": "Gradient Rounding Power",
+              "description": "Rounding power of groupbar gradient corners (2 is a circle)",
+              "type": "float",
+              "default": 2.0,
+              "min": 1.0,
+              "max": 10.0,
+              "step": 0.1
+            },
+            {
+              "key": "group:groupbar:round_only_edges",
+              "label": "Round Only Edges",
+              "description": "If yes, will only round at the groupbar edges",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "group:groupbar:gradient_round_only_edges",
+              "label": "Gradient Round Only Edges",
+              "description": "If yes, will only round at the groupbar gradient edges",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "group:groupbar:text_color",
+              "label": "Text Color",
+              "description": "Color for window titles in the groupbar",
+              "type": "color",
+              "default": "0xffffffff"
+            },
+            {
+              "key": "group:groupbar:text_color_inactive",
+              "label": "Text Color Inactive",
+              "description": "Color for inactive windows' titles in the groupbar",
+              "type": "color",
+              "default": "-1"
+            },
+            {
+              "key": "group:groupbar:text_color_locked_active",
+              "label": "Text Color Locked Active",
+              "description": "Color for the active window's title in a locked group",
+              "type": "color",
+              "default": "-1"
+            },
+            {
+              "key": "group:groupbar:text_color_locked_inactive",
+              "label": "Text Color Locked Inactive",
+              "description": "Color for inactive windows' titles in locked groups",
+              "type": "color",
+              "default": "-1"
+            },
+            {
+              "key": "group:groupbar:col.active",
+              "label": "Active Color",
+              "description": "Active group border color",
+              "type": "color",
+              "default": "0x66ffff00"
+            },
+            {
+              "key": "group:groupbar:col.inactive",
+              "label": "Inactive Color",
+              "description": "Inactive (out of focus) group border color",
+              "type": "color",
+              "default": "0x66777700"
+            },
+            {
+              "key": "group:groupbar:col.locked_active",
+              "label": "Locked Active Color",
+              "description": "Active locked group border color",
+              "type": "color",
+              "default": "0x66ff5500"
+            },
+            {
+              "key": "group:groupbar:col.locked_inactive",
+              "label": "Locked Inactive Color",
+              "description": "Inactive locked group border color",
+              "type": "color",
+              "default": "0x66775500"
+            },
+            {
+              "key": "group:groupbar:gaps_out",
+              "label": "Gaps Out",
+              "description": "Gap between gradients and window",
+              "type": "int",
+              "default": 2,
+              "min": 0,
+              "max": 20
+            },
+            {
+              "key": "group:groupbar:gaps_in",
+              "label": "Gaps In",
+              "description": "Gap between gradients",
+              "type": "int",
+              "default": 2,
+              "min": 0,
+              "max": 20
+            },
+            {
+              "key": "group:groupbar:keep_upper_gap",
+              "label": "Keep Upper Gap",
+              "description": "Keep an upper gap above gradient",
+              "type": "bool",
+              "default": true
+            },
+            {
+              "key": "group:groupbar:text_offset",
+              "label": "Text Offset",
+              "description": "Set an offset for a text",
+              "type": "int",
+              "default": 0,
+              "min": -20,
+              "max": 20
+            },
+            {
+              "key": "group:groupbar:text_padding",
+              "label": "Text Padding",
+              "description": "Set horizontal padding for a text",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 22
+            },
+            {
+              "key": "group:groupbar:blur",
+              "label": "Blur",
+              "description": "Enable background blur for groupbars",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "misc",
+      "label": "Miscellaneous",
+      "icon": "preferences-other-symbolic",
+      "sections": [
+        {
+          "id": "misc:disable_hyprland_logo",
+          "label": "Disable Hyprland Logo",
+          "options": [
+            {
+              "key": "misc:disable_hyprland_logo",
+              "label": "Disable Hyprland Logo",
+              "description": "Disables the random Hyprland logo / anime girl background. :(",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:disable_splash_rendering",
+          "label": "Disable Splash Rendering",
+          "options": [
+            {
+              "key": "misc:disable_splash_rendering",
+              "label": "Disable Splash Rendering",
+              "description": "Disables the Hyprland splash rendering.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:col.splash",
+          "label": "Splash Color",
+          "options": [
+            {
+              "key": "misc:col.splash",
+              "label": "Splash Color",
+              "description": "Changes the color of the splash text.",
+              "type": "color",
+              "default": "0x55ffffff"
+            }
+          ]
+        },
+        {
+          "id": "misc:font_family",
+          "label": "Font Family",
+          "options": [
+            {
+              "key": "misc:font_family",
+              "label": "Font Family",
+              "description": "Set the global default font to render the text.",
+              "type": "string",
+              "default": "Sans"
+            }
+          ]
+        },
+        {
+          "id": "misc:splash_font_family",
+          "label": "Splash Font Family",
+          "options": [
+            {
+              "key": "misc:splash_font_family",
+              "label": "Splash Font Family",
+              "description": "Changes the font used to render the splash text.",
+              "type": "string",
+              "default": "[[EMPTY]]"
+            }
+          ]
+        },
+        {
+          "id": "misc:force_default_wallpaper",
+          "label": "Force Default Wallpaper",
+          "options": [
+            {
+              "key": "misc:force_default_wallpaper",
+              "label": "Force Default Wallpaper",
+              "description": "Force any of the 3 default wallpapers. [-1/0/1/2]",
+              "type": "int",
+              "default": -1,
+              "min": -1,
+              "max": 2
+            }
+          ]
+        },
+        {
+          "id": "misc:mouse_move_enables_dpms",
+          "label": "Mouse Move Enables DPMS",
+          "options": [
+            {
+              "key": "misc:mouse_move_enables_dpms",
+              "label": "Mouse Move Enables DPMS",
+              "description": "If DPMS is set to off, wake up the monitors if the mouse moves",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:key_press_enables_dpms",
+          "label": "Key Press Enables DPMS",
+          "options": [
+            {
+              "key": "misc:key_press_enables_dpms",
+              "label": "Key Press Enables DPMS",
+              "description": "If DPMS is set to off, wake up the monitors if a key is pressed.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:name_vk_after_proc",
+          "label": "Name Vk After Proc",
+          "options": [
+            {
+              "key": "misc:name_vk_after_proc",
+              "label": "Name Vk After Proc",
+              "description": "Name virtual keyboards after the processes that create them.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "misc:always_follow_on_dnd",
+          "label": "Always Follow On Dnd",
+          "options": [
+            {
+              "key": "misc:always_follow_on_dnd",
+              "label": "Always Follow On Dnd",
+              "description": "Will make mouse focus follow the mouse when drag and dropping.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "misc:layers_hog_keyboard_focus",
+          "label": "Layers Hog Keyboard Focus",
+          "options": [
+            {
+              "key": "misc:layers_hog_keyboard_focus",
+              "label": "Layers Hog Keyboard Focus",
+              "description": "If true, will make keyboard-interactive layers keep their focus on mouse move.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "misc:animate_manual_resizes",
+          "label": "Animate Manual Resizes",
+          "options": [
+            {
+              "key": "misc:animate_manual_resizes",
+              "label": "Animate Manual Resizes",
+              "description": "If true, will animate manual window resizes/moves",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:animate_mouse_windowdragging",
+          "label": "Animate Mouse Windowdragging",
+          "options": [
+            {
+              "key": "misc:animate_mouse_windowdragging",
+              "label": "Animate Mouse Windowdragging",
+              "description": "If true, will animate windows being dragged by mouse.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:disable_autoreload",
+          "label": "Disable Autoreload",
+          "options": [
+            {
+              "key": "misc:disable_autoreload",
+              "label": "Disable Autoreload",
+              "description": "If true, the config will not reload automatically on save.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:enable_swallow",
+          "label": "Enable Swallow",
+          "options": [
+            {
+              "key": "misc:enable_swallow",
+              "label": "Enable Swallow",
+              "description": "Enable window swallowing",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:swallow_regex",
+          "label": "Swallow Regex",
+          "options": [
+            {
+              "key": "misc:swallow_regex",
+              "label": "Swallow Regex",
+              "description": "The class regex to be used for windows that should be swallowed.",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "misc:swallow_exception_regex",
+          "label": "Swallow Exception Regex",
+          "options": [
+            {
+              "key": "misc:swallow_exception_regex",
+              "label": "Swallow Exception Regex",
+              "description": "The title regex to be used for windows that should not be swallowed.",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "misc:focus_on_activate",
+          "label": "Focus On Activate",
+          "options": [
+            {
+              "key": "misc:focus_on_activate",
+              "label": "Focus On Activate",
+              "description": "Whether Hyprland should focus an app that requests to be focused.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:mouse_move_focuses_monitor",
+          "label": "Mouse Move Focuses Monitor",
+          "options": [
+            {
+              "key": "misc:mouse_move_focuses_monitor",
+              "label": "Mouse Move Focuses Monitor",
+              "description": "Whether mouse moving into a different monitor should focus it",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "misc:allow_session_lock_restore",
+          "label": "Allow Session Lock Restore",
+          "options": [
+            {
+              "key": "misc:allow_session_lock_restore",
+              "label": "Allow Session Lock Restore",
+              "description": "If true, will allow you to restart a lockscreen app in case it crashes.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:session_lock_xray",
+          "label": "Session Lock Xray",
+          "options": [
+            {
+              "key": "misc:session_lock_xray",
+              "label": "Session Lock Xray",
+              "description": "Keep rendering workspaces below your lockscreen",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:session_lock_blur",
+          "label": "Session Lock Blur",
+          "options": [
+            {
+              "key": "misc:session_lock_blur",
+              "label": "Session Lock Blur",
+              "description": "Enable blur for lockscreen. You probably want to enable `session_lock_xray`.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:background_color",
+          "label": "Background Color",
+          "options": [
+            {
+              "key": "misc:background_color",
+              "label": "Background Color",
+              "description": "Change the background color.",
+              "type": "color",
+              "default": "0xff111111"
+            }
+          ]
+        },
+        {
+          "id": "misc:close_special_on_empty",
+          "label": "Close Special On Empty",
+          "options": [
+            {
+              "key": "misc:close_special_on_empty",
+              "label": "Close Special On Empty",
+              "description": "Close the special workspace if the last window is removed",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "misc:initial_workspace_tracking",
+          "label": "Initial Workspace Tracking",
+          "options": [
+            {
+              "key": "misc:initial_workspace_tracking",
+              "label": "Initial Workspace Tracking",
+              "description": "If enabled, windows will open on the workspace they were invoked on.",
+              "type": "int",
+              "default": 1,
+              "min": 0,
+              "max": 2
+            }
+          ]
+        },
+        {
+          "id": "misc:initial_workspace_token_timeout",
+          "label": "Initial Workspace Token Timeout",
+          "options": [
+            {
+              "key": "misc:initial_workspace_token_timeout",
+              "label": "Initial Workspace Token Timeout",
+              "description": "The time in seconds a window has to open on its invoked workspace before the tracking token expires.",
+              "type": "int",
+              "default": 10,
+              "min": 1,
+              "max": 3600
+            }
+          ]
+        },
+        {
+          "id": "misc:middle_click_paste",
+          "label": "Middle Click Paste",
+          "options": [
+            {
+              "key": "misc:middle_click_paste",
+              "label": "Middle Click Paste",
+              "description": "Whether to enable middle-click-paste (aka primary selection)",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "misc:render_unfocused_fps",
+          "label": "Render Unfocused FPS",
+          "options": [
+            {
+              "key": "misc:render_unfocused_fps",
+              "label": "Render Unfocused FPS",
+              "description": "The maximum limit for renderunfocused windows' fps in the background",
+              "type": "int",
+              "default": 15,
+              "min": 1,
+              "max": 120
+            }
+          ]
+        },
+        {
+          "id": "misc:disable_xdg_env_checks",
+          "label": "Disable Xdg Env Checks",
+          "options": [
+            {
+              "key": "misc:disable_xdg_env_checks",
+              "label": "Disable Xdg Env Checks",
+              "description": "Disable the warning if XDG environment is externally managed",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:disable_hyprland_guiutils_check",
+          "label": "Disable Hyprland Guiutils Check",
+          "options": [
+            {
+              "key": "misc:disable_hyprland_guiutils_check",
+              "label": "Disable Hyprland Guiutils Check",
+              "description": "Disable the warning if hyprland-guiutils is missing",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:disable_watchdog_warning",
+          "label": "Disable Watchdog Warning",
+          "options": [
+            {
+              "key": "misc:disable_watchdog_warning",
+              "label": "Disable Watchdog Warning",
+              "description": "Whether to disable the warning about not using start-hyprland.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:lockdead_screen_delay",
+          "label": "Lockdead Screen Delay",
+          "options": [
+            {
+              "key": "misc:lockdead_screen_delay",
+              "label": "Lockdead Screen Delay",
+              "description": "The delay in ms after the lockdead screen appears.",
+              "type": "int",
+              "default": 1000,
+              "min": 0,
+              "max": 5000
+            }
+          ]
+        },
+        {
+          "id": "misc:enable_anr_dialog",
+          "label": "Enable ANR Dialog",
+          "options": [
+            {
+              "key": "misc:enable_anr_dialog",
+              "label": "Enable ANR Dialog",
+              "description": "Whether to enable the ANR (app not responding) dialog when your apps hang",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "misc:anr_missed_pings",
+          "label": "ANR Missed Pings",
+          "options": [
+            {
+              "key": "misc:anr_missed_pings",
+              "label": "ANR Missed Pings",
+              "description": "Number of missed pings before showing the ANR dialog",
+              "type": "int",
+              "default": 5,
+              "min": 1,
+              "max": 20
+            }
+          ]
+        },
+        {
+          "id": "misc:screencopy_force_8b",
+          "label": "Screencopy Force 8b",
+          "options": [
+            {
+              "key": "misc:screencopy_force_8b",
+              "label": "Screencopy Force 8b",
+              "description": "Forces 8 bit screencopy",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "misc:disable_scale_notification",
+          "label": "Disable Scale Notification",
+          "options": [
+            {
+              "key": "misc:disable_scale_notification",
+              "label": "Disable Scale Notification",
+              "description": "Disables notification popup when a monitor fails to set a suitable scale",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:size_limits_tiled",
+          "label": "Size Limits Tiled",
+          "options": [
+            {
+              "key": "misc:size_limits_tiled",
+              "label": "Size Limits Tiled",
+              "description": "Whether to apply minsize and maxsize rules to tiled windows",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "misc:bell_sound",
+          "label": "Bell Sound",
+          "options": [
+            {
+              "key": "misc:bell_sound",
+              "label": "Bell Sound",
+              "description": "Path to custom wav/ogg system bell. `none` or an empty string mute it. `default` uses the system's current one.",
+              "type": "string",
+              "default": "default"
+            }
+          ]
+        },
+        {
+          "id": "misc:new_float_force_onscreen",
+          "label": "New Float Force Onscreen",
+          "options": [
+            {
+              "key": "misc:new_float_force_onscreen",
+              "label": "New Float Force Onscreen",
+              "description": "Whether new floating windows must be placed fully/partially on-screen",
+              "type": "int",
+              "default": 2
+            }
+          ]
+        },
+        {
+          "id": "misc:float_force_onscreen",
+          "label": "Float Force Onscreen",
+          "options": [
+            {
+              "key": "misc:float_force_onscreen",
+              "label": "Float Force Onscreen",
+              "description": "Whether existing floating windows must remain fully/partially on-screen",
+              "type": "int",
+              "default": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "binds",
+      "label": "Keybinds & Navigation",
+      "icon": "input-keyboard-symbolic",
+      "sections": [
+        {
+          "id": "binds:pass_mouse_when_bound",
+          "label": "Pass Mouse When Bound",
+          "options": [
+            {
+              "key": "binds:pass_mouse_when_bound",
+              "label": "Pass Mouse When Bound",
+              "description": "If disabled, will not pass the mouse events to apps / dragging windows around if a keybind has been triggered.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:scroll_event_delay",
+          "label": "Scroll Event Delay",
+          "options": [
+            {
+              "key": "binds:scroll_event_delay",
+              "label": "Scroll Event Delay",
+              "description": "In ms, how many ms to wait after a scroll event to allow passing another one for the binds.",
+              "type": "int",
+              "default": 300,
+              "min": 0,
+              "max": 2000
+            }
+          ]
+        },
+        {
+          "id": "binds:workspace_back_and_forth",
+          "label": "Workspace Back And Forth",
+          "options": [
+            {
+              "key": "binds:workspace_back_and_forth",
+              "label": "Workspace Back And Forth",
+              "description": "If enabled, an attempt to switch to the currently focused workspace will instead switch to the previous workspace.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:hide_special_on_workspace_change",
+          "label": "Hide Special On Workspace Change",
+          "options": [
+            {
+              "key": "binds:hide_special_on_workspace_change",
+              "label": "Hide Special On Workspace Change",
+              "description": "If enabled, changing the active workspace will hide the special workspace on the monitor.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:allow_workspace_cycles",
+          "label": "Allow Workspace Cycles",
+          "options": [
+            {
+              "key": "binds:allow_workspace_cycles",
+              "label": "Allow Workspace Cycles",
+              "description": "If enabled, workspaces don't forget their previous workspace.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:workspace_center_on",
+          "label": "Workspace Center On",
+          "options": [
+            {
+              "key": "binds:workspace_center_on",
+              "label": "Workspace Center On",
+              "description": "Whether switching workspaces should center the cursor on the workspace (0) or on the last active window (1)",
+              "type": "int",
+              "default": 1,
+              "min": 0,
+              "max": 1
+            }
+          ]
+        },
+        {
+          "id": "binds:focus_preferred_method",
+          "label": "Focus Preferred Method",
+          "options": [
+            {
+              "key": "binds:focus_preferred_method",
+              "label": "Focus Preferred Method",
+              "description": "Sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction.",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 1
+            }
+          ]
+        },
+        {
+          "id": "binds:ignore_group_lock",
+          "label": "Ignore Group Lock",
+          "options": [
+            {
+              "key": "binds:ignore_group_lock",
+              "label": "Ignore Group Lock",
+              "description": "If enabled, dispatchers like moveintogroup, moveoutofgroup and movewindoworgroup will ignore lock per group.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:movefocus_cycles_fullscreen",
+          "label": "Movefocus Cycles Fullscreen",
+          "options": [
+            {
+              "key": "binds:movefocus_cycles_fullscreen",
+              "label": "Movefocus Cycles Fullscreen",
+              "description": "If enabled, when on a fullscreen window, movefocus will cycle fullscreen.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:movefocus_cycles_groupfirst",
+          "label": "Movefocus Cycles Groupfirst",
+          "options": [
+            {
+              "key": "binds:movefocus_cycles_groupfirst",
+              "label": "Movefocus Cycles Groupfirst",
+              "description": "If enabled, when in a grouped window, movefocus will cycle windows in the groups first.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:disable_keybind_grabbing",
+          "label": "Disable Keybind Grabbing",
+          "options": [
+            {
+              "key": "binds:disable_keybind_grabbing",
+              "label": "Disable Keybind Grabbing",
+              "description": "If enabled, apps that request keybinds to be disabled will not be able to do so.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:window_direction_monitor_fallback",
+          "label": "Window Direction Monitor Fallback",
+          "options": [
+            {
+              "key": "binds:window_direction_monitor_fallback",
+              "label": "Window Direction Monitor Fallback",
+              "description": "If enabled, moving a window or focus over the edge of a monitor with a direction will move it to the next monitor.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "binds:allow_pin_fullscreen",
+          "label": "Allow Pin Fullscreen",
+          "options": [
+            {
+              "key": "binds:allow_pin_fullscreen",
+              "label": "Allow Pin Fullscreen",
+              "description": "Allows fullscreen to pinned windows, and restore their pinned status afterwards",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "binds:drag_threshold",
+          "label": "Drag Threshold",
+          "options": [
+            {
+              "key": "binds:drag_threshold",
+              "label": "Drag Threshold",
+              "description": "Movement threshold in pixels for window dragging and c/g bind flags. 0 to disable.",
+              "type": "int",
+              "default": 0,
+              "min": 0
+            }
+          ]
+        },
+        {
+          "id": "binds:drag_center_window",
+          "label": "Drag Center Window",
+          "options": [
+            {
+              "key": "binds:drag_center_window",
+              "label": "Drag Center Window",
+              "description": "If enabled, dragging a tiled or fullscreen window will center it on the cursor when it becomes floating.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "xwayland",
+      "label": "XWayland",
+      "icon": "application-x-executable-symbolic",
+      "sections": [
+        {
+          "id": "xwayland:enabled",
+          "label": "Enabled",
+          "options": [
+            {
+              "key": "xwayland:enabled",
+              "label": "Enabled",
+              "description": "Allow running applications using X11",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "xwayland:use_nearest_neighbor",
+          "label": "Use Nearest Neighbor",
+          "options": [
+            {
+              "key": "xwayland:use_nearest_neighbor",
+              "label": "Use Nearest Neighbor",
+              "description": "Uses the nearest neighbor filtering for xwayland apps, making them pixelated rather than blurry",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "xwayland:force_zero_scaling",
+          "label": "Force Zero Scaling",
+          "options": [
+            {
+              "key": "xwayland:force_zero_scaling",
+              "label": "Force Zero Scaling",
+              "description": "Forces a scale of 1 on xwayland windows on scaled displays.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "xwayland:create_abstract_socket",
+          "label": "Create Abstract Socket",
+          "options": [
+            {
+              "key": "xwayland:create_abstract_socket",
+              "label": "Create Abstract Socket",
+              "description": "Create the abstract Unix domain socket for XWayland",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "opengl",
+      "label": "OpenGL",
+      "icon": "video-display-symbolic",
+      "sections": [
+        {
+          "id": "opengl:nvidia_anti_flicker",
+          "label": "Nvidia Anti Flicker",
+          "options": [
+            {
+              "key": "opengl:nvidia_anti_flicker",
+              "label": "Nvidia Anti Flicker",
+              "description": "Reduces flickering on nvidia at the cost of possible frame drops on lower-end GPUs.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "render",
+      "label": "Rendering & Pipeline",
+      "icon": "video-display-symbolic",
+      "sections": [
+        {
+          "id": "render:expand_undersized_textures",
+          "label": "Expand Undersized Textures",
+          "options": [
+            {
+              "key": "render:expand_undersized_textures",
+              "label": "Expand Undersized Textures",
+              "description": "Whether to expand textures that have not yet resized to be larger.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "render:xp_mode",
+          "label": "Xp Mode",
+          "options": [
+            {
+              "key": "render:xp_mode",
+              "label": "Xp Mode",
+              "description": "Disable back buffer and bottom layer rendering.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "render:cm_enabled",
+          "label": "CM Enabled",
+          "options": [
+            {
+              "key": "render:cm_enabled",
+              "label": "CM Enabled",
+              "description": "Enable Color Management pipelines (requires restart to fully take effect)",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "render:send_content_type",
+          "label": "Send Content Type",
+          "options": [
+            {
+              "key": "render:send_content_type",
+              "label": "Send Content Type",
+              "description": "Report content type to allow monitor profile autoswitch",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "render:new_render_scheduling",
+          "label": "New Render Scheduling",
+          "options": [
+            {
+              "key": "render:new_render_scheduling",
+              "label": "New Render Scheduling",
+              "description": "Enable new render scheduling, which should improve FPS on underpowered devices.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "render:cm_sdr_eotf",
+          "label": "CM SDR EOTF",
+          "options": [
+            {
+              "key": "render:cm_sdr_eotf",
+              "label": "CM SDR EOTF",
+              "description": "Default transfer function for displaying SDR apps.",
+              "type": "string",
+              "default": "default"
+            }
+          ]
+        },
+        {
+          "id": "render:commit_timing_enabled",
+          "label": "Commit Timing Enabled",
+          "options": [
+            {
+              "key": "render:commit_timing_enabled",
+              "label": "Commit Timing Enabled",
+              "description": "Enable commit timing proto. Requires restart",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "render:icc_vcgt_enabled",
+          "label": "ICC VCGT Enabled",
+          "options": [
+            {
+              "key": "render:icc_vcgt_enabled",
+              "label": "ICC VCGT Enabled",
+              "description": "Enable sending VCGT ramps to KMS with ICC profiles",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "render:use_shader_blur_blend",
+          "label": "Use Shader Blur Blend",
+          "options": [
+            {
+              "key": "render:use_shader_blur_blend",
+              "label": "Use Shader Blur Blend",
+              "description": "Use experimental blurred bg blending",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cursor",
+      "label": "Cursor & Pointer",
+      "icon": "input-mouse-symbolic",
+      "sections": [
+        {
+          "id": "cursor:invisible",
+          "label": "Invisible",
+          "options": [
+            {
+              "key": "cursor:invisible",
+              "label": "Invisible",
+              "description": "Don't render cursors",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "cursor:min_refresh_rate",
+          "label": "Min Refresh Rate",
+          "options": [
+            {
+              "key": "cursor:min_refresh_rate",
+              "label": "Min Refresh Rate",
+              "description": "Minimum refresh rate for cursor movement when no_break_fs_vrr is active.",
+              "type": "int",
+              "default": 24,
+              "min": 10,
+              "max": 500
+            }
+          ]
+        },
+        {
+          "id": "cursor:hotspot_padding",
+          "label": "Hotspot Padding",
+          "options": [
+            {
+              "key": "cursor:hotspot_padding",
+              "label": "Hotspot Padding",
+              "description": "The padding, in logical px, between screen edges and the cursor",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 20
+            }
+          ]
+        },
+        {
+          "id": "cursor:inactive_timeout",
+          "label": "Inactive Timeout",
+          "options": [
+            {
+              "key": "cursor:inactive_timeout",
+              "label": "Inactive Timeout",
+              "description": "In seconds, after how many seconds of cursor's inactivity to hide it. Set to 0 for never.",
+              "type": "float",
+              "default": 0.0,
+              "min": 0.0,
+              "max": 20.0,
+              "step": 0.5
+            }
+          ]
+        },
+        {
+          "id": "cursor:no_warps",
+          "label": "No Warps",
+          "options": [
+            {
+              "key": "cursor:no_warps",
+              "label": "No Warps",
+              "description": "If true, will not warp the cursor in many cases",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "cursor:persistent_warps",
+          "label": "Persistent Warps",
+          "options": [
+            {
+              "key": "cursor:persistent_warps",
+              "label": "Persistent Warps",
+              "description": "When a window is refocused, the cursor returns to its last position relative to that window.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "cursor:default_monitor",
+          "label": "Default Monitor",
+          "options": [
+            {
+              "key": "cursor:default_monitor",
+              "label": "Default Monitor",
+              "description": "The name of a default monitor for the cursor to be set to on startup",
+              "type": "string",
+              "default": ""
+            }
+          ]
+        },
+        {
+          "id": "cursor:zoom_factor",
+          "label": "Zoom Factor",
+          "options": [
+            {
+              "key": "cursor:zoom_factor",
+              "label": "Zoom Factor",
+              "description": "The factor to zoom by around the cursor. 1 means no zoom.",
+              "type": "float",
+              "default": 1.0,
+              "min": 1.0,
+              "max": 10.0,
+              "step": 0.1
+            }
+          ]
+        },
+        {
+          "id": "cursor:zoom_rigid",
+          "label": "Zoom Rigid",
+          "options": [
+            {
+              "key": "cursor:zoom_rigid",
+              "label": "Zoom Rigid",
+              "description": "Whether the zoom should follow the cursor rigidly or loosely",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "cursor:zoom_disable_aa",
+          "label": "Zoom Disable Aa",
+          "options": [
+            {
+              "key": "cursor:zoom_disable_aa",
+              "label": "Zoom Disable Aa",
+              "description": "If enabled, when zooming, no antialiasing will be used",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "cursor:zoom_detached_camera",
+          "label": "Zoom Detached Camera",
+          "options": [
+            {
+              "key": "cursor:zoom_detached_camera",
+              "label": "Zoom Detached Camera",
+              "description": "Detaches the camera from the mouse when zoomed in",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "cursor:enable_hyprcursor",
+          "label": "Enable Hyprcursor",
+          "options": [
+            {
+              "key": "cursor:enable_hyprcursor",
+              "label": "Enable Hyprcursor",
+              "description": "Whether to enable hyprcursor support",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "cursor:hide_on_key_press",
+          "label": "Hide On Key Press",
+          "options": [
+            {
+              "key": "cursor:hide_on_key_press",
+              "label": "Hide On Key Press",
+              "description": "Hides the cursor when you press any key until the mouse is moved.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "cursor:hide_on_touch",
+          "label": "Hide On Touch",
+          "options": [
+            {
+              "key": "cursor:hide_on_touch",
+              "label": "Hide On Touch",
+              "description": "Hides the cursor when the last input was a touch input until a mouse input is done.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "cursor:hide_on_tablet",
+          "label": "Hide On Tablet",
+          "options": [
+            {
+              "key": "cursor:hide_on_tablet",
+              "label": "Hide On Tablet",
+              "description": "Hides the cursor when the last input was a tablet input until a mouse input is done.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "cursor:sync_gsettings_theme",
+          "label": "Sync Gsettings Theme",
+          "options": [
+            {
+              "key": "cursor:sync_gsettings_theme",
+              "label": "Sync Gsettings Theme",
+              "description": "Sync xcursor theme with gsettings",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "cursor:warp_back_after_non_mouse_input",
+          "label": "Warp Back After Non Mouse Input",
+          "options": [
+            {
+              "key": "cursor:warp_back_after_non_mouse_input",
+              "label": "Warp Back After Non Mouse Input",
+              "description": "Warp the cursor back to where it was after using a non-mouse input to move it.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ecosystem",
+      "label": "Ecosystem & Permissions",
+      "icon": "security-high-symbolic",
+      "sections": [
+        {
+          "id": "ecosystem:no_update_news",
+          "label": "No Update News",
+          "options": [
+            {
+              "key": "ecosystem:no_update_news",
+              "label": "No Update News",
+              "description": "Disable the popup that shows up when you update hyprland to a new version.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "ecosystem:no_donation_nag",
+          "label": "No Donation Nag",
+          "options": [
+            {
+              "key": "ecosystem:no_donation_nag",
+              "label": "No Donation Nag",
+              "description": "Disable the popup that shows up twice a year encouraging to donate.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "ecosystem:enforce_permissions",
+          "label": "Enforce Permissions",
+          "options": [
+            {
+              "key": "ecosystem:enforce_permissions",
+              "label": "Enforce Permissions",
+              "description": "Whether to enable permission control.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "debug",
+      "label": "Debug & Diagnostics",
+      "icon": "tools-symbolic",
+      "sections": [
+        {
+          "id": "debug:overlay",
+          "label": "Overlay",
+          "options": [
+            {
+              "key": "debug:overlay",
+              "label": "Overlay",
+              "description": "Print the debug performance overlay.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:damage_blink",
+          "label": "Damage Blink",
+          "options": [
+            {
+              "key": "debug:damage_blink",
+              "label": "Damage Blink",
+              "description": "Flash damaged areas",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:gl_debugging",
+          "label": "Gl Debugging",
+          "options": [
+            {
+              "key": "debug:gl_debugging",
+              "label": "Gl Debugging",
+              "description": "Enable OpenGL debugging and error checking.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:disable_logs",
+          "label": "Disable Logs",
+          "options": [
+            {
+              "key": "debug:disable_logs",
+              "label": "Disable Logs",
+              "description": "Disable logging to a file",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "debug:disable_time",
+          "label": "Disable Time",
+          "options": [
+            {
+              "key": "debug:disable_time",
+              "label": "Disable Time",
+              "description": "Disables time logging",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "debug:enable_stdout_logs",
+          "label": "Enable Stdout Logs",
+          "options": [
+            {
+              "key": "debug:enable_stdout_logs",
+              "label": "Enable Stdout Logs",
+              "description": "Enables logging to stdout",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:manual_crash",
+          "label": "Manual Crash",
+          "options": [
+            {
+              "key": "debug:manual_crash",
+              "label": "Manual Crash",
+              "description": "Set to 1 and then back to 0 to crash Hyprland.",
+              "type": "int",
+              "default": 0,
+              "min": 0,
+              "max": 1
+            }
+          ]
+        },
+        {
+          "id": "debug:suppress_errors",
+          "label": "Suppress Errors",
+          "options": [
+            {
+              "key": "debug:suppress_errors",
+              "label": "Suppress Errors",
+              "description": "If true, do not display config file parsing errors.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:disable_scale_checks",
+          "label": "Disable Scale Checks",
+          "options": [
+            {
+              "key": "debug:disable_scale_checks",
+              "label": "Disable Scale Checks",
+              "description": "Disables verification of the scale factors.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:error_limit",
+          "label": "Error Limit",
+          "options": [
+            {
+              "key": "debug:error_limit",
+              "label": "Error Limit",
+              "description": "Limits the number of displayed config file parsing errors.",
+              "type": "int",
+              "default": 5,
+              "min": 0,
+              "max": 20
+            }
+          ]
+        },
+        {
+          "id": "debug:colored_stdout_logs",
+          "label": "Colored Stdout Logs",
+          "options": [
+            {
+              "key": "debug:colored_stdout_logs",
+              "label": "Colored Stdout Logs",
+              "description": "Enables colors in the stdout logs.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "debug:log_damage",
+          "label": "Log Damage",
+          "options": [
+            {
+              "key": "debug:log_damage",
+              "label": "Log Damage",
+              "description": "Enables logging the damage.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:pass",
+          "label": "Pass",
+          "options": [
+            {
+              "key": "debug:pass",
+              "label": "Pass",
+              "description": "Enables render pass debugging.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:full_cm_proto",
+          "label": "Full CM Proto",
+          "options": [
+            {
+              "key": "debug:full_cm_proto",
+              "label": "Full CM Proto",
+              "description": "Claims support for all cm proto features (requires restart)",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:ds_handle_same_buffer",
+          "label": "Ds Handle Same Buffer",
+          "options": [
+            {
+              "key": "debug:ds_handle_same_buffer",
+              "label": "Ds Handle Same Buffer",
+              "description": "Special case for DS with unmodified buffer",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "debug:ds_handle_same_buffer_fifo",
+          "label": "Ds Handle Same Buffer Fifo",
+          "options": [
+            {
+              "key": "debug:ds_handle_same_buffer_fifo",
+              "label": "Ds Handle Same Buffer Fifo",
+              "description": "Special case for DS with unmodified buffer unlocks fifo",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "debug:render_solitary_wo_damage",
+          "label": "Render Solitary Wo Damage",
+          "options": [
+            {
+              "key": "debug:render_solitary_wo_damage",
+              "label": "Render Solitary Wo Damage",
+              "description": "Render solitary window with empty damage",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "debug:vfr",
+          "label": "VFR",
+          "options": [
+            {
+              "key": "debug:vfr",
+              "label": "VFR",
+              "description": "Controls the VFR status of Hyprland. Do not turn off unless debugging",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "layout",
+      "label": "Layout",
+      "icon": "preferences-other-symbolic",
+      "sections": [
+        {
+          "id": "layout:single_window_aspect_ratio",
+          "label": "Single Window Aspect Ratio",
+          "options": [
+            {
+              "key": "layout:single_window_aspect_ratio",
+              "label": "Single Window Aspect Ratio",
+              "description": "If specified, whenever only a single window is open, it will be coerced into the specified aspect ratio.",
+              "type": "vec2",
+              "default": "0 0"
+            }
+          ]
+        },
+        {
+          "id": "layout:single_window_aspect_ratio_tolerance",
+          "label": "Single Window Aspect Ratio Tolerance",
+          "options": [
+            {
+              "key": "layout:single_window_aspect_ratio_tolerance",
+              "label": "Single Window Aspect Ratio Tolerance",
+              "description": "Minimum distance for single_window_aspect_ratio to take effect.",
+              "type": "float",
+              "default": 0.1,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dwindle",
+      "label": "Dwindle Layout",
+      "icon": "view-compact-symbolic",
+      "sections": [
+        {
+          "id": "dwindle:preserve_split",
+          "label": "Preserve Split",
+          "options": [
+            {
+              "key": "dwindle:preserve_split",
+              "label": "Preserve Split",
+              "description": "If enabled, the split will not change regardless of what happens to the container.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "dwindle:smart_split",
+          "label": "Smart Split",
+          "options": [
+            {
+              "key": "dwindle:smart_split",
+              "label": "Smart Split",
+              "description": "If enabled, allows a more precise control over the window split direction based on the cursor's position.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "dwindle:smart_resizing",
+          "label": "Smart Resizing",
+          "options": [
+            {
+              "key": "dwindle:smart_resizing",
+              "label": "Smart Resizing",
+              "description": "If enabled, resizing direction will be determined by the mouse's position on the window.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "dwindle:permanent_direction_override",
+          "label": "Permanent Direction Override",
+          "options": [
+            {
+              "key": "dwindle:permanent_direction_override",
+              "label": "Permanent Direction Override",
+              "description": "If enabled, makes the preselect direction persist.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "dwindle:special_scale_factor",
+          "label": "Special Scale Factor",
+          "options": [
+            {
+              "key": "dwindle:special_scale_factor",
+              "label": "Special Scale Factor",
+              "description": "Specifies the scale factor of windows on the special workspace",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 1.0,
+              "deprecation_notice": "Use workspace rules to achieve the same effect",
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "dwindle:split_width_multiplier",
+          "label": "Split Width Multiplier",
+          "options": [
+            {
+              "key": "dwindle:split_width_multiplier",
+              "label": "Split Width Multiplier",
+              "description": "Specifies the auto-split width multiplier",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.1,
+              "max": 3.0,
+              "step": 0.1
+            }
+          ]
+        },
+        {
+          "id": "dwindle:use_active_for_splits",
+          "label": "Use Active For Splits",
+          "options": [
+            {
+              "key": "dwindle:use_active_for_splits",
+              "label": "Use Active For Splits",
+              "description": "Whether to prefer the active window or the mouse position for splits",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "dwindle:default_split_ratio",
+          "label": "Default Split Ratio",
+          "options": [
+            {
+              "key": "dwindle:default_split_ratio",
+              "label": "Default Split Ratio",
+              "description": "The default split ratio on window open.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.1,
+              "max": 1.9,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "dwindle:precise_mouse_move",
+          "label": "Precise Mouse Move",
+          "options": [
+            {
+              "key": "dwindle:precise_mouse_move",
+              "label": "Precise Mouse Move",
+              "description": "If enabled, bindm movewindow will drop the window more precisely depending on where your mouse is.",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "master",
+      "label": "Master Layout",
+      "icon": "view-dual-symbolic",
+      "sections": [
+        {
+          "id": "master:allow_small_split",
+          "label": "Allow Small Split",
+          "options": [
+            {
+              "key": "master:allow_small_split",
+              "label": "Allow Small Split",
+              "description": "Enable adding additional master windows in a horizontal split style",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "master:special_scale_factor",
+          "label": "Special Scale Factor",
+          "options": [
+            {
+              "key": "master:special_scale_factor",
+              "label": "Special Scale Factor",
+              "description": "The scale of the special workspace windows.",
+              "type": "float",
+              "default": 1.0,
+              "min": 0.0,
+              "max": 1.0,
+              "deprecation_notice": "Use workspace rules to achieve the same effect",
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "master:mfact",
+          "label": "Mfact",
+          "options": [
+            {
+              "key": "master:mfact",
+              "label": "Mfact",
+              "description": "The size as a percentage of the master window.",
+              "type": "float",
+              "default": 0.55,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "master:new_status",
+          "label": "New Status",
+          "options": [
+            {
+              "key": "master:new_status",
+              "label": "New Status",
+              "description": "`master`: new window becomes master; `slave`: new windows are added to slave stack; `inherit`: inherit from focused window",
+              "type": "string",
+              "default": "slave"
+            }
+          ]
+        },
+        {
+          "id": "master:new_on_top",
+          "label": "New On Top",
+          "options": [
+            {
+              "key": "master:new_on_top",
+              "label": "New On Top",
+              "description": "Whether a newly open window should be on the top of the stack",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "master:new_on_active",
+          "label": "New On Active",
+          "options": [
+            {
+              "key": "master:new_on_active",
+              "label": "New On Active",
+              "description": "`before`, `after`: place new window relative to the focused window; `none`: place new window according to new_on_top.",
+              "type": "string",
+              "default": "none"
+            }
+          ]
+        },
+        {
+          "id": "master:orientation",
+          "label": "Orientation",
+          "options": [
+            {
+              "key": "master:orientation",
+              "label": "Orientation",
+              "description": "Default placement of the master area",
+              "type": "string",
+              "default": "left"
+            }
+          ]
+        },
+        {
+          "id": "master:slave_count_for_center_master",
+          "label": "Slave Count For Center Master",
+          "options": [
+            {
+              "key": "master:slave_count_for_center_master",
+              "label": "Slave Count For Center Master",
+              "description": "When using orientation=center, make the master window centered only when at least this many slave windows are open.",
+              "type": "int",
+              "default": 2,
+              "min": 0,
+              "max": 10
+            }
+          ]
+        },
+        {
+          "id": "master:center_master_fallback",
+          "label": "Center Master Fallback",
+          "options": [
+            {
+              "key": "master:center_master_fallback",
+              "label": "Center Master Fallback",
+              "description": "Set fallback for center master when slaves are less than slave_count_for_center_master",
+              "type": "string",
+              "default": "left"
+            }
+          ]
+        },
+        {
+          "id": "master:center_ignores_reserved",
+          "label": "Center Ignores Reserved",
+          "options": [
+            {
+              "key": "master:center_ignores_reserved",
+              "label": "Center Ignores Reserved",
+              "description": "Centers the master window on monitor ignoring reserved areas",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "master:smart_resizing",
+          "label": "Smart Resizing",
+          "options": [
+            {
+              "key": "master:smart_resizing",
+              "label": "Smart Resizing",
+              "description": "If enabled, resizing direction will be determined by the mouse's position on the window.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "master:drop_at_cursor",
+          "label": "Drop At Cursor",
+          "options": [
+            {
+              "key": "master:drop_at_cursor",
+              "label": "Drop At Cursor",
+              "description": "When enabled, dragging and dropping windows will put them at the cursor position.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "master:always_keep_position",
+          "label": "Always Keep Position",
+          "options": [
+            {
+              "key": "master:always_keep_position",
+              "label": "Always Keep Position",
+              "description": "Whether to keep the master window in its configured position when there are no slave windows",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "master:focus_master_on_close",
+          "label": "Focus Master On Close",
+          "options": [
+            {
+              "key": "master:focus_master_on_close",
+              "label": "Focus Master On Close",
+              "description": "When enabled, closing a window focuses the master window",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scrolling",
+      "label": "Scrolling Layout",
+      "icon": "view-continuous-symbolic",
+      "sections": [
+        {
+          "id": "scrolling:fullscreen_on_one_column",
+          "label": "Fullscreen On One Column",
+          "options": [
+            {
+              "key": "scrolling:fullscreen_on_one_column",
+              "label": "Fullscreen On One Column",
+              "description": "When enabled, a single column on a workspace will always span the entire screen.",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "scrolling:column_width",
+          "label": "Column Width",
+          "options": [
+            {
+              "key": "scrolling:column_width",
+              "label": "Column Width",
+              "description": "The default width of a column.",
+              "type": "float",
+              "default": 0.5,
+              "min": 0.1,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "scrolling:follow_focus",
+          "label": "Follow Focus",
+          "options": [
+            {
+              "key": "scrolling:follow_focus",
+              "label": "Follow Focus",
+              "description": "When a window is focused, should the layout move to bring it into view automatically",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "scrolling:follow_min_visible",
+          "label": "Follow Min Visible",
+          "options": [
+            {
+              "key": "scrolling:follow_min_visible",
+              "label": "Follow Min Visible",
+              "description": "When a window is focused, require that at least a given fraction of it is visible for focus to follow",
+              "type": "float",
+              "default": 0.4,
+              "min": 0.0,
+              "max": 1.0,
+              "step": 0.05
+            }
+          ]
+        },
+        {
+          "id": "scrolling:direction",
+          "label": "Direction",
+          "options": [
+            {
+              "key": "scrolling:direction",
+              "label": "Direction",
+              "description": "Direction in which new windows appear and the layout scrolls",
+              "type": "string",
+              "default": "right"
+            }
+          ]
+        },
+        {
+          "id": "scrolling:wrap_focus",
+          "label": "Wrap Focus",
+          "options": [
+            {
+              "key": "scrolling:wrap_focus",
+              "label": "Wrap Focus",
+              "description": "Determines if column focus wraps around",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        },
+        {
+          "id": "scrolling:wrap_swapcol",
+          "label": "Wrap Swapcol",
+          "options": [
+            {
+              "key": "scrolling:wrap_swapcol",
+              "label": "Wrap Swapcol",
+              "description": "Determines if column movement wraps around",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "experimental",
+      "label": "Experimental",
+      "icon": "applications-science-symbolic",
+      "sections": [
+        {
+          "id": "experimental:wp_cm_1_2",
+          "label": "Wp CM 1 2",
+          "options": [
+            {
+              "key": "experimental:wp_cm_1_2",
+              "label": "Wp CM 1 2",
+              "description": "Allow wp-cm-v1 version 2",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "input-capture",
+      "label": "Input Capture",
+      "icon": "input-keyboard-symbolic",
+      "sections": [
+        {
+          "id": "input-capture:capture_modifiers",
+          "label": "Capture Modifiers",
+          "options": [
+            {
+              "key": "input-capture:capture_modifiers",
+              "label": "Capture Modifiers",
+              "description": "If enabled, modifiers are also captured and sent to the program",
+              "type": "bool",
+              "default": false
+            }
+          ]
+        },
+        {
+          "id": "input-capture:enforce_barriers",
+          "label": "Enforce Barriers",
+          "options": [
+            {
+              "key": "input-capture:enforce_barriers",
+              "label": "Enforce Barriers",
+              "description": "If enabled, throw a wayland error when a invalid barrier is received",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quirks",
+      "label": "Quirks & Compatibility",
+      "icon": "dialog-warning-symbolic",
+      "sections": [
+        {
+          "id": "quirks:skip_non_kms_dmabuf_formats",
+          "label": "Skip Non Kms Dmabuf Formats",
+          "options": [
+            {
+              "key": "quirks:skip_non_kms_dmabuf_formats",
+              "label": "Skip Non Kms Dmabuf Formats",
+              "description": "Do not report dmabuf formats which cannot be imported into KMS",
+              "type": "bool",
+              "default": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

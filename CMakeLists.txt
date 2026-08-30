@@ -100,6 +100,8 @@ qt_add_resources(flightdeck "resources"
     FILES
         assets/icons/flightdeck.svg
         assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
+        data/schema/hyprland_options.json
+        data/schema/options.json
 )
 
 # Add QML files with CONFIGURE_DEPENDS
@@ -116,6 +118,7 @@ add_executable(test_autostart
     src/caelestia/flightdeckwriter.cpp
     src/caelestia/luavalidator.cpp
     src/hyprland/hyprlandsocket.cpp
+    src/hyprland/hyprlandschema.cpp
 )
 target_include_directories(test_autostart PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
