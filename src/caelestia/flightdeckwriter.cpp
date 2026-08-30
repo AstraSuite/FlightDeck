@@ -25,15 +25,15 @@ FlightDeckWriter* FlightDeckWriter::create(QQmlEngine*, QJSEngine*) {
 }
 
 QString FlightDeckWriter::flightDeckFilePath() {
-    const QString astraFlightDeckPath = QDir::homePath() + QStringLiteral("/.config/caelestia/astra-flightdeck.lua");
-    if (QFile::exists(astraFlightDeckPath)) {
-        return astraFlightDeckPath;
-    }
-    const QString astraHelmPath = QDir::homePath() + QStringLiteral("/.config/caelestia/astra-helm.lua");
-    if (QFile::exists(astraHelmPath)) {
-        return astraHelmPath;
-    }
-    return astraFlightDeckPath;
+    const QString xdg = qEnvironmentVariable("XDG_CONFIG_HOME");
+    const QString base = !xdg.isEmpty() ? xdg : QDir::homePath() + QStringLiteral("/.config");
+    const QString p1 = base + QStringLiteral("/caelestia/astra-flightdeck.lua");
+    if (QFile::exists(p1)) return p1;
+    const QString p2 = base + QStringLiteral("/caelestia/astra-helm.lua");
+    if (QFile::exists(p2)) return p2;
+    const QString p3 = base + QStringLiteral("/hypr/astra-flightdeck.lua");
+    if (QFile::exists(p3)) return p3;
+    return p1;
 }
 
 QString FlightDeckWriter::astraHelmFilePath() {

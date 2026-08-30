@@ -37,6 +37,14 @@ QVariantList HyprlandSchema::groups() const {
     return m_groups;
 }
 
+QVariantList HyprlandSchema::keybindSections() const {
+    return m_keybindSections;
+}
+
+QVariantList HyprlandSchema::caelestiaSections() const {
+    return m_caelestiaSections;
+}
+
 QVariantList HyprlandSchema::supportedPlugins() const {
     return m_supportedPlugins;
 }
@@ -86,6 +94,62 @@ void HyprlandSchema::loadSchema() {
         QJsonDocument doc = QJsonDocument::fromJson(groupsData);
         if (doc.isObject() && doc.object().contains(QStringLiteral("groups"))) {
             m_groups = doc.object().value(QStringLiteral("groups")).toArray().toVariantList();
+        }
+    }
+
+    // Load Caelestia variables schema & keybind sections
+    m_caelestiaSections.clear();
+    m_keybindSections.clear();
+
+    QStringList caelestiaPaths = {
+        QStringLiteral(":/schema/caelestia_variables.json"),
+        QStringLiteral("/home/dim/Projects/AstraSuite/FlightDeck/data/schema/caelestia_variables.json")
+    };
+
+    QByteArray caelestiaData;
+    for (const auto& path : caelestiaPaths) {
+        QFile file(path);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            caelestiaData = file.readAll();
+            break;
+        }
+    }
+
+    if (!caelestiaData.isEmpty()) {
+        QJsonDocument doc = QJsonDocument::fromJson(caelestiaData);
+        if (doc.isObject() && doc.object().contains(QStringLiteral("sections"))) {
+            QJsonArray sections = doc.object().value(QStringLiteral("sections")).toArray();
+            for (const auto& secVal : sections) {
+                QJsonObject secObj = secVal.toObject();
+                QVariantMap secMap = secObj.toVariantMap();
+                m_caelestiaSections.append(secMap);
+
+                QString secId = secObj.value(QStringLiteral("id")).toString();
+                bool isKeybindSec = secId.startsWith(QStringLiteral("keybinds"));
+
+                if (secObj.contains(QStringLiteral("options"))) {
+                    QJsonArray opts = secObj.value(QStringLiteral("options")).toArray();
+                    for (const auto& optVal : opts) {
+                        QJsonObject optObj = optVal.toObject();
+                        QString key = optObj.value(QStringLiteral("key")).toString();
+                        if (!key.isEmpty()) {
+                            m_rawCatalog[key] = optObj.toVariantMap();
+
+                            if (optObj.contains(QStringLiteral("hyprKeyword"))) {
+                                QString hk = optObj.value(QStringLiteral("hyprKeyword")).toString();
+                                if (!hk.isEmpty()) {
+                                    m_aliasToHyprKey[key] = hk;
+                                    m_hyprKeyToAlias[hk] = key;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isKeybindSec) {
+                    m_keybindSections.append(secMap);
+                }
+            }
         }
     }
 

@@ -16,6 +16,8 @@ class HyprlandSchema : public QObject {
 
     Q_PROPERTY(int optionCount READ optionCount NOTIFY schemaLoaded)
     Q_PROPERTY(QVariantList groups READ groups NOTIFY schemaLoaded)
+    Q_PROPERTY(QVariantList keybindSections READ keybindSections NOTIFY schemaLoaded)
+    Q_PROPERTY(QVariantList caelestiaSections READ caelestiaSections NOTIFY schemaLoaded)
     Q_PROPERTY(QVariantList supportedPlugins READ supportedPlugins NOTIFY schemaLoaded)
 
 public:
@@ -27,6 +29,8 @@ public:
 
     int optionCount() const;
     QVariantList groups() const;
+    QVariantList keybindSections() const;
+    QVariantList caelestiaSections() const;
     QVariantList supportedPlugins() const;
 
     Q_INVOKABLE bool hasOption(const QString& key) const;
@@ -57,6 +61,8 @@ private:
 
     QVariantMap m_rawCatalog;
     QVariantList m_groups;
+    QVariantList m_keybindSections;
+    QVariantList m_caelestiaSections;
     QVariantList m_supportedPlugins;
     QVariantMap m_pluginSchemas;
     QHash<QString, QString> m_aliasToHyprKey;

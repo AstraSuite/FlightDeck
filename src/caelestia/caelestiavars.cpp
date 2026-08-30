@@ -27,15 +27,33 @@ CaelestiaVars* CaelestiaVars::create(QQmlEngine*, QJSEngine*) {
 }
 
 QString CaelestiaVars::varsFilePath() {
-    return QDir::homePath() + QStringLiteral("/.config/caelestia/hypr-vars.lua");
+    const QString xdg = qEnvironmentVariable("XDG_CONFIG_HOME");
+    const QString base = !xdg.isEmpty() ? xdg : QDir::homePath() + QStringLiteral("/.config");
+    const QString p1 = base + QStringLiteral("/caelestia/hypr-vars.lua");
+    if (QFile::exists(p1)) return p1;
+    const QString p2 = base + QStringLiteral("/hypr/hypr-vars.lua");
+    if (QFile::exists(p2)) return p2;
+    return p1;
 }
 
 QString CaelestiaVars::defaultVarsFilePath() {
-    return QDir::homePath() + QStringLiteral("/.config/hypr/variables.lua");
+    const QString xdg = qEnvironmentVariable("XDG_CONFIG_HOME");
+    const QString base = !xdg.isEmpty() ? xdg : QDir::homePath() + QStringLiteral("/.config");
+    const QString p1 = base + QStringLiteral("/hypr/variables.lua");
+    if (QFile::exists(p1)) return p1;
+    const QString p2 = base + QStringLiteral("/hypr/hyprland/variables.lua");
+    if (QFile::exists(p2)) return p2;
+    return p1;
 }
 
 QString CaelestiaVars::schemeFilePath() {
-    return QDir::homePath() + QStringLiteral("/.config/hypr/scheme/current.lua");
+    const QString xdg = qEnvironmentVariable("XDG_CONFIG_HOME");
+    const QString base = !xdg.isEmpty() ? xdg : QDir::homePath() + QStringLiteral("/.config");
+    const QString p1 = base + QStringLiteral("/hypr/scheme/current.lua");
+    if (QFile::exists(p1)) return p1;
+    const QString p2 = base + QStringLiteral("/caelestia/scheme/current.lua");
+    if (QFile::exists(p2)) return p2;
+    return p1;
 }
 
 CaelestiaVars::CaelestiaVars(QObject* parent)

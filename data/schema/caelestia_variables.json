@@ -382,9 +382,9 @@
       ]
     },
     {
-      "id": "keybinds",
-      "label": "Keybindings",
-      "description": "Modifier keys, workspace navigation, window controls, and application shortcuts.",
+      "id": "keybinds_modifiers",
+      "label": "Workspace Navigation Modifiers",
+      "description": "Modifier keys and workspace navigation shortcuts.",
       "options": [
         {
           "key": "kbGoToWs",
@@ -413,45 +413,6 @@
           "type": "keybind_modifier",
           "default": "CTRL + SUPER + ALT",
           "description": "Modifier key combination for moving active window to workspace group 0-9"
-        },
-        {
-          "key": "kbMoveWinToWsSpecial",
-          "label": "Move Window To Special Workspace",
-          "type": "keybind",
-          "default": [
-            "SUPER + ALT + S",
-            "CTRL + SUPER + SHIFT + Up"
-          ],
-          "description": "Send active window to scratchpad / special workspace"
-        },
-        {
-          "key": "kbMoveWinFromWsSpecial",
-          "label": "Move Window From Special Workspace",
-          "type": "keybind",
-          "default": "CTRL + SUPER + SHIFT + Down",
-          "description": "Retrieve window from special workspace"
-        },
-        {
-          "key": "kbMoveWinToWsNext",
-          "label": "Move Window To Next Workspace",
-          "type": "keybind",
-          "default": [
-            "SUPER + ALT + mouse_down",
-            "SUPER + ALT + Page_Down",
-            "CTRL + SUPER + SHIFT + Right"
-          ],
-          "description": "Move active window to the next workspace"
-        },
-        {
-          "key": "kbMoveWinToWsPrev",
-          "label": "Move Window To Previous Workspace",
-          "type": "keybind",
-          "default": [
-            "SUPER + ALT + mouse_up",
-            "SUPER + ALT + Page_Up",
-            "CTRL + SUPER + SHIFT + Left"
-          ],
-          "description": "Move active window to the previous workspace"
         },
         {
           "key": "kbNextWs",
@@ -490,6 +451,52 @@
           "description": "Switch to previous workspace group"
         },
         {
+          "key": "kbMoveWinToWsNext",
+          "label": "Move Window To Next Workspace",
+          "type": "keybind",
+          "default": [
+            "SUPER + ALT + mouse_down",
+            "SUPER + ALT + Page_Down",
+            "CTRL + SUPER + SHIFT + Right"
+          ],
+          "description": "Move active window to the next workspace"
+        },
+        {
+          "key": "kbMoveWinToWsPrev",
+          "label": "Move Window To Previous Workspace",
+          "type": "keybind",
+          "default": [
+            "SUPER + ALT + mouse_up",
+            "SUPER + ALT + Page_Up",
+            "CTRL + SUPER + SHIFT + Left"
+          ],
+          "description": "Move active window to the previous workspace"
+        },
+        {
+          "key": "kbMoveWinToWsSpecial",
+          "label": "Move Window To Special Workspace",
+          "type": "keybind",
+          "default": [
+            "SUPER + ALT + S",
+            "CTRL + SUPER + SHIFT + Up"
+          ],
+          "description": "Send active window to scratchpad / special workspace"
+        },
+        {
+          "key": "kbMoveWinFromWsSpecial",
+          "label": "Move Window From Special Workspace",
+          "type": "keybind",
+          "default": "CTRL + SUPER + SHIFT + Down",
+          "description": "Retrieve window from special workspace"
+        }
+      ]
+    },
+    {
+      "id": "keybinds_group",
+      "label": "Window Group",
+      "description": "Shortcuts for tabbed window groups and group cycling.",
+      "options": [
+        {
           "key": "kbWindowCycleNext",
           "label": "Focus Next Window",
           "type": "keybind",
@@ -518,6 +525,13 @@
           "description": "Cycle tabs backwards inside tabbed group"
         },
         {
+          "key": "kbGroupLockActive",
+          "label": "Lock Group",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + Comma",
+          "description": "Lock window group from receiving new windows"
+        },
+        {
           "key": "kbUngroup",
           "label": "Ungroup Window",
           "type": "keybind",
@@ -530,14 +544,91 @@
           "type": "keybind",
           "default": "SUPER + Comma",
           "description": "Create or toggle tabbed window group"
+        }
+      ]
+    },
+    {
+      "id": "keybinds_window",
+      "label": "Window Management",
+      "description": "Window positioning, sizing, pinning, and floating controls.",
+      "options": [
+        {
+          "key": "kbCloseWindow",
+          "label": "Close Active Window",
+          "type": "keybind",
+          "default": "SUPER + Q",
+          "description": "Gracefully close active window"
         },
         {
-          "key": "kbGroupLockActive",
-          "label": "Lock Group",
+          "key": "kbToggleWindowFloating",
+          "label": "Toggle Window Floating",
           "type": "keybind",
-          "default": "SUPER + SHIFT + Comma",
-          "description": "Lock window group from receiving new windows"
+          "default": "SUPER + ALT + Space",
+          "description": "Toggle between tiling and floating state"
         },
+        {
+          "key": "kbWindowFullscreen",
+          "label": "Toggle Fullscreen",
+          "type": "keybind",
+          "default": "SUPER + F",
+          "description": "Toggle window true fullscreen"
+        },
+        {
+          "key": "kbWindowBorderedFullscreen",
+          "label": "Toggle Maximize / Fake Fullscreen",
+          "type": "keybind",
+          "default": "SUPER + ALT + F",
+          "description": "Maximize window keeping panel/borders"
+        },
+        {
+          "key": "kbCenterWindow",
+          "label": "Center Window",
+          "type": "keybind",
+          "default": "CTRL + SUPER + Backslash",
+          "description": "Center floating window on screen"
+        },
+        {
+          "key": "kbNormalizeWindow",
+          "label": "Normalize Window Size",
+          "type": "keybind",
+          "default": "CTRL + SUPER + ALT + Backslash",
+          "description": "Reset split size to even proportions"
+        },
+        {
+          "key": "kbPinWindow",
+          "label": "Pin Window (All Workspaces)",
+          "type": "keybind",
+          "default": "SUPER + P",
+          "description": "Pin floating window to remain visible across all workspaces"
+        },
+        {
+          "key": "kbWindowPip",
+          "label": "Picture-in-Picture Mode",
+          "type": "keybind",
+          "default": "SUPER + ALT + Backslash",
+          "description": "Pin and float window in bottom corner"
+        },
+        {
+          "key": "kbMoveWindow",
+          "label": "Move Window Interactive",
+          "type": "keybind",
+          "default": "SUPER + Z",
+          "description": "Interactive window move mode"
+        },
+        {
+          "key": "kbResizeWindow",
+          "label": "Resize Window Interactive",
+          "type": "keybind",
+          "default": "SUPER + X",
+          "description": "Interactive window resize mode"
+        }
+      ]
+    },
+    {
+      "id": "keybinds_resizing",
+      "label": "Window Resizing Shortcuts",
+      "description": "Fine-grained window dimension resizing shortcuts.",
+      "options": [
         {
           "key": "kbWindowDecreaseWidth",
           "label": "Decrease Window Width",
@@ -577,112 +668,14 @@
             "SUPER + ALT + Down"
           ],
           "description": "Expand window height"
-        },
-        {
-          "key": "kbMoveWindow",
-          "label": "Move Window Interactive",
-          "type": "keybind",
-          "default": "SUPER + Z",
-          "description": "Interactive window move mode"
-        },
-        {
-          "key": "kbResizeWindow",
-          "label": "Resize Window Interactive",
-          "type": "keybind",
-          "default": "SUPER + X",
-          "description": "Interactive window resize mode"
-        },
-        {
-          "key": "kbCenterWindow",
-          "label": "Center Window",
-          "type": "keybind",
-          "default": "CTRL + SUPER + Backslash",
-          "description": "Center floating window on screen"
-        },
-        {
-          "key": "kbNormalizeWindow",
-          "label": "Normalize Window Size",
-          "type": "keybind",
-          "default": "CTRL + SUPER + ALT + Backslash",
-          "description": "Reset split size to even proportions"
-        },
-        {
-          "key": "kbWindowPip",
-          "label": "Picture-in-Picture Mode",
-          "type": "keybind",
-          "default": "SUPER + ALT + Backslash",
-          "description": "Pin and float window in bottom corner"
-        },
-        {
-          "key": "kbPinWindow",
-          "label": "Pin Window (All Workspaces)",
-          "type": "keybind",
-          "default": "SUPER + P",
-          "description": "Pin floating window to remain visible across all workspaces"
-        },
-        {
-          "key": "kbWindowFullscreen",
-          "label": "Toggle Fullscreen",
-          "type": "keybind",
-          "default": "SUPER + F",
-          "description": "Toggle window true fullscreen"
-        },
-        {
-          "key": "kbWindowBorderedFullscreen",
-          "label": "Toggle Maximize / Fake Fullscreen",
-          "type": "keybind",
-          "default": "SUPER + ALT + F",
-          "description": "Maximize window keeping panel/borders"
-        },
-        {
-          "key": "kbToggleWindowFloating",
-          "label": "Toggle Window Floating",
-          "type": "keybind",
-          "default": "SUPER + ALT + Space",
-          "description": "Toggle between tiling and floating state"
-        },
-        {
-          "key": "kbCloseWindow",
-          "label": "Close Active Window",
-          "type": "keybind",
-          "default": "SUPER + Q",
-          "description": "Gracefully close active window"
-        },
-        {
-          "key": "kbSpecialWs",
-          "label": "Toggle Special Workspace (Scratchpad)",
-          "type": "keybind",
-          "default": "SUPER + S",
-          "description": "Toggle default special scratchpad workspace"
-        },
-        {
-          "key": "kbSystemMonitorWs",
-          "label": "Toggle System Monitor Special Workspace",
-          "type": "keybind",
-          "default": "CTRL + SHIFT + Escape",
-          "description": "Toggle dedicated system monitor scratchpad"
-        },
-        {
-          "key": "kbMusicWs",
-          "label": "Toggle Music Player Special Workspace",
-          "type": "keybind",
-          "default": "SUPER + M",
-          "description": "Toggle dedicated music scratchpad"
-        },
-        {
-          "key": "kbCommunicationWs",
-          "label": "Toggle Chat / Discord Special Workspace",
-          "type": "keybind",
-          "default": "SUPER + D",
-          "description": "Toggle dedicated communications scratchpad"
-        },
-        {
-          "key": "kbTodoWs",
-          "label": "Toggle Notes / Todo Special Workspace",
-          "type": "keybind",
-          "default": "SUPER + R",
-          "description": "Toggle dedicated todo notes scratchpad"
-        },
+        }
+      ]
+    },
+    {
+      "id": "keybinds_apps",
+      "label": "Applications",
+      "description": "Launch shortcuts for system applications.",
+      "options": [
         {
           "key": "kbTerminal",
           "label": "Launch Terminal",
@@ -717,7 +710,14 @@
           "type": "keybind",
           "default": "CTRL + ALT + V",
           "description": "Launch configured audio control panel"
-        },
+        }
+      ]
+    },
+    {
+      "id": "keybinds_utilities",
+      "label": "Utilities",
+      "description": "Screenshot, screen recording, and color picker tools.",
+      "options": [
         {
           "key": "kbScreenshot",
           "label": "Screenshot (Full Screen)",
@@ -726,18 +726,18 @@
           "description": "Capture full screen screenshot"
         },
         {
-          "key": "kbScreenshotFreeze",
-          "label": "Screenshot (Freeze Screen)",
-          "type": "keybind",
-          "default": "SUPER + SHIFT + S",
-          "description": "Freeze display and open area selection for screenshot"
-        },
-        {
           "key": "kbScreenshotRegion",
           "label": "Screenshot (Region Direct)",
           "type": "keybind",
           "default": "SUPER + SHIFT + ALT + S",
           "description": "Capture selected region"
+        },
+        {
+          "key": "kbScreenshotFreeze",
+          "label": "Screenshot (Freeze Screen)",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + S",
+          "description": "Freeze display and open area selection for screenshot"
         },
         {
           "key": "kbRecord",
@@ -766,7 +766,14 @@
           "type": "keybind",
           "default": "SUPER + SHIFT + C",
           "description": "Open screen color picker and copy hex to clipboard"
-        },
+        }
+      ]
+    },
+    {
+      "id": "keybinds_media",
+      "label": "Media & Volume",
+      "description": "Playback control and audio volume shortcuts.",
+      "options": [
         {
           "key": "kbMediaToggle",
           "label": "Media Play / Pause",
@@ -801,7 +808,14 @@
           "type": "keybind",
           "default": "SUPER + SHIFT + M",
           "description": "Toggle master audio mute"
-        },
+        }
+      ]
+    },
+    {
+      "id": "keybinds_session",
+      "label": "System & Session",
+      "description": "System lock, sleep, launcher, and panel visibility toggles.",
+      "options": [
         {
           "key": "kbLauncher",
           "label": "App Launcher / Search",
@@ -857,7 +871,14 @@
           "type": "keybind",
           "default": "SUPER + SHIFT + L",
           "description": "Put system to sleep immediately"
-        },
+        }
+      ]
+    },
+    {
+      "id": "keybinds_clipboard",
+      "label": "Clipboard & Emoji",
+      "description": "Clipboard history manager and emoji selector.",
+      "options": [
         {
           "key": "kbClipboard",
           "label": "Clipboard History Manager",
@@ -885,6 +906,48 @@
           "type": "keybind",
           "default": "SUPER + Period",
           "description": "Open emoji and symbol picker popup"
+        }
+      ]
+    },
+    {
+      "id": "keybinds_special_workspaces",
+      "label": "Special Workspaces",
+      "description": "Dedicated scratchpad workspaces for apps and tools.",
+      "options": [
+        {
+          "key": "kbSpecialWs",
+          "label": "Toggle Special Workspace (Scratchpad)",
+          "type": "keybind",
+          "default": "SUPER + S",
+          "description": "Toggle default special scratchpad workspace"
+        },
+        {
+          "key": "kbSystemMonitorWs",
+          "label": "Toggle System Monitor Special Workspace",
+          "type": "keybind",
+          "default": "CTRL + SHIFT + Escape",
+          "description": "Toggle dedicated system monitor scratchpad"
+        },
+        {
+          "key": "kbMusicWs",
+          "label": "Toggle Music Player Special Workspace",
+          "type": "keybind",
+          "default": "SUPER + M",
+          "description": "Toggle dedicated music scratchpad"
+        },
+        {
+          "key": "kbCommunicationWs",
+          "label": "Toggle Chat / Discord Special Workspace",
+          "type": "keybind",
+          "default": "SUPER + D",
+          "description": "Toggle dedicated communications scratchpad"
+        },
+        {
+          "key": "kbTodoWs",
+          "label": "Toggle Notes / Todo Special Workspace",
+          "type": "keybind",
+          "default": "SUPER + R",
+          "description": "Toggle dedicated todo notes scratchpad"
         }
       ]
     }
