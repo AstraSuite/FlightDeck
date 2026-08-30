@@ -20,6 +20,7 @@ class CaelestiaVars : public QObject {
     Q_PROPERTY(QVariantMap currentVars READ currentVars NOTIFY varsChanged)
     Q_PROPERTY(QVariantMap pendingVars READ pendingVars NOTIFY pendingChanged)
     Q_PROPERTY(QVariantList schemeColors READ schemeColors NOTIFY schemeColorsChanged)
+    Q_PROPERTY(QVariantList keybindSections READ keybindSections NOTIFY schemaLoaded)
 
 public:
     static CaelestiaVars* instance();
@@ -38,6 +39,7 @@ public:
     QVariantMap currentVars() const;
     QVariantMap pendingVars() const;
     QVariantList schemeColors() const;
+    QVariantList keybindSections() const;
 
     Q_INVOKABLE QVariant get(const QString& key, const QVariant& fallback = QVariant()) const;
     Q_INVOKABLE QVariant getDefault(const QString& key, const QVariant& fallback = QVariant()) const;

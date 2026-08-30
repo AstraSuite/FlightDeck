@@ -16,7 +16,7 @@ import FlightDeck.Hyprland 1.0
 PageBase {
     id: root
 
-    title: qsTr("Keyboard shortcuts")
+    title: qsTr("Keybinds")
 
     ColumnLayout {
         anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
@@ -29,12 +29,12 @@ PageBase {
             text: qsTr("Custom Keybinds")
         }
 
-        // Add Keybind via DialogRowButton (connected to custom keybinds list below)
+        // Add Keybind via DialogRowButton (standalone card)
         DialogRowButton {
             id: addBindBtn
             rootParent: root.modalOverlay
             first: true
-            last: FlightDeckWriter.customBinds.length === 0
+            last: true
             icon: "add_circle"
             label: qsTr("Add Keybind")
             header: qsTr("Add Custom Keybind")
@@ -309,7 +309,7 @@ PageBase {
                 required property int index
 
                 rootParent: root.modalOverlay
-                first: false
+                first: index === 0
                 last: index === FlightDeckWriter.customBinds.length - 1
                 icon: "keyboard"
 
@@ -620,7 +620,7 @@ PageBase {
         }
 
         Repeater {
-            model: HyprlandSchema.keybindSections
+            model: (CaelestiaVars.keybindSections && CaelestiaVars.keybindSections.length > 0) ? CaelestiaVars.keybindSections : HyprlandSchema.keybindSections
 
             delegate: ColumnLayout {
                 id: secCol
@@ -645,7 +645,7 @@ PageBase {
 
                         rootParent: root.modalOverlay
                         first: kbRow.index === 0
-                        last: kbRow.index === optRepeater.count - 1
+                        last: kbRow.index === (secCol.modelData.options ? secCol.modelData.options.length - 1 : -1)
                         isModifier: kbRow.modelData.type === "keybind_modifier" || kbRow.modelData.type === "modifier"
                         label: kbRow.modelData.label || kbRow.modelData.key
                         varKey: kbRow.modelData.key

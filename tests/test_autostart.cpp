@@ -77,6 +77,8 @@ int main(int argc, char* argv[]) {
     // Test 11: HyprlandSchema option catalog & serialization
     auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
     qDebug() << "HyprlandSchema total options:" << schema->optionCount();
+    qDebug() << "Keybind sections count:" << schema->keybindSections().size();
+    assert(schema->keybindSections().size() > 0);
     assert(schema->optionCount() >= 300);
     assert(schema->hasOption("general:border_size"));
     assert(schema->hasOption("input:touchpad:tap-to-click"));

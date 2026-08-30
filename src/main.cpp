@@ -43,6 +43,10 @@
 #endif
 
 int main(int argc, char* argv[]) {
+    Q_INIT_RESOURCE(resources);
+    Q_INIT_RESOURCE(schema_resources);
+    Q_INIT_RESOURCE(qml_resources);
+
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
     qputenv("QT_NO_XDG_DESKTOP_PORTAL", "1");
 

@@ -28,7 +28,7 @@ QtObject {
 
         // Input
         {
-            label: qsTr("Keyboard shortcuts"),
+            label: qsTr("Keybinds"),
             icon: "keyboard",
             description: qsTr("System bindings, application launchers, and custom keybinds"),
             category: "input"

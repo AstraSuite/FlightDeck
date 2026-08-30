@@ -218,6 +218,17 @@ QVariantList CaelestiaVars::sections() const {
     return m_sections;
 }
 
+QVariantList CaelestiaVars::keybindSections() const {
+    QVariantList list;
+    for (const auto& secVal : m_sections) {
+        QVariantMap sec = secVal.toMap();
+        if (sec.value(QStringLiteral("id")).toString().startsWith(QStringLiteral("keybinds"))) {
+            list.append(sec);
+        }
+    }
+    return list;
+}
+
 QVariantMap CaelestiaVars::getVariableSchema(const QString& key) const {
     return m_schemaOptions.value(key).toMap();
 }

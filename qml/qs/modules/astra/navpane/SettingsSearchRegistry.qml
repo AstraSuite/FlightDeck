@@ -537,7 +537,7 @@ QtObject {
         // Keybinds (PageIdx: 3)
         {
             pageIdx: 3,
-            category: "Keyboard shortcuts",
+            category: "Keybinds",
             title: "Terminal Shortcut",
             breadcrumb: "Keyboard shortcuts › Core Applications",
             subtext: "Shortcut key combination to launch terminal",
@@ -547,7 +547,7 @@ QtObject {
         },
         {
             pageIdx: 3,
-            category: "Keyboard shortcuts",
+            category: "Keybinds",
             title: "Application Launcher",
             breadcrumb: "Keyboard shortcuts › Core Applications",
             subtext: "Shortcut key combination to launch application menu",
@@ -557,7 +557,7 @@ QtObject {
         },
         {
             pageIdx: 3,
-            category: "Keyboard shortcuts",
+            category: "Keybinds",
             title: "Web Browser",
             breadcrumb: "Keyboard shortcuts › Core Applications",
             subtext: "Shortcut key combination to launch web browser",
@@ -567,7 +567,7 @@ QtObject {
         },
         {
             pageIdx: 3,
-            category: "Keyboard shortcuts",
+            category: "Keybinds",
             title: "File Manager",
             breadcrumb: "Keyboard shortcuts › Core Applications",
             subtext: "Shortcut key combination to launch file manager",
@@ -577,7 +577,7 @@ QtObject {
         },
         {
             pageIdx: 3,
-            category: "Keyboard shortcuts",
+            category: "Keybinds",
             title: "Close Active Window",
             breadcrumb: "Keyboard shortcuts › Window Actions",
             subtext: "Shortcut key combination to close active focused window",
@@ -587,7 +587,7 @@ QtObject {
         },
         {
             pageIdx: 3,
-            category: "Keyboard shortcuts",
+            category: "Keybinds",
             title: "Toggle Floating Window",
             breadcrumb: "Keyboard shortcuts › Window Actions",
             subtext: "Shortcut key combination to toggle window floating state",
@@ -597,7 +597,7 @@ QtObject {
         },
         {
             pageIdx: 3,
-            category: "Keyboard shortcuts",
+            category: "Keybinds",
             title: "Screen Lock",
             breadcrumb: "Keyboard shortcuts › Utilities & Actions",
             subtext: "Shortcut key combination to lock session",
@@ -607,7 +607,7 @@ QtObject {
         },
         {
             pageIdx: 3,
-            category: "Keyboard shortcuts",
+            category: "Keybinds",
             title: "Screenshot (Snip)",
             breadcrumb: "Keyboard shortcuts › Utilities & Actions",
             subtext: "Shortcut key combination to capture interactive screenshot region",
