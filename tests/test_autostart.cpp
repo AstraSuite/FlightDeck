@@ -8,6 +8,7 @@
 using namespace FlightDeck::Managers;
 
 int main(int argc, char* argv[]) {
+    Q_INIT_RESOURCE(test_schema_resources);
     QCoreApplication app(argc, argv);
     AutostartManager mgr;
 

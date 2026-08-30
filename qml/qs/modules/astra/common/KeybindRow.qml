@@ -30,15 +30,7 @@ DialogRowButton {
     header: root.isModifier ? qsTr("Edit Modifier Combination") : qsTr("Edit Keybinding")
     acceptLabel: qsTr("Save Keybinding")
 
-    subtext: {
-        if (root.isModifier) {
-            if (root.currentBindValue === qsTr("Disabled / Unbound")) {
-                return qsTr("Modifier: Disabled");
-            }
-            return qsTr("Modifier: %1 (used with [0-9])").arg(root.currentBindValue);
-        }
-        return root.currentBindValue;
-    }
+    subtext: root.currentBindValue
 
     onOpenChanged: {
         if (open) {

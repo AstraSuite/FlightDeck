@@ -228,7 +228,7 @@ def organize_into_groups(options: list[dict[str, Any]]) -> dict[str, Any]:
 
 def main():
     parser = argparse.ArgumentParser(description="Scrape Hyprland source code for configuration schemas")
-    parser.add_argument("--hyprland-src", type=Path, default=Path("/home/dim/Projects/Hyprland"), help="Path to Hyprland source root")
+    parser.add_argument("--hyprland-src", type=Path, default=Path.home() / "Projects" / "Hyprland", help="Path to Hyprland source root")
     parser.add_argument("--output-dir", type=Path, default=Path(__file__).parent.parent / "data" / "schema", help="Output directory for JSON schemas")
     args = parser.parse_args()
 

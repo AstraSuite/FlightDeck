@@ -1,4 +1,5 @@
 #include "hyprlandschema.hpp"
+#include <QCoreApplication>
 #include <QFile>
 #include <QDir>
 #include <QJsonDocument>
@@ -54,10 +55,14 @@ QVariantMap HyprlandSchema::pluginSchema(const QString& pluginId) const {
 }
 
 void HyprlandSchema::loadSchema() {
-    // Try embedded resource first, then local filesystem
+    const QString appDir = QCoreApplication::applicationDirPath();
+
+    // 1. Hyprland Options Catalog
     QStringList candidatePaths = {
         QStringLiteral(":/schema/hyprland_options.json"),
-        QStringLiteral("/home/dim/Projects/AstraSuite/FlightDeck/data/schema/hyprland_options.json")
+        appDir + QStringLiteral("/../data/schema/hyprland_options.json"),
+        appDir + QStringLiteral("/data/schema/hyprland_options.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/hyprland_options.json")
     };
 
     QByteArray catalogData;
@@ -76,9 +81,12 @@ void HyprlandSchema::loadSchema() {
         }
     }
 
+    // 2. Options Groups
     QStringList groupPaths = {
         QStringLiteral(":/schema/options.json"),
-        QStringLiteral("/home/dim/Projects/AstraSuite/FlightDeck/data/schema/options.json")
+        appDir + QStringLiteral("/../data/schema/options.json"),
+        appDir + QStringLiteral("/data/schema/options.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/options.json")
     };
 
     QByteArray groupsData;
@@ -97,13 +105,15 @@ void HyprlandSchema::loadSchema() {
         }
     }
 
-    // Load Caelestia variables schema & keybind sections
+    // 3. Load Caelestia variables schema & keybind sections
     m_caelestiaSections.clear();
     m_keybindSections.clear();
 
     QStringList caelestiaPaths = {
         QStringLiteral(":/schema/caelestia_variables.json"),
-        QStringLiteral("/home/dim/Projects/AstraSuite/FlightDeck/data/schema/caelestia_variables.json")
+        appDir + QStringLiteral("/../data/schema/caelestia_variables.json"),
+        appDir + QStringLiteral("/data/schema/caelestia_variables.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/caelestia_variables.json")
     };
 
     QByteArray caelestiaData;
@@ -153,10 +163,12 @@ void HyprlandSchema::loadSchema() {
         }
     }
 
-    // Load plugin schemas
+    // 4. Load plugin schemas
     QStringList pluginDirs = {
         QStringLiteral(":/schema/plugins"),
-        QStringLiteral("/home/dim/Projects/AstraSuite/FlightDeck/data/schema/plugins")
+        appDir + QStringLiteral("/../data/schema/plugins"),
+        appDir + QStringLiteral("/data/schema/plugins"),
+        QStringLiteral("/usr/share/flightdeck/schema/plugins")
     };
 
     m_supportedPlugins.clear();

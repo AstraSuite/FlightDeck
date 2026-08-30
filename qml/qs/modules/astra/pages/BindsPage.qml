@@ -648,7 +648,6 @@ PageBase {
                         last: kbRow.index === optRepeater.count - 1
                         isModifier: kbRow.modelData.type === "keybind_modifier" || kbRow.modelData.type === "modifier"
                         label: kbRow.modelData.label || kbRow.modelData.key
-                        subtext: kbRow.modelData.description || ""
                         varKey: kbRow.modelData.key
                     }
                 }

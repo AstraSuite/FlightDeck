@@ -100,6 +100,12 @@ qt_add_resources(flightdeck "resources"
     FILES
         assets/icons/flightdeck.svg
         assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
+)
+
+qt_add_resources(flightdeck "schema_resources"
+    PREFIX "/schema"
+    BASE_DIR "data/schema"
+    FILES
         data/schema/hyprland_options.json
         data/schema/options.json
         data/schema/plugins/hypr-dynamic-cursors.json
@@ -132,6 +138,15 @@ target_link_libraries(test_autostart PRIVATE
     Qt6::Core
     Qt6::Qml
     Qt6::Network
+)
+qt_add_resources(test_autostart "test_schema_resources"
+    PREFIX "/schema"
+    BASE_DIR "data/schema"
+    FILES
+        data/schema/hyprland_options.json
+        data/schema/options.json
+        data/schema/plugins/hypr-dynamic-cursors.json
+        data/schema/caelestia_variables.json
 )
 
 # Installation
