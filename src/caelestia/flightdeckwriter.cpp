@@ -14,6 +14,8 @@
 
 namespace FlightDeck::Caelestia {
 
+static QString unescapeLuaString(const QString& str);
+
 FlightDeckWriter* FlightDeckWriter::instance() {
     static FlightDeckWriter inst;
     return &inst;
@@ -468,7 +470,7 @@ static QVariantMap parseLuaTable(const QString& tableStr) {
             auto m = it.next();
             QString k = m.captured(1).trimmed();
             QString v = !m.captured(2).isNull() ? m.captured(2) : (!m.captured(3).isNull() ? m.captured(3) : m.captured(4));
-            matchMap[k] = v;
+            matchMap[k] = unescapeLuaString(v);
         }
         result[QStringLiteral("match")] = matchMap;
     }
@@ -494,7 +496,7 @@ static QVariantMap parseLuaTable(const QString& tableStr) {
             if (ok) {
                 result[k] = d;
             } else {
-                result[k] = strVal;
+                result[k] = unescapeLuaString(strVal);
             }
         }
     }
@@ -521,6 +523,35 @@ static QString escapeLuaString(const QString& str) {
             res += QStringLiteral("\\r");
         } else if (c == QLatin1Char('\t')) {
             res += QStringLiteral("\\t");
+        } else {
+            res += c;
+        }
+    }
+    return res;
+}
+
+static QString unescapeLuaString(const QString& str) {
+    QString res;
+    res.reserve(str.size());
+    for (int i = 0; i < str.size(); ++i) {
+        QChar c = str.at(i);
+        if (c == QLatin1Char('\\') && i + 1 < str.size()) {
+            QChar n = str.at(i + 1);
+            ++i;
+            if (n == QLatin1Char('\\')) {
+                res += QLatin1Char('\\');
+            } else if (n == QLatin1Char('"')) {
+                res += QLatin1Char('"');
+            } else if (n == QLatin1Char('n')) {
+                res += QLatin1Char('\n');
+            } else if (n == QLatin1Char('r')) {
+                res += QLatin1Char('\r');
+            } else if (n == QLatin1Char('t')) {
+                res += QLatin1Char('\t');
+            } else {
+                res += QLatin1Char('\\');
+                res += n;
+            }
         } else {
             res += c;
         }
@@ -564,13 +595,13 @@ static QVariantList parseLayerRulesFromContent(const QString& content) {
 
 static QVariantList parseCustomBindsFromContent(const QString& content) {
     QVariantList list;
-    static const QRegularExpression bindRe(QStringLiteral(R"RAW(hl\.bind\s*\(\s*["']([^"']+)["']\s*,\s*(?:hl\.dsp\.)?([a-zA-Z0-9_]+)\s*\(\s*(?:["']((?:\\.|[^"'\\])*)["'])?\s*\))RAW"));
+    static const QRegularExpression bindRe(QStringLiteral(R"RAW(hl\.bind\s*\(\s*["']([^"']+)["']\s*,\s*(?:hl\.dsp\.)?([a-zA-Z0-9_]+)\s*\(\s*(?:["']((?:\\.|[^"\\])*)["'])?\s*\))RAW"));
     auto it = bindRe.globalMatch(content);
     while (it.hasNext()) {
         auto m = it.next();
-        QString key = m.captured(1).trimmed();
+        QString key = unescapeLuaString(m.captured(1).trimmed());
         QString dsp = m.captured(2).trimmed();
-        QString args = m.captured(3).trimmed();
+        QString args = unescapeLuaString(m.captured(3).trimmed());
         if (dsp == QStringLiteral("exec_cmd")) {
             dsp = QStringLiteral("exec");
         }
@@ -591,14 +622,14 @@ static QVariantList parseAutostartEntriesFromContent(const QString& content) {
 
     // 1. Find hl.on("hyprland.start", function() ... end) blocks (onReload = false)
     static const QRegularExpression startBlockRe(QStringLiteral(R"RAW(hl\.on\s*\(\s*["']hyprland\.start["']\s*,\s*function\s*\(\s*\)([\s\S]*?)end\s*\))RAW"));
-    static const QRegularExpression execRe(QStringLiteral(R"RAW(hl\.exec_cmd\s*\(\s*["']((?:\\.|[^"'\\])*)["']\s*\))RAW"));
+    static const QRegularExpression execRe(QStringLiteral(R"RAW(hl\.exec_cmd\s*\(\s*["']((?:\\.|[^"\\])*)["']\s*\))RAW"));
 
     auto startBlockIt = startBlockRe.globalMatch(content);
     while (startBlockIt.hasNext()) {
         QString blockBody = startBlockIt.next().captured(1);
         auto execIt = execRe.globalMatch(blockBody);
         while (execIt.hasNext()) {
-            QString cmd = execIt.next().captured(1).trimmed();
+            QString cmd = unescapeLuaString(execIt.next().captured(1).trimmed());
             if (!cmd.isEmpty() && !seen.contains(cmd)) {
                 seen.insert(cmd);
                 QVariantMap entry;
@@ -615,7 +646,7 @@ static QVariantList parseAutostartEntriesFromContent(const QString& content) {
 
     auto remainingIt = execRe.globalMatch(remaining);
     while (remainingIt.hasNext()) {
-        QString cmd = remainingIt.next().captured(1).trimmed();
+        QString cmd = unescapeLuaString(remainingIt.next().captured(1).trimmed());
         if (!cmd.isEmpty() && !seen.contains(cmd)) {
             seen.insert(cmd);
             QVariantMap entry;
@@ -684,7 +715,7 @@ static void parseNestedLuaTable(const QString& tableBody, const QString& prefix,
             }
 
             if (valStr.startsWith(QLatin1Char('"')) && valStr.endsWith(QLatin1Char('"'))) {
-                outOptions[canonKey] = valStr.mid(1, valStr.length() - 2);
+                outOptions[canonKey] = unescapeLuaString(valStr.mid(1, valStr.length() - 2));
             } else if (valStr == QStringLiteral("true")) {
                 outOptions[canonKey] = true;
             } else if (valStr == QStringLiteral("false")) {
@@ -758,7 +789,7 @@ void FlightDeckWriter::loadFromFile() {
                 QString k = kv.captured(1).trimmed();
                 QString v = kv.captured(2).trimmed();
                 if (v.startsWith(QLatin1Char('"')) && v.endsWith(QLatin1Char('"'))) {
-                    mon[k] = v.mid(1, v.length() - 2);
+                    mon[k] = unescapeLuaString(v.mid(1, v.length() - 2));
                 } else if (v == QStringLiteral("true")) {
                     mon[k] = true;
                 } else if (v == QStringLiteral("false")) {

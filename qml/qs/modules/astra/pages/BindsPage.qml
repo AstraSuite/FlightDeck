@@ -235,10 +235,10 @@ PageBase {
                             if (!addBindBtn.recording) return;
                             let k = event.key;
                             let mods = [];
+                            if (event.modifiers & Qt.MetaModifier) mods.push("SUPER");
                             if (event.modifiers & Qt.ControlModifier) mods.push("CTRL");
                             if (event.modifiers & Qt.ShiftModifier) mods.push("SHIFT");
                             if (event.modifiers & Qt.AltModifier) mods.push("ALT");
-                            if (event.modifiers & Qt.MetaModifier) mods.push("SUPER");
 
                             if (k === Qt.Key_Escape) {
                                 if (mods.length === 0) {
@@ -554,10 +554,10 @@ PageBase {
                                 if (!editBindRow.recording) return;
                                 let k = event.key;
                                 let mods = [];
+                                if (event.modifiers & Qt.MetaModifier) mods.push("SUPER");
                                 if (event.modifiers & Qt.ControlModifier) mods.push("CTRL");
                                 if (event.modifiers & Qt.ShiftModifier) mods.push("SHIFT");
                                 if (event.modifiers & Qt.AltModifier) mods.push("ALT");
-                                if (event.modifiers & Qt.MetaModifier) mods.push("SUPER");
 
                                 if (k === Qt.Key_Escape) {
                                     if (mods.length === 0) {

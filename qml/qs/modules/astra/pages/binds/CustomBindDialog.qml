@@ -195,10 +195,10 @@ Popup {
             let k = event.key;
 
             let mods = [];
+            if (event.modifiers & Qt.MetaModifier) mods.push("SUPER");
             if (event.modifiers & Qt.ControlModifier) mods.push("CTRL");
             if (event.modifiers & Qt.ShiftModifier) mods.push("SHIFT");
             if (event.modifiers & Qt.AltModifier) mods.push("ALT");
-            if (event.modifiers & Qt.MetaModifier) mods.push("SUPER");
 
             if (k === Qt.Key_Escape) {
                 if (mods.length === 0) {
@@ -261,7 +261,10 @@ Popup {
                 else if (k === Qt.Key_Alt) modStr = "ALT";
                 else if (k === Qt.Key_Meta || k === Qt.Key_Super_L || k === Qt.Key_Super_R) modStr = "SUPER";
 
-                if (!mods.includes(modStr) && modStr !== "") mods.push(modStr);
+                if (!mods.includes(modStr) && modStr !== "") {
+                    if (modStr === "SUPER") mods.unshift(modStr);
+                    else mods.push(modStr);
+                }
                 lastMods = mods;
                 event.accepted = true;
             }

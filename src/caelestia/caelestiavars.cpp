@@ -17,6 +17,8 @@
 
 namespace FlightDeck::Caelestia {
 
+static QString unescapeLuaString(const QString& str);
+
 CaelestiaVars* CaelestiaVars::instance() {
     static CaelestiaVars inst;
     return &inst;
@@ -303,7 +305,7 @@ void CaelestiaVars::loadDefaults() {
             if (valStr.contains(QLatin1String("scheme.")) || valStr.contains(QLatin1String("..")) || valStr.startsWith(QLatin1String("rgba("))) {
                 m_defaults[key] = valStr;
             } else if (valStr.startsWith(QLatin1Char('"')) && valStr.endsWith(QLatin1Char('"'))) {
-                m_defaults[key] = valStr.mid(1, valStr.length() - 2);
+                m_defaults[key] = unescapeLuaString(valStr.mid(1, valStr.length() - 2));
             } else if (valStr == QStringLiteral("true")) {
                 m_defaults[key] = true;
             } else if (valStr == QStringLiteral("false")) {
@@ -314,7 +316,7 @@ void CaelestiaVars::loadDefaults() {
                 static const QRegularExpression strItemRe(QStringLiteral(R"(\"([^\"]*)\")"));
                 auto itemIt = strItemRe.globalMatch(inner);
                 while (itemIt.hasNext()) {
-                    items.append(itemIt.next().captured(1));
+                    items.append(unescapeLuaString(itemIt.next().captured(1)));
                 }
                 m_defaults[key] = items;
             } else {
@@ -391,7 +393,7 @@ void CaelestiaVars::loadFromFile() {
         if (valStr.contains(QLatin1String("scheme.")) || valStr.contains(QLatin1String("..")) || valStr.startsWith(QLatin1String("rgba("))) {
             m_savedVars[key] = valStr;
         } else if (valStr.startsWith(QLatin1Char('"')) && valStr.endsWith(QLatin1Char('"'))) {
-            m_savedVars[key] = valStr.mid(1, valStr.length() - 2);
+            m_savedVars[key] = unescapeLuaString(valStr.mid(1, valStr.length() - 2));
         } else if (valStr == QStringLiteral("true")) {
             m_savedVars[key] = true;
         } else if (valStr == QStringLiteral("false")) {
@@ -402,7 +404,7 @@ void CaelestiaVars::loadFromFile() {
             static const QRegularExpression strItemRe(QStringLiteral(R"(\"([^\"]*)\")"));
             auto itemIt = strItemRe.globalMatch(inner);
             while (itemIt.hasNext()) {
-                items.append(itemIt.next().captured(1));
+                items.append(unescapeLuaString(itemIt.next().captured(1)));
             }
             m_savedVars[key] = items;
         } else {
@@ -806,6 +808,35 @@ static QString escapeLuaString(const QString& str) {
             res += QStringLiteral("\\r");
         } else if (c == QLatin1Char('\t')) {
             res += QStringLiteral("\\t");
+        } else {
+            res += c;
+        }
+    }
+    return res;
+}
+
+static QString unescapeLuaString(const QString& str) {
+    QString res;
+    res.reserve(str.size());
+    for (int i = 0; i < str.size(); ++i) {
+        QChar c = str.at(i);
+        if (c == QLatin1Char('\\') && i + 1 < str.size()) {
+            QChar n = str.at(i + 1);
+            ++i;
+            if (n == QLatin1Char('\\')) {
+                res += QLatin1Char('\\');
+            } else if (n == QLatin1Char('"')) {
+                res += QLatin1Char('"');
+            } else if (n == QLatin1Char('n')) {
+                res += QLatin1Char('\n');
+            } else if (n == QLatin1Char('r')) {
+                res += QLatin1Char('\r');
+            } else if (n == QLatin1Char('t')) {
+                res += QLatin1Char('\t');
+            } else {
+                res += QLatin1Char('\\');
+                res += n;
+            }
         } else {
             res += c;
         }
