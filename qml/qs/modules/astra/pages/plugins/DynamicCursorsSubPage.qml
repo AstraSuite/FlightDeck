@@ -37,21 +37,39 @@ PageBase {
             onToggled: CaelestiaVars.set("plugin:dynamic-cursors:enabled", checked)
         }
 
-        DialogSelectButton {
-            varKey: "plugin:dynamic-cursors:mode"
+        SelectRow {
             label: qsTr("Simulation Mode")
             subtext: qsTr("Cursor shape simulation algorithm")
-            header: qsTr("Select Cursor Simulation Mode")
-            options: [
-                { id: "tilt", label: qsTr("Tilt (Air Drag Simulation)") },
-                { id: "rotate", label: qsTr("Rotate (Stick Dragging Simulation)") },
-                { id: "stretch", label: qsTr("Stretch (Comic Motion Squish/Stretch)") },
-                { id: "none", label: qsTr("None (Shake-to-find only)") }
-            ]
-            currentValue: CaelestiaVars.pendingVars["plugin:dynamic-cursors:mode"] ?? CaelestiaVars.currentVars["plugin:dynamic-cursors:mode"] ?? HyprlandSchema.getDefault("plugin:dynamic-cursors:mode", "tilt")
-            onSelected: function(opt) {
-                CaelestiaVars.set("plugin:dynamic-cursors:mode", opt.id);
+            fallbackText: {
+                const cur = CaelestiaVars.pendingVars["plugin:dynamic-cursors:mode"] ?? CaelestiaVars.currentVars["plugin:dynamic-cursors:mode"] ?? HyprlandSchema.getDefault("plugin:dynamic-cursors:mode", "tilt");
+                if (cur === "tilt") return qsTr("Tilt (Air Drag Simulation)");
+                if (cur === "rotate") return qsTr("Rotate (Stick Dragging Simulation)");
+                if (cur === "stretch") return qsTr("Stretch (Comic Motion Squish/Stretch)");
+                if (cur === "none") return qsTr("None (Shake-to-find only)");
+                return String(cur);
             }
+            menuItems: [
+                MenuItem {
+                    text: qsTr("Tilt (Air Drag Simulation)")
+                    icon: "air"
+                    onClicked: CaelestiaVars.set("plugin:dynamic-cursors:mode", "tilt")
+                },
+                MenuItem {
+                    text: qsTr("Rotate (Stick Dragging Simulation)")
+                    icon: "rotate_right"
+                    onClicked: CaelestiaVars.set("plugin:dynamic-cursors:mode", "rotate")
+                },
+                MenuItem {
+                    text: qsTr("Stretch (Comic Motion Squish/Stretch)")
+                    icon: "aspect_ratio"
+                    onClicked: CaelestiaVars.set("plugin:dynamic-cursors:mode", "stretch")
+                },
+                MenuItem {
+                    text: qsTr("None (Shake-to-find only)")
+                    icon: "block"
+                    onClicked: CaelestiaVars.set("plugin:dynamic-cursors:mode", "none")
+                }
+            ]
         }
 
         StepperRow {
