@@ -66,7 +66,8 @@ Item {
 
     Layout.fillWidth: true
     implicitHeight: openButton.implicitHeight
-    z: open || dialogTransition.running ? 2 : 0
+    readonly property bool isTransitioning: openTransition.running || closeTransition.running
+    z: open || root.isTransitioning ? 2 : 0
 
     BlobGroup {
         id: blobGroup
@@ -74,7 +75,7 @@ Item {
         color: root.open ? Colours.palette.m3surfaceContainerHighest : Colours.tPalette.m3surfaceContainer
 
         Behavior on color {
-            enabled: dialogTransition.running
+            enabled: root.isTransitioning
             CAnim {}
         }
     }
@@ -90,9 +91,9 @@ Item {
     }
 
     Connections {
-        target: dialogTransition
+        target: closeTransition
         function onRunningChanged() {
-            if (!dialogTransition.running && !root.open) {
+            if (!closeTransition.running && !root.open) {
                 dialogWrapper.parent = root;
                 dialogWrapper.x = 0;
                 dialogWrapper.y = 0;
@@ -110,6 +111,7 @@ Item {
         y: 0
         width: root.width
         height: openButton.implicitHeight
+        state: root.open ? "open" : "closed"
 
         states: [
             State {
@@ -186,28 +188,56 @@ Item {
             }
         ]
 
-        transitions: Transition {
-            id: dialogTransition
+        transitions: [
+            Transition {
+                id: openTransition
+                from: "closed"
+                to: "open"
 
-            SequentialAnimation {
-                ScriptAction {
-                    script: root.reparentWrapper()
+                SequentialAnimation {
+                    ScriptAction {
+                        script: root.reparentWrapper()
+                    }
+                    Anim {
+                        properties: "x,y"
+                    }
+                }
+                PropertyAction {
+                    property: "enabled"
                 }
                 Anim {
-                    properties: "x,y"
+                    properties: "opacity,radius,topLeftRadius,topRightRadius,bottomLeftRadius,bottomRightRadius"
+                    type: Anim.DefaultEffects
+                }
+                Anim {
+                    properties: "width,height"
+                }
+            },
+            Transition {
+                id: closeTransition
+                from: "open"
+                to: "closed"
+
+                SequentialAnimation {
+                    Anim {
+                        properties: "x,y"
+                    }
+                    ScriptAction {
+                        script: root.reparentWrapper()
+                    }
+                }
+                PropertyAction {
+                    property: "enabled"
+                }
+                Anim {
+                    properties: "opacity,radius,topLeftRadius,topRightRadius,bottomLeftRadius,bottomRightRadius"
+                    type: Anim.DefaultEffects
+                }
+                Anim {
+                    properties: "width,height"
                 }
             }
-            PropertyAction {
-                property: "enabled"
-            }
-            Anim {
-                properties: "opacity,radius,topLeftRadius,topRightRadius,bottomLeftRadius,bottomRightRadius"
-                type: Anim.DefaultEffects
-            }
-            Anim {
-                properties: "width,height"
-            }
-        }
+        ]
 
         Elevation {
             id: elevation
@@ -261,7 +291,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: implicitHeight
-            color: (root.open || dialogTransition.running) ? "transparent" : Colours.tPalette.m3surfaceContainer
+            color: (root.open || root.isTransitioning) ? "transparent" : Colours.tPalette.m3surfaceContainer
 
             first: root.first
             last: root.last
