@@ -408,8 +408,8 @@ static QVariantMap parseLuaTable(const QString& tableStr) {
         }
     }
 
-    if (result.contains(QStringLiteral("no_blur"))) {
-        result[QStringLiteral("noblur")] = result.value(QStringLiteral("no_blur"));
+    if (result.contains(QStringLiteral("noblur"))) {
+        result[QStringLiteral("no_blur")] = result.value(QStringLiteral("noblur"));
     }
 
     return result;
@@ -458,6 +458,9 @@ static QVariantList parseCustomBindsFromContent(const QString& content) {
         QString key = m.captured(1).trimmed();
         QString dsp = m.captured(2).trimmed();
         QString args = m.captured(3).trimmed();
+        if (dsp == QStringLiteral("exec_cmd")) {
+            dsp = QStringLiteral("exec");
+        }
         QVariantMap b{
             { QStringLiteral("key"), key },
             { QStringLiteral("dispatcher"), dsp },
@@ -959,12 +962,14 @@ QString FlightDeckWriter::formatLua() const {
             }
             for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
                 if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source")) continue;
+                if (it.key() == QStringLiteral("noblur")) continue; // written as no_blur
+                const QString k = (it.key() == QStringLiteral("noblur")) ? QStringLiteral("no_blur") : it.key();
                 if (it.value().typeId() == QMetaType::Bool) {
-                    windowRulesStr += QStringLiteral("    %1 = %2,\n").arg(it.key(), it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+                    windowRulesStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
                 } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
-                    windowRulesStr += QStringLiteral("    %1 = %2,\n").arg(it.key(), it.value().toString());
+                    windowRulesStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toString());
                 } else {
-                    windowRulesStr += QStringLiteral("    %1 = \"%2\",\n").arg(it.key(), it.value().toString());
+                    windowRulesStr += QStringLiteral("    %1 = \"%2\",\n").arg(k, it.value().toString());
                 }
             }
             windowRulesStr += QStringLiteral("})\n");
@@ -1017,7 +1022,13 @@ QString FlightDeckWriter::formatLua() const {
             if (bind.value(QStringLiteral("unbindFirst")).toBool()) {
                 out += QStringLiteral("hl.unbind(\"%1\")\n").arg(key);
             }
-            out += QStringLiteral("hl.bind(\"%1\", hl.dsp.%2(\"%3\"))\n").arg(key, dsp, args);
+            if (dsp == QStringLiteral("exec") || dsp == QStringLiteral("exec_cmd")) {
+                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.exec_cmd(\"%2\"))\n").arg(key, args);
+            } else if (args.isEmpty()) {
+                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.%2())\n").arg(key, dsp);
+            } else {
+                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.%2(\"%3\"))\n").arg(key, dsp, args);
+            }
         }
         out += QStringLiteral("\n");
     }

@@ -114,7 +114,7 @@ PageBase {
                 if (isPin) ruleMap["pin"] = true;
                 if (isCenter) ruleMap["center"] = true;
                 if (isOpaque) ruleMap["opaque"] = true;
-                if (isNoBlur) ruleMap["noblur"] = true;
+                if (isNoBlur) ruleMap["no_blur"] = true;
                 if (isFullscreen) ruleMap["fullscreen"] = true;
                 if (targetWorkspace.trim() !== "") ruleMap["workspace"] = targetWorkspace.trim();
                 if (targetSize.trim() !== "") ruleMap["size"] = targetSize.trim();
@@ -492,7 +492,7 @@ PageBase {
                     if (isPin) ruleMap["pin"] = true;
                     if (isCenter) ruleMap["center"] = true;
                     if (isOpaque) ruleMap["opaque"] = true;
-                    if (isNoBlur) ruleMap["noblur"] = true;
+                    if (isNoBlur) ruleMap["no_blur"] = true;
                     if (isFullscreen) ruleMap["fullscreen"] = true;
                     if (targetWorkspace.trim() !== "") ruleMap["workspace"] = targetWorkspace.trim();
                     if (targetSize.trim() !== "") ruleMap["size"] = targetSize.trim();
