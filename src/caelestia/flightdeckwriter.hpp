@@ -60,6 +60,7 @@ public:
     Q_INVOKABLE void setHyprOption(const QString& key, const QVariant& value);
     Q_INVOKABLE QVariant getHyprOption(const QString& key, const QVariant& fallback = QVariant()) const;
     Q_INVOKABLE bool hasHyprOption(const QString& key) const;
+    Q_INVOKABLE void removeHyprOption(const QString& key);
 
     Q_INVOKABLE void addWindowRule(const QVariantMap& rule);
     Q_INVOKABLE void removeWindowRule(int index);

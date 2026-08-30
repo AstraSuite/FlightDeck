@@ -99,6 +99,17 @@ int main(int argc, char* argv[]) {
     assert(serializedLua.contains("snap = {"));
     assert(serializedLua.contains("window_gap = 10,"));
 
+    // Test 13: FlightDeckWriter getHyprOption/hasHyprOption/removeHyprOption canonical alias resolution
+    writer->setHyprOption("mouseAccelProfile", "flat");
+    assert(writer->hasHyprOption("mouseAccelProfile"));
+    assert(writer->hasHyprOption("input:accel_profile"));
+    assert(writer->getHyprOption("mouseAccelProfile").toString() == "flat");
+    assert(writer->getHyprOption("input:accel_profile").toString() == "flat");
+
+    writer->removeHyprOption("mouseAccelProfile");
+    assert(!writer->hasHyprOption("mouseAccelProfile"));
+    assert(!writer->hasHyprOption("input:accel_profile"));
+
     qDebug() << "=== ALL AUTOSTART & SCHEMA UNIT TESTS PASSED SUCCESSFULLY! ===";
     return 0;
 }

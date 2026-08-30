@@ -68,7 +68,6 @@ ConnectedRect {
 
                 StyledText {
                     id: titleText
-                    Layout.fillWidth: true
                     text: root.text
                     font: Tokens.font.body.small
                     color: Colours.palette.m3onSurface
@@ -88,6 +87,10 @@ ConnectedRect {
                         }
                         root.reset();
                     }
+                }
+
+                Item {
+                    Layout.fillWidth: true
                 }
             }
 

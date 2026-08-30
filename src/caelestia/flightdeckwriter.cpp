@@ -168,8 +168,9 @@ void FlightDeckWriter::setHyprOptions(const QVariantMap& options) {
 }
 
 void FlightDeckWriter::setHyprOption(const QString& key, const QVariant& value) {
-    if (m_hyprOptions.value(key) != value) {
-        m_hyprOptions[key] = value;
+    QString canonicalKey = FlightDeck::Hyprland::HyprlandSchema::instance()->toHyprKey(key);
+    if (m_hyprOptions.value(canonicalKey) != value) {
+        m_hyprOptions[canonicalKey] = value;
         m_isDirty = true;
         emit hyprOptionsChanged();
         emit dirtyChanged();
@@ -177,6 +178,10 @@ void FlightDeckWriter::setHyprOption(const QString& key, const QVariant& value) 
 }
 
 QVariant FlightDeckWriter::getHyprOption(const QString& key, const QVariant& fallback) const {
+    QString canonicalKey = FlightDeck::Hyprland::HyprlandSchema::instance()->toHyprKey(key);
+    if (m_hyprOptions.contains(canonicalKey)) {
+        return m_hyprOptions.value(canonicalKey);
+    }
     if (m_hyprOptions.contains(key)) {
         return m_hyprOptions.value(key);
     }
@@ -184,7 +189,26 @@ QVariant FlightDeckWriter::getHyprOption(const QString& key, const QVariant& fal
 }
 
 bool FlightDeckWriter::hasHyprOption(const QString& key) const {
-    return m_hyprOptions.contains(key);
+    QString canonicalKey = FlightDeck::Hyprland::HyprlandSchema::instance()->toHyprKey(key);
+    return m_hyprOptions.contains(canonicalKey) || m_hyprOptions.contains(key);
+}
+
+void FlightDeckWriter::removeHyprOption(const QString& key) {
+    QString canonicalKey = FlightDeck::Hyprland::HyprlandSchema::instance()->toHyprKey(key);
+    bool changed = false;
+    if (m_hyprOptions.contains(canonicalKey)) {
+        m_hyprOptions.remove(canonicalKey);
+        changed = true;
+    }
+    if (m_hyprOptions.contains(key)) {
+        m_hyprOptions.remove(key);
+        changed = true;
+    }
+    if (changed) {
+        m_isDirty = true;
+        emit hyprOptionsChanged();
+        emit dirtyChanged();
+    }
 }
 
 void FlightDeckWriter::addWindowRule(const QVariantMap& rule) {
