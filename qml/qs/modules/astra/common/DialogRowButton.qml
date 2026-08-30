@@ -74,7 +74,7 @@ Item {
         color: root.open ? Colours.palette.m3surfaceContainerHighest : Colours.tPalette.m3surfaceContainer
 
         Behavior on color {
-            enabled: root.Component.status === Component.Ready
+            enabled: dialogTransition.running
             CAnim {}
         }
     }
@@ -231,8 +231,7 @@ Item {
             anchors.fill: parent
             first: root.first
             last: root.last
-            visible: !root.open && opacity > 0
-            opacity: 1 - elevation.opacity
+            visible: !root.open
             color: Colours.tPalette.m3surfaceContainer
         }
 
@@ -262,7 +261,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: implicitHeight
-            color: "transparent"
+            color: (root.open || dialogTransition.running) ? "transparent" : Colours.tPalette.m3surfaceContainer
 
             first: root.first
             last: root.last

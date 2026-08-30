@@ -52,7 +52,7 @@ signals:
 
 private:
     qreal m_smoothing = 32.0;
-    QColor m_color{ 0x44, 0x88, 0xff };
+    QColor m_color;
     bool m_cornerFill = true;
     QList<BlobShape*> m_shapes;
     BlobInvertedRect* m_invertedRect = nullptr;

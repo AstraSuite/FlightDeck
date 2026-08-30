@@ -207,7 +207,7 @@ DialogRowButton {
                         keyStr = String.fromCharCode(k);
                     } else {
                         let map = {
-                            [Qt.Key_Escape]: "Escape",
+                            [Qt.Key_Escape]: "escape",
                             [Qt.Key_Return]: "Return",
                             [Qt.Key_Enter]: "Return",
                             [Qt.Key_Space]: "Space",

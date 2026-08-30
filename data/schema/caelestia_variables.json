@@ -925,7 +925,7 @@
           "key": "kbSystemMonitorWs",
           "label": "Toggle System Monitor Special Workspace",
           "type": "keybind",
-          "default": "CTRL + SHIFT + Escape",
+          "default": "CTRL + SHIFT + escape",
           "description": "Toggle dedicated system monitor scratchpad"
         },
         {
