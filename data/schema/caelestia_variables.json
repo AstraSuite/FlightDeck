@@ -53,6 +53,7 @@
       "options": [
         {
           "key": "touchpadDisableTyping",
+          "hyprKeyword": "input:touchpad:disable_while_typing",
           "label": "Disable Touchpad While Typing",
           "type": "bool",
           "default": true,
@@ -60,6 +61,7 @@
         },
         {
           "key": "touchpadScrollFactor",
+          "hyprKeyword": "input:touchpad:scroll_factor",
           "label": "Touchpad Scroll Speed Factor",
           "type": "float",
           "min": 0.1,
@@ -80,6 +82,7 @@
         },
         {
           "key": "workspaceSwipeFingers",
+          "hyprKeyword": "gestures:workspace_swipe_fingers",
           "label": "Hyprland Swipe Fingers",
           "type": "int",
           "min": 3,
@@ -107,6 +110,7 @@
       "options": [
         {
           "key": "blurEnabled",
+          "hyprKeyword": "decoration:blur:enabled",
           "label": "Enable Blur",
           "type": "bool",
           "default": true,
@@ -114,6 +118,7 @@
         },
         {
           "key": "blurSpecialWs",
+          "hyprKeyword": "decoration:blur:special",
           "label": "Blur Special Workspaces",
           "type": "bool",
           "default": false,
@@ -121,6 +126,7 @@
         },
         {
           "key": "blurPopups",
+          "hyprKeyword": "decoration:blur:popups",
           "label": "Blur UI Popups",
           "type": "bool",
           "default": true,
@@ -128,6 +134,7 @@
         },
         {
           "key": "blurInputMethods",
+          "hyprKeyword": "decoration:blur:input_methods",
           "label": "Blur Input Methods",
           "type": "bool",
           "default": true,
@@ -135,6 +142,7 @@
         },
         {
           "key": "blurSize",
+          "hyprKeyword": "decoration:blur:size",
           "label": "Blur Radius / Size",
           "type": "int",
           "min": 1,
@@ -145,6 +153,7 @@
         },
         {
           "key": "blurPasses",
+          "hyprKeyword": "decoration:blur:passes",
           "label": "Blur Passes",
           "type": "int",
           "min": 1,
@@ -155,6 +164,7 @@
         },
         {
           "key": "blurXray",
+          "hyprKeyword": "decoration:blur:xray",
           "label": "Blur X-Ray Mode",
           "type": "bool",
           "default": false,
@@ -169,6 +179,7 @@
       "options": [
         {
           "key": "shadowEnabled",
+          "hyprKeyword": "decoration:shadow:enabled",
           "label": "Enable Shadows",
           "type": "bool",
           "default": true,
@@ -176,6 +187,7 @@
         },
         {
           "key": "shadowRange",
+          "hyprKeyword": "decoration:shadow:range",
           "label": "Shadow Range / Blur",
           "type": "int",
           "min": 1,
@@ -186,6 +198,7 @@
         },
         {
           "key": "shadowRenderPower",
+          "hyprKeyword": "decoration:shadow:render_power",
           "label": "Shadow Falloff Power",
           "type": "int",
           "min": 1,
@@ -196,6 +209,8 @@
         },
         {
           "key": "shadowColour",
+          "hyprKeyword": "decoration:shadow:color",
+          "format": "color_argb_hex",
           "label": "Shadow Color",
           "type": "color",
           "default": "rgba(\" .. scheme.shadow .. \"60)",
@@ -210,6 +225,7 @@
       "options": [
         {
           "key": "workspaceGaps",
+          "hyprKeyword": "general:gaps_workspaces",
           "label": "Workspace Gaps",
           "type": "int",
           "min": 0,
@@ -220,6 +236,7 @@
         },
         {
           "key": "windowGapsIn",
+          "hyprKeyword": "general:gaps_in",
           "label": "Inner Window Gaps",
           "type": "int",
           "min": 0,
@@ -230,6 +247,7 @@
         },
         {
           "key": "windowGapsOut",
+          "hyprKeyword": "general:gaps_out",
           "label": "Outer Screen Gaps",
           "type": "int",
           "min": 0,
@@ -240,6 +258,7 @@
         },
         {
           "key": "singleWindowGapsOut",
+          "format": "single_window_gaps_out",
           "label": "Single Window Outer Gaps",
           "type": "int",
           "min": 0,
@@ -257,6 +276,7 @@
       "options": [
         {
           "key": "windowOpacity",
+          "format": "window_opacity_rule",
           "label": "Window Opacity",
           "type": "float",
           "min": 0.1,
@@ -267,6 +287,7 @@
         },
         {
           "key": "windowRounding",
+          "hyprKeyword": "decoration:rounding",
           "label": "Window Corner Radius",
           "type": "int",
           "min": 0,
@@ -277,6 +298,7 @@
         },
         {
           "key": "windowBorderSize",
+          "hyprKeyword": "general:border_size",
           "label": "Window Border Width",
           "type": "int",
           "min": 0,
@@ -287,6 +309,8 @@
         },
         {
           "key": "activeWindowBorderColour",
+          "hyprKeyword": "general:col.active_border",
+          "format": "color_argb_hex",
           "label": "Active Window Border Color",
           "type": "color",
           "default": "rgba(\" .. scheme.primary .. \"e6)",
@@ -294,6 +318,8 @@
         },
         {
           "key": "inactiveWindowBorderColour",
+          "hyprKeyword": "general:col.inactive_border",
+          "format": "color_argb_hex",
           "label": "Inactive Window Border Color",
           "type": "color",
           "default": "rgba(\" .. scheme.onSurfaceVariant .. \"11)",
@@ -328,6 +354,7 @@
         },
         {
           "key": "cursorTheme",
+          "format": "cursor_theme",
           "label": "Cursor Theme",
           "type": "string",
           "default": "sweet-cursors",
@@ -335,6 +362,8 @@
         },
         {
           "key": "cursorSize",
+          "hyprKeyword": "cursor:size",
+          "format": "cursor_size",
           "label": "Cursor Size (px)",
           "type": "int",
           "min": 16,

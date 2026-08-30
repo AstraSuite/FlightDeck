@@ -211,12 +211,75 @@ void FlightDeckWriter::removeHyprOption(const QString& key) {
     }
 }
 
+void FlightDeckWriter::applyWindowRuleOverIPC(const QVariantMap& rule) {
+    auto socket = Hyprland::HyprlandSocket::instance();
+    if (!socket || !socket->isOnline()) return;
+
+    QString ruleStr = QStringLiteral("hl.window_rule({\n");
+    if (rule.contains(QStringLiteral("match"))) {
+        const QVariantMap match = rule.value(QStringLiteral("match")).toMap();
+        ruleStr += QStringLiteral("    match = {\n");
+        for (auto it = match.constBegin(); it != match.constEnd(); ++it) {
+            if (it.value().typeId() == QMetaType::Bool) {
+                ruleStr += QStringLiteral("        %1 = %2,\n").arg(it.key(), it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+            } else {
+                ruleStr += QStringLiteral("        %1 = \"%2\",\n").arg(it.key(), it.value().toString());
+            }
+        }
+        ruleStr += QStringLiteral("    },\n");
+    }
+    for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
+        if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source")) continue;
+        const QString k = (it.key() == QStringLiteral("noblur")) ? QStringLiteral("no_blur") : it.key();
+        if (it.value().typeId() == QMetaType::Bool) {
+            ruleStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+        } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
+            ruleStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toString());
+        } else {
+            ruleStr += QStringLiteral("    %1 = \"%2\",\n").arg(k, it.value().toString());
+        }
+    }
+    ruleStr += QStringLiteral("})");
+
+    socket->evalLua(ruleStr);
+}
+
+void FlightDeckWriter::applyLayerRuleOverIPC(const QVariantMap& rule) {
+    auto socket = Hyprland::HyprlandSocket::instance();
+    if (!socket || !socket->isOnline()) return;
+
+    QString ruleStr = QStringLiteral("hl.layer_rule({\n");
+    if (rule.contains(QStringLiteral("match"))) {
+        const QVariantMap match = rule.value(QStringLiteral("match")).toMap();
+        ruleStr += QStringLiteral("    match = {\n");
+        for (auto it = match.constBegin(); it != match.constEnd(); ++it) {
+            ruleStr += QStringLiteral("        %1 = \"%2\",\n").arg(it.key(), it.value().toString());
+        }
+        ruleStr += QStringLiteral("    },\n");
+    }
+    for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
+        if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source")) continue;
+        const QString k = (it.key() == QStringLiteral("noblur")) ? QStringLiteral("no_blur") : it.key();
+        if (it.value().typeId() == QMetaType::Bool) {
+            ruleStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+        } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
+            ruleStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toString());
+        } else {
+            ruleStr += QStringLiteral("    %1 = \"%2\",\n").arg(k, it.value().toString());
+        }
+    }
+    ruleStr += QStringLiteral("})");
+
+    socket->evalLua(ruleStr);
+}
+
 void FlightDeckWriter::addWindowRule(const QVariantMap& rule) {
     QVariantMap r = rule;
     r[QStringLiteral("isReadOnly")] = false;
     r[QStringLiteral("source")] = QStringLiteral("flightdeck");
     m_windowRules.append(r);
     m_isDirty = true;
+    applyWindowRuleOverIPC(r);
     emit windowRulesChanged();
     emit dirtyChanged();
 }
@@ -240,6 +303,7 @@ void FlightDeckWriter::updateWindowRule(int index, const QVariantMap& rule) {
         r[QStringLiteral("source")] = QStringLiteral("flightdeck");
         m_windowRules[index] = r;
         m_isDirty = true;
+        applyWindowRuleOverIPC(r);
         emit windowRulesChanged();
         emit dirtyChanged();
     }
@@ -251,6 +315,7 @@ void FlightDeckWriter::addLayerRule(const QVariantMap& rule) {
     r[QStringLiteral("source")] = QStringLiteral("flightdeck");
     m_layerRules.append(r);
     m_isDirty = true;
+    applyLayerRuleOverIPC(r);
     emit layerRulesChanged();
     emit dirtyChanged();
 }
@@ -274,6 +339,7 @@ void FlightDeckWriter::updateLayerRule(int index, const QVariantMap& rule) {
         r[QStringLiteral("source")] = QStringLiteral("flightdeck");
         m_layerRules[index] = r;
         m_isDirty = true;
+        applyLayerRuleOverIPC(r);
         emit layerRulesChanged();
         emit dirtyChanged();
     }
@@ -978,6 +1044,20 @@ bool FlightDeckWriter::save() {
 
     file.write(lua.toUtf8());
     file.close();
+
+    // Instantly apply user-configured window rules and layer rules over IPC
+    for (const auto& item : m_windowRules) {
+        const QVariantMap r = item.toMap();
+        if (!r.value(QStringLiteral("isReadOnly")).toBool()) {
+            applyWindowRuleOverIPC(r);
+        }
+    }
+    for (const auto& item : m_layerRules) {
+        const QVariantMap r = item.toMap();
+        if (!r.value(QStringLiteral("isReadOnly")).toBool()) {
+            applyLayerRuleOverIPC(r);
+        }
+    }
 
     m_isDirty = false;
     emit dirtyChanged();

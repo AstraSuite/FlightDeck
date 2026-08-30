@@ -88,6 +88,9 @@ public:
     Q_INVOKABLE QVariantList activeHyprlandWindowRules() const;
     Q_INVOKABLE QVariantList activeHyprlandLayers() const;
 
+    Q_INVOKABLE void applyWindowRuleOverIPC(const QVariantMap& rule);
+    Q_INVOKABLE void applyLayerRuleOverIPC(const QVariantMap& rule);
+
     static QString flightDeckFilePath();
     static QString astraHelmFilePath();
 

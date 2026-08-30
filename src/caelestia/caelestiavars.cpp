@@ -492,52 +492,60 @@ void CaelestiaVars::syncFromHyprland() {
 
 void CaelestiaVars::applyKeywordToHyprland(const QString& key, const QVariant& value) {
     auto socket = Hyprland::HyprlandSocket::instance();
-    if (!socket) return;
+    if (!socket || !socket->isOnline()) return;
 
-    if (key == QStringLiteral("cursorTheme") || key == QStringLiteral("cursorSize")) {
-        QString theme = m_savedVars.value(QStringLiteral("cursorTheme"), m_defaults.value(QStringLiteral("cursorTheme"))).toString();
-        int size = m_savedVars.value(QStringLiteral("cursorSize"), m_defaults.value(QStringLiteral("cursorSize"))).toInt();
-        if (key == QStringLiteral("cursorTheme")) theme = value.toString();
-        if (key == QStringLiteral("cursorSize")) size = value.toInt();
-        socket->setCursor(theme, size);
-        return;
+    // 1. Check Caelestia schema descriptors
+    if (m_schemaOptions.contains(key)) {
+        const QVariantMap opt = m_schemaOptions.value(key).toMap();
+        const QString hyprKeyword = opt.value(QStringLiteral("hyprKeyword")).toString();
+        const QString format = opt.value(QStringLiteral("format")).toString();
+
+        if (format == QStringLiteral("cursor_theme") || format == QStringLiteral("cursor_size")) {
+            QString theme = m_savedVars.value(QStringLiteral("cursorTheme"), m_defaults.value(QStringLiteral("cursorTheme"))).toString();
+            int size = m_savedVars.value(QStringLiteral("cursorSize"), m_defaults.value(QStringLiteral("cursorSize"))).toInt();
+            if (key == QStringLiteral("cursorTheme")) theme = value.toString();
+            if (key == QStringLiteral("cursorSize")) size = value.toInt();
+            socket->setCursor(theme, size);
+            if (!hyprKeyword.isEmpty()) {
+                socket->send(QStringLiteral("keyword %1 %2").arg(hyprKeyword, QString::number(size)));
+            }
+            return;
+        }
+
+        if (format == QStringLiteral("single_window_gaps_out")) {
+            socket->send(QStringLiteral("keyword workspace w[tv1]s[false], gapsout:%1").arg(value.toInt()));
+            socket->send(QStringLiteral("keyword workspace f[1]s[false], gapsout:%1").arg(value.toInt()));
+            return;
+        }
+
+        if (format == QStringLiteral("window_opacity_rule")) {
+            socket->send(QStringLiteral("keyword windowrule opacity %1 override, match:fullscreen false").arg(QString::number(value.toDouble(), 'f', 2)));
+            return;
+        }
+
+        if (format == QStringLiteral("color_argb_hex") && !hyprKeyword.isEmpty()) {
+            QVariantMap parsed = parseColor(value.toString());
+            QString hex = parsed.value(QStringLiteral("hex")).toString();
+            QString alpha = parsed.value(QStringLiteral("alphaHex")).toString();
+            socket->send(QStringLiteral("keyword %1 0x%2%3").arg(hyprKeyword, alpha, hex));
+            return;
+        }
+
+        if (!hyprKeyword.isEmpty()) {
+            QString valStr;
+            if (value.typeId() == QMetaType::Bool) {
+                valStr = value.toBool() ? QStringLiteral("1") : QStringLiteral("0");
+            } else if (value.typeId() == QMetaType::Double || value.typeId() == QMetaType::Float) {
+                valStr = QString::number(value.toDouble(), 'g', 4);
+            } else {
+                valStr = value.toString();
+            }
+            socket->send(QStringLiteral("keyword %1 %2").arg(hyprKeyword, valStr));
+            return;
+        }
     }
 
-    if (key == QStringLiteral("singleWindowGapsOut")) {
-        socket->send(QStringLiteral("keyword workspace w[tv1]s[false], gapsout:%1").arg(value.toInt()));
-        socket->send(QStringLiteral("keyword workspace f[1]s[false], gapsout:%1").arg(value.toInt()));
-        return;
-    }
-
-    if (key == QStringLiteral("windowOpacity")) {
-        socket->send(QStringLiteral("keyword windowrule opacity %1 override, match:fullscreen false").arg(QString::number(value.toDouble(), 'f', 2)));
-        return;
-    }
-
-    if (key == QStringLiteral("activeWindowBorderColour") || key == QStringLiteral("activeWindowBorderColor")) {
-        QVariantMap parsed = parseColor(value.toString());
-        QString hex = parsed.value(QStringLiteral("hex")).toString();
-        QString alpha = parsed.value(QStringLiteral("alphaHex")).toString();
-        socket->send(QStringLiteral("keyword general:col.active_border 0x%1%2").arg(alpha, hex));
-        return;
-    }
-
-    if (key == QStringLiteral("inactiveWindowBorderColour") || key == QStringLiteral("inactiveWindowBorderColor")) {
-        QVariantMap parsed = parseColor(value.toString());
-        QString hex = parsed.value(QStringLiteral("hex")).toString();
-        QString alpha = parsed.value(QStringLiteral("alphaHex")).toString();
-        socket->send(QStringLiteral("keyword general:col.inactive_border 0x%1%2").arg(alpha, hex));
-        return;
-    }
-
-    if (key == QStringLiteral("shadowColour") || key == QStringLiteral("shadowColor")) {
-        QVariantMap parsed = parseColor(value.toString());
-        QString hex = parsed.value(QStringLiteral("hex")).toString();
-        QString alpha = parsed.value(QStringLiteral("alphaHex")).toString();
-        socket->send(QStringLiteral("keyword decoration:shadow:color 0x%1%2").arg(alpha, hex));
-        return;
-    }
-
+    // 2. Check Hyprland schema options (native & plugins)
     auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
     QString canonicalKey = schema->toHyprKey(key);
 
