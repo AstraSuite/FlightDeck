@@ -29,6 +29,7 @@
 #include "caelestia/astrahelmwriter.hpp"
 #include "caelestia/caelestiabootstrap.hpp"
 #include "hyprland/hyprlandstate.hpp"
+#include "hyprland/hyprlandschema.hpp"
 #include "managers/monitormanager.hpp"
 #include "managers/animationmanager.hpp"
 #include "managers/cursormanager.hpp"
@@ -125,6 +126,7 @@ int main(int argc, char* argv[]) {
     const char* hyprlandUris[] = { "FlightDeck.Hyprland", "Helm.Hyprland" };
     for (const char* uri : hyprlandUris) {
         qmlRegisterSingletonType<FlightDeck::Hyprland::HyprlandState>(uri, 1, 0, "HyprlandState", &FlightDeck::Hyprland::HyprlandState::create);
+        qmlRegisterSingletonType<FlightDeck::Hyprland::HyprlandSchema>(uri, 1, 0, "HyprlandSchema", &FlightDeck::Hyprland::HyprlandSchema::create);
     }
 
     const char* managerUris[] = { "FlightDeck.Managers", "Helm.Managers" };
