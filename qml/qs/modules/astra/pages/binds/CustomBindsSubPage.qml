@@ -219,7 +219,9 @@ PageBase {
                             onTextEdited: addBindBtn.paramInput = text
                         }
 
-                        AppPickerButtonRow {
+                        AppPickerPopup {
+                            Layout.alignment: Qt.AlignVCenter
+                            rootParent: root.modalOverlay
                             visible: addBindBtn.selectedCategory === "Launch Application"
                             onAppSelected: (exec, name, icon) => {
                                 addBindBtn.paramInput = exec;
@@ -536,7 +538,9 @@ PageBase {
                                 onTextEdited: editBindRow.paramInput = text
                             }
 
-                            AppPickerButtonRow {
+                            AppPickerPopup {
+                                Layout.alignment: Qt.AlignVCenter
+                                rootParent: root.modalOverlay
                                 visible: editBindRow.selectedCategory === "Launch Application"
                                 onAppSelected: (exec, name, icon) => {
                                     editBindRow.paramInput = exec;
