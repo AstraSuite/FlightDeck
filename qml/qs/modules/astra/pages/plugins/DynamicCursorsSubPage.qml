@@ -38,6 +38,7 @@ PageBase {
         }
 
         SelectRow {
+            id: modeSelectRow
             label: qsTr("Simulation Mode")
             subtext: qsTr("Cursor shape simulation algorithm")
             fallbackText: {
@@ -48,23 +49,34 @@ PageBase {
                 if (cur === "none") return qsTr("None (Shake-to-find only)");
                 return String(cur);
             }
+            active: {
+                const cur = CaelestiaVars.pendingVars["plugin:dynamic-cursors:mode"] ?? CaelestiaVars.currentVars["plugin:dynamic-cursors:mode"] ?? HyprlandSchema.getDefault("plugin:dynamic-cursors:mode", "tilt");
+                for (var i = 0; i < menuItems.length; i++) {
+                    if (menuItems[i].itemKey === cur) return menuItems[i];
+                }
+                return menuItems[0] || null;
+            }
             menuItems: [
                 MenuItem {
+                    property string itemKey: "tilt"
                     text: qsTr("Tilt (Air Drag Simulation)")
                     icon: "air"
                     onClicked: CaelestiaVars.set("plugin:dynamic-cursors:mode", "tilt")
                 },
                 MenuItem {
+                    property string itemKey: "rotate"
                     text: qsTr("Rotate (Stick Dragging Simulation)")
                     icon: "rotate_right"
                     onClicked: CaelestiaVars.set("plugin:dynamic-cursors:mode", "rotate")
                 },
                 MenuItem {
+                    property string itemKey: "stretch"
                     text: qsTr("Stretch (Comic Motion Squish/Stretch)")
                     icon: "aspect_ratio"
                     onClicked: CaelestiaVars.set("plugin:dynamic-cursors:mode", "stretch")
                 },
                 MenuItem {
+                    property string itemKey: "none"
                     text: qsTr("None (Shake-to-find only)")
                     icon: "block"
                     onClicked: CaelestiaVars.set("plugin:dynamic-cursors:mode", "none")

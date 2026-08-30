@@ -696,12 +696,31 @@ void FlightDeckWriter::loadFromFile() {
         const QString content = QString::fromUtf8(file.readAll());
         file.close();
 
-        // Parse hl.config({ ... }) options
-        static const QRegularExpression configRe(QStringLiteral(R"(hl\.config\s*\(\s*\{([\s\S]*?)\}\s*\))"));
-        auto cfgIt = configRe.globalMatch(content);
-        while (cfgIt.hasNext()) {
-            QString cfgBody = cfgIt.next().captured(1);
-            parseNestedLuaTable(cfgBody, QString(), m_hyprOptions);
+        // Parse hl.config({ ... }) options with balanced brace matching
+        int searchIdx = 0;
+        while ((searchIdx = content.indexOf(QStringLiteral("hl.config"), searchIdx)) != -1) {
+            int openBrace = content.indexOf(QLatin1Char('{'), searchIdx);
+            if (openBrace == -1) break;
+
+            int braceDepth = 1;
+            int i = openBrace + 1;
+            int len = content.length();
+            while (i < len && braceDepth > 0) {
+                if (content[i] == QLatin1Char('{')) {
+                    braceDepth++;
+                } else if (content[i] == QLatin1Char('}')) {
+                    braceDepth--;
+                }
+                if (braceDepth > 0) i++;
+            }
+
+            if (braceDepth == 0) {
+                QString cfgBody = content.mid(openBrace + 1, i - (openBrace + 1));
+                parseNestedLuaTable(cfgBody, QString(), m_hyprOptions);
+                searchIdx = i + 1;
+            } else {
+                searchIdx = openBrace + 1;
+            }
         }
 
         // Parse monitors: hl.monitor({ ... })
