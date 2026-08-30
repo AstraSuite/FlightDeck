@@ -16,7 +16,7 @@ import FlightDeck.Hyprland 1.0
 PageBase {
     id: root
 
-    title: qsTr("Custom keybinds")
+    title: qsTr("System & custom keybinds")
     isSubPage: true
 
     ColumnLayout {
@@ -27,7 +27,7 @@ PageBase {
 
         SectionHeader {
             first: true
-            text: qsTr("User-Defined Shortcuts")
+            text: qsTr("Custom Keybinds")
         }
 
         // Add Keybind via DialogRowButton
@@ -619,6 +619,83 @@ PageBase {
                 }
             }
         }
+
+        SectionHeader {
+            text: qsTr("Applications")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Terminal"); varKey: "kbTerminal" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Web Browser"); varKey: "kbBrowser" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Code / Text Editor"); varKey: "kbEditor" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("File Explorer"); varKey: "kbFileExplorer" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Audio Settings"); varKey: "kbAudioSettings" }
+
+        SectionHeader {
+            text: qsTr("Utilities")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Full Screenshot"); varKey: "kbScreenshot" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screenshot Region"); varKey: "kbScreenshotRegion" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screenshot Freeze"); varKey: "kbScreenshotFreeze" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screen Record"); varKey: "kbRecord" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screen Record Sound"); varKey: "kbRecordSound" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Screen Record Region"); varKey: "kbRecordRegion" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Color Picker"); varKey: "kbColorPicker" }
+
+        SectionHeader {
+            text: qsTr("Media & Volume")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Media Play / Pause"); varKey: "kbMediaToggle" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Next Track"); varKey: "kbMediaNext" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Previous Track"); varKey: "kbMediaPrev" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Stop Media"); varKey: "kbMediaStop" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Mute Volume"); varKey: "kbVolumeMute" }
+
+        SectionHeader {
+            text: qsTr("System & Session")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Application Launcher"); varKey: "kbLauncher" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Session Menu"); varKey: "kbSession" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Toggle Sidebar"); varKey: "kbShowSidebar" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Clear Notifications"); varKey: "kbClearNotifs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Toggle Panels"); varKey: "kbShowPanels" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Lock Screen"); varKey: "kbLock" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Restore Lock Screen"); varKey: "kbRestoreLock" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Sleep / Suspend"); varKey: "kbSleep" }
+
+        SectionHeader {
+            text: qsTr("Clipboard & Emoji")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Clipboard History"); varKey: "kbClipboard" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Delete Clipboard Entry"); varKey: "kbClipboardDel" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Paste Latest Entry"); varKey: "kbClipboardPasteLatest" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Emoji Picker"); varKey: "kbEmoji" }
+
+        SectionHeader {
+            text: qsTr("Special Workspaces")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Toggle Special Workspace"); varKey: "kbSpecialWs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("System Monitor"); varKey: "kbSystemMonitorWs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Music Workspace"); varKey: "kbMusicWs" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Communication"); varKey: "kbCommunicationWs" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Todo Workspace"); varKey: "kbTodoWs" }
+
+        SectionHeader {
+            text: qsTr("Window Management")
+        }
+
+        KeybindRow { rootParent: root.modalOverlay; first: true; label: qsTr("Close active window"); varKey: "kbCloseWindow" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Toggle floating"); varKey: "kbToggleWindowFloating" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Fullscreen"); varKey: "kbWindowFullscreen" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Maximized / Bordered Fullscreen"); varKey: "kbWindowBorderedFullscreen" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Center window"); varKey: "kbCenterWindow" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Normalize window size"); varKey: "kbNormalizeWindow" }
+        KeybindRow { rootParent: root.modalOverlay; label: qsTr("Pin window"); varKey: "kbPinWindow" }
+        KeybindRow { rootParent: root.modalOverlay; last: true; label: qsTr("Picture-in-picture"); varKey: "kbWindowPip" }
 
         Item {
             Layout.preferredHeight: Tokens.padding.large

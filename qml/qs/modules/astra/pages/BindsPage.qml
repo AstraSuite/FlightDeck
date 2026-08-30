@@ -34,17 +34,17 @@ StackPage {
 
                     NavRow {
                         first: true
-                        label: qsTr("Custom Hyprland Keybinds")
-                        subtext: qsTr("Add, edit, enable, or delete custom compositor shortcut bindings")
+                        label: qsTr("System & Custom Keybinds")
+                        subtext: qsTr("Custom shortcuts, application launchers, media controls, and system actions")
                         icon: "keyboard_command_key"
                         onClicked: root.nState.openSubPage(1)
                     }
 
                     NavRow {
                         last: true
-                        label: qsTr("Caelestia & System Shortcuts")
-                        subtext: qsTr("Caelestia dotfile shortcuts, workspace modifiers, and desktop bindings")
-                        icon: "auto_awesome"
+                        label: qsTr("Caelestia Modifiers & Navigation")
+                        subtext: qsTr("Workspace navigation modifiers, window resizing, and group tiling variables")
+                        icon: "tune"
                         onClicked: root.nState.openSubPage(2)
                     }
 
