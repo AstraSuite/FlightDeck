@@ -348,19 +348,43 @@ static QString formatLuaTree(const QVariantMap& tree, int indentLevel) {
 QString HyprlandSchema::serializeToLuaConfig(const QVariantMap& options) const {
     if (options.isEmpty()) return QString();
 
-    QVariantMap rootTree;
+    QVariantMap nativeTree;
+    QVariantMap pluginTree;
+
     for (auto it = options.constBegin(); it != options.constEnd(); ++it) {
         QString hyprKey = toHyprKey(it.key());
         QStringList parts = hyprKey.split(QLatin1Char(':'));
-        insertNestedOption(rootTree, parts, it.value());
+        if (parts.first() == QStringLiteral("plugin")) {
+            insertNestedOption(pluginTree, parts.mid(1), it.value());
+        } else {
+            insertNestedOption(nativeTree, parts, it.value());
+        }
     }
 
-    if (rootTree.isEmpty()) return QString();
+    QString result;
+    if (!nativeTree.isEmpty()) {
+        result += QStringLiteral("hl.config({\n");
+        result += formatLuaTree(nativeTree, 1);
+        result += QStringLiteral("})\n\n");
+    }
 
-    QString result = QStringLiteral("hl.config({\n");
-    result += formatLuaTree(rootTree, 1);
-    result += QStringLiteral("})\n");
-    return result;
+    if (!pluginTree.isEmpty()) {
+        for (auto it = pluginTree.constBegin(); it != pluginTree.constEnd(); ++it) {
+            const QString pluginName = it.key();
+            const QVariantMap pluginOpts = it.value().toMap();
+            result += QStringLiteral("if hl.plugin and hl.plugin.%1 then\n").arg(pluginName);
+            result += QStringLiteral("    hl.config({\n");
+            result += QStringLiteral("        plugin = {\n");
+            result += QStringLiteral("            %1 = {\n").arg(pluginName);
+            result += formatLuaTree(pluginOpts, 4);
+            result += QStringLiteral("            },\n");
+            result += QStringLiteral("        },\n");
+            result += QStringLiteral("    })\n");
+            result += QStringLiteral("end\n\n");
+        }
+    }
+
+    return result.trimmed() + (result.isEmpty() ? QString() : QStringLiteral("\n"));
 }
 
 } // namespace FlightDeck::Hyprland
