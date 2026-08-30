@@ -84,7 +84,16 @@ QtObject {
             }
         },
 
-        // 8: Autostart
+        // 8: Plugins & Extensions
+        Component {
+            StackPage {
+                Component {
+                    PluginsPage {}
+                }
+            }
+        },
+
+        // 9: Autostart
         Component {
             StackPage {
                 Component {

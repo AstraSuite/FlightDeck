@@ -62,6 +62,14 @@ QtObject {
             category: "rules"
         },
 
+        // Extensions
+        {
+            label: qsTr("Plugins & extensions"),
+            icon: "extension",
+            description: qsTr("Hyprland plugins, dynamic cursors, and physics"),
+            category: "plugins"
+        },
+
         // Startup
         {
             label: qsTr("Autostart"),
