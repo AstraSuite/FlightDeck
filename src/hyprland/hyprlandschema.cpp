@@ -350,12 +350,18 @@ QString HyprlandSchema::serializeToLuaConfig(const QVariantMap& options) const {
 
     QVariantMap nativeTree;
     QVariantMap pluginTree;
+    QMap<QString, QString> pluginFirstKeys;
 
     for (auto it = options.constBegin(); it != options.constEnd(); ++it) {
         QString hyprKey = toHyprKey(it.key());
         QStringList parts = hyprKey.split(QLatin1Char(':'));
         if (parts.first() == QStringLiteral("plugin")) {
             insertNestedOption(pluginTree, parts.mid(1), it.value());
+            QString pluginName = parts.size() > 1 ? parts[1] : QString();
+            pluginName.replace(QLatin1Char('-'), QLatin1Char('_'));
+            if (!pluginFirstKeys.contains(pluginName)) {
+                pluginFirstKeys[pluginName] = hyprKey;
+            }
         } else {
             insertNestedOption(nativeTree, parts, it.value());
         }
@@ -372,7 +378,28 @@ QString HyprlandSchema::serializeToLuaConfig(const QVariantMap& options) const {
         for (auto it = pluginTree.constBegin(); it != pluginTree.constEnd(); ++it) {
             const QString pluginName = it.key();
             const QVariantMap pluginOpts = it.value().toMap();
-            result += QStringLiteral("if hl.plugin and hl.plugin.%1 then\n").arg(pluginName);
+            QString checkKey = pluginFirstKeys.value(pluginName);
+            if (checkKey.isEmpty()) {
+                for (const auto& plugVal : m_supportedPlugins) {
+                    QVariantMap pMap = plugVal.toMap();
+                    QString luaNs = pMap.value(QStringLiteral("luaNamespace")).toString();
+                    if (luaNs == pluginName || pMap.value(QStringLiteral("id")).toString() == pluginName) {
+                        QVariantList sections = pMap.value(QStringLiteral("sections")).toList();
+                        if (!sections.isEmpty()) {
+                            QVariantList opts = sections.first().toMap().value(QStringLiteral("options")).toList();
+                            if (!opts.isEmpty()) {
+                                checkKey = opts.first().toMap().value(QStringLiteral("key")).toString();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (checkKey.isEmpty()) {
+                checkKey = QStringLiteral("plugin:%1").arg(pluginName);
+            }
+
+            result += QStringLiteral("if hl.get_config and hl.get_config(\"%1\") ~= nil then\n").arg(checkKey);
             result += QStringLiteral("    hl.config({\n");
             result += QStringLiteral("        plugin = {\n");
             result += QStringLiteral("            %1 = {\n").arg(pluginName);
