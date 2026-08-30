@@ -1,2 +1,3 @@
 module qs.modules.astra.pages.monitors
 MonitorLayoutPreview 1.0 MonitorLayoutPreview.qml
+MonitorCard 1.0 MonitorCard.qml

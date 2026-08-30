@@ -15,6 +15,82 @@ PageBase {
 
     title: qsTr("Window rules")
 
+    headerContent: Component {
+        SearchBar {
+            topPadding: Tokens.padding.small
+            bottomPadding: Tokens.padding.small
+
+            placeholderText: qsTr("Search window rules")
+            font: Tokens.font.body.medium
+
+            bg.color: Colours.tPalette.m3surfaceContainerLowest
+            bg.border.color: Colours.palette.m3outlineVariant
+            searchIcon.fontStyle: Tokens.font.icon.medium
+            searchIcon.anchors.leftMargin: Tokens.padding.largeIncreased
+            clearIcon.font: Tokens.font.icon.medium
+            clearIcon.padding: Tokens.padding.extraSmall
+
+            onTextChanged: root.searchText = text
+        }
+    }
+    headerContentWidth: 240
+
+    property string searchText: ""
+
+    function windowRuleMatches(r) {
+        const q = root.searchText.trim().toLowerCase();
+        if (q === "") return true;
+        const terms = q.split(/\s+/).filter(t => t.length > 0);
+
+        let matchStr = "";
+        if (r.match) {
+            for (let k in r.match) {
+                matchStr += " " + k + " " + r.match[k];
+            }
+        }
+        let acts = [];
+        if (r.float) acts.push("float");
+        if (r.opaque) acts.push("opaque");
+        if (r.pin) acts.push("pin");
+        if (r.center) acts.push("center");
+        if (r.noblur || r.no_blur) acts.push("no_blur noblur");
+        if (r.fullscreen) acts.push("fullscreen");
+        if (r.workspace) acts.push("workspace " + r.workspace);
+        if (r.size) acts.push("size " + r.size);
+        if (r.move) acts.push("move " + r.move);
+        if (r.opacity) acts.push("opacity " + r.opacity);
+        if (r.rounding !== undefined) acts.push("rounding " + r.rounding);
+        if (r.sourcePath) acts.push(r.sourcePath);
+        if (r.isReadOnly) acts.push("system readonly default");
+
+        const hay = (matchStr + " " + acts.join(" ")).toLowerCase();
+        for (let i = 0; i < terms.length; i++) {
+            if (hay.indexOf(terms[i]) === -1) return false;
+        }
+        return true;
+    }
+
+    readonly property var filteredWindowRules: {
+        const q = root.searchText.trim();
+        const src = FlightDeckWriter.windowRules;
+        if (q === "") return src;
+        const out = [];
+        for (let i = 0; i < src.length; i++) {
+            if (root.windowRuleMatches(src[i])) {
+                out.push(src[i]);
+            }
+        }
+        return out;
+    }
+
+    function findMasterWindowRuleIndex(ruleData) {
+        const list = FlightDeckWriter.windowRules;
+        for (let i = 0; i < list.length; i++) {
+            if (list[i] === ruleData) return i;
+        }
+        return -1;
+    }
+
     ColumnLayout {
         id: mainCol
         anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
@@ -24,6 +100,7 @@ PageBase {
 
         SectionHeader {
             first: true
+            visible: root.searchText.trim() === "" || root.filteredWindowRules.length > 0
             text: qsTr("Window Rules")
         }
 
@@ -31,6 +108,7 @@ PageBase {
         DialogRowButton {
             id: addRuleBtn
             rootParent: root.modalOverlay
+            visible: root.searchText.trim() === ""
             first: true
             last: FlightDeckWriter.windowRules.length === 0
             icon: "add_circle"
@@ -355,7 +433,7 @@ PageBase {
 
         // Each Configured Rule is its own DialogRowButton
         Repeater {
-            model: FlightDeckWriter.windowRules
+            model: root.filteredWindowRules
 
             delegate: DialogRowButton {
                 id: editRuleRow
@@ -365,8 +443,8 @@ PageBase {
                 readonly property bool isReadOnly: editRuleRow.modelData ? (editRuleRow.modelData.isReadOnly || false) : false
 
                 rootParent: root.modalOverlay
-                first: false
-                last: index === FlightDeckWriter.windowRules.length - 1
+                first: index === 0 && root.searchText.trim() !== ""
+                last: index === root.filteredWindowRules.length - 1
                 icon: editRuleRow.isReadOnly ? "tune" : "web_asset"
 
                 label: {
@@ -499,8 +577,11 @@ PageBase {
                         ruleMap["rounding"] = isNaN(rVal) ? targetRounding.trim() : rVal;
                     }
 
-                    FlightDeckWriter.updateWindowRule(editRuleRow.index, ruleMap);
-                    FlightDeckWriter.save();
+                    var masterIdx = root.findMasterWindowRuleIndex(editRuleRow.modelData);
+                    if (masterIdx !== -1) {
+                        FlightDeckWriter.updateWindowRule(masterIdx, ruleMap);
+                        FlightDeckWriter.save();
+                    }
                 }
 
                 trailingActions: Component {
@@ -513,8 +594,11 @@ PageBase {
                             type: IconButton.Text
                             font: Tokens.font.icon.small
                             onClicked: {
-                                FlightDeckWriter.removeWindowRule(editRuleRow.index);
-                                FlightDeckWriter.save();
+                                var masterIdx = root.findMasterWindowRuleIndex(editRuleRow.modelData);
+                                if (masterIdx !== -1) {
+                                    FlightDeckWriter.removeWindowRule(masterIdx);
+                                    FlightDeckWriter.save();
+                                }
                             }
                         }
                     }
@@ -752,6 +836,19 @@ PageBase {
             StyledText {
                 anchors.centerIn: parent
                 text: qsTr("No custom window rules defined yet.")
+                color: Colours.palette.m3outline
+                font: Tokens.font.body.medium
+            }
+        }
+
+        Item {
+            visible: root.searchText.trim() !== "" && root.filteredWindowRules.length === 0 && FlightDeckWriter.windowRules.length > 0
+            Layout.fillWidth: true
+            Layout.preferredHeight: 80
+
+            StyledText {
+                anchors.centerIn: parent
+                text: qsTr("No window rules matching \"%1\"").arg(root.searchText.trim())
                 color: Colours.palette.m3outline
                 font: Tokens.font.body.medium
             }

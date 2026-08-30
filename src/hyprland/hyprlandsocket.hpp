@@ -23,6 +23,7 @@ public:
     static QString eventSocketPath();
 
     static bool isOnline();
+    static bool isLuaMode();
 
     QString send(const QString& command, int timeoutMs = 2000) const;
     QJsonDocument queryJson(const QString& command, int timeoutMs = 2000) const;
@@ -32,6 +33,7 @@ public:
     // cache (mirrors Bibata's reload_system_cursors behaviour).
     bool setCursorAll(const QString& theme, int size);
 
+    bool applyMonitor(const QVariantMap& monitorData);
     bool keyword(const QString& key, const QVariant& value);
     bool keywordBatch(const QList<QPair<QString, QVariant>>& commands);
     bool evalLua(const QString& luaCode);

@@ -25,7 +25,10 @@ public:
     QVariantList liveMonitors() const;
     QVariantList configuredMonitors() const;
 
+    Q_INVOKABLE void applyMonitor(const QVariantMap& monitorData);
     Q_INVOKABLE void applyMonitor(const QString& name, const QString& mode, const QString& pos, qreal scale, int transform = 0, bool disabled = false);
+    Q_INVOKABLE QVariantList computeValidScales(int width, int height, qreal minScale = 0.5, qreal maxScale = 3.0) const;
+    Q_INVOKABLE QString validateMirror(const QString& monitorName, const QString& mirrorTarget) const;
     Q_INVOKABLE void saveMonitors();
     Q_INVOKABLE void refresh();
 

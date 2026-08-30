@@ -14,6 +14,78 @@ PageBase {
 
     title: qsTr("Layer rules")
 
+    headerContent: Component {
+        SearchBar {
+            topPadding: Tokens.padding.small
+            bottomPadding: Tokens.padding.small
+
+            placeholderText: qsTr("Search layer rules")
+            font: Tokens.font.body.medium
+
+            bg.color: Colours.tPalette.m3surfaceContainerLowest
+            bg.border.color: Colours.palette.m3outlineVariant
+            searchIcon.fontStyle: Tokens.font.icon.medium
+            searchIcon.anchors.leftMargin: Tokens.padding.largeIncreased
+            clearIcon.font: Tokens.font.icon.medium
+            clearIcon.padding: Tokens.padding.extraSmall
+
+            onTextChanged: root.searchText = text
+        }
+    }
+    headerContentWidth: 240
+
+    property string searchText: ""
+
+    function layerRuleMatches(r) {
+        const q = root.searchText.trim().toLowerCase();
+        if (q === "") return true;
+        const terms = q.split(/\s+/).filter(t => t.length > 0);
+
+        let props = [];
+        if (r.namespace) props.push("namespace " + r.namespace);
+        if (r.match) {
+            for (let k in r.match) {
+                props.push(k + " " + r.match[k]);
+            }
+        }
+        if (r.blur) props.push("blur");
+        if (r.dimaround || r.dim_around) props.push("dimaround dim_around");
+        if (r.ignorealpha || r.ignore_alpha) props.push("ignorealpha ignore_alpha");
+        if (r.blurpopups || r.blur_popups) props.push("blurpopups blur_popups");
+        if (r.noanim || r.no_anim) props.push("noanim no_anim");
+        if (r.xray) props.push("xray");
+        if (r.animation) props.push("anim animation " + r.animation);
+        if (r.sourcePath) props.push(r.sourcePath);
+        if (r.isReadOnly) props.push("system readonly default");
+
+        const hay = props.join(" ").toLowerCase();
+        for (let i = 0; i < terms.length; i++) {
+            if (hay.indexOf(terms[i]) === -1) return false;
+        }
+        return true;
+    }
+
+    readonly property var filteredLayerRules: {
+        const q = root.searchText.trim();
+        const src = FlightDeckWriter.layerRules;
+        if (q === "") return src;
+        const out = [];
+        for (let i = 0; i < src.length; i++) {
+            if (root.layerRuleMatches(src[i])) {
+                out.push(src[i]);
+            }
+        }
+        return out;
+    }
+
+    function findMasterLayerRuleIndex(ruleData) {
+        const list = FlightDeckWriter.layerRules;
+        for (let i = 0; i < list.length; i++) {
+            if (list[i] === ruleData) return i;
+        }
+        return -1;
+    }
+
     ColumnLayout {
         id: mainCol
         anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
@@ -23,6 +95,7 @@ PageBase {
 
         SectionHeader {
             first: true
+            visible: root.searchText.trim() === "" || root.filteredLayerRules.length > 0
             text: qsTr("Layer Rule Management")
         }
 
@@ -30,6 +103,7 @@ PageBase {
         DialogRowButton {
             id: addLayerBtn
             rootParent: root.modalOverlay
+            visible: root.searchText.trim() === ""
             first: true
             last: FlightDeckWriter.layerRules.length === 0
             icon: "add_circle"
@@ -230,7 +304,7 @@ PageBase {
 
         // Each Configured Layer Rule is its own DialogRowButton
         Repeater {
-            model: FlightDeckWriter.layerRules
+            model: root.filteredLayerRules
 
             delegate: DialogRowButton {
                 id: editLayerRow
@@ -240,8 +314,8 @@ PageBase {
                 readonly property bool isReadOnly: editLayerRow.modelData ? (editLayerRow.modelData.isReadOnly || false) : false
 
                 rootParent: root.modalOverlay
-                first: false
-                last: index === FlightDeckWriter.layerRules.length - 1
+                first: index === 0 && root.searchText.trim() !== ""
+                last: index === root.filteredLayerRules.length - 1
                 icon: editLayerRow.isReadOnly ? "tune" : "layers"
 
                 label: editLayerRow.modelData.namespace ? ("Namespace: " + editLayerRow.modelData.namespace) : ("Layer Rule " + (editLayerRow.index + 1))
@@ -339,8 +413,11 @@ PageBase {
                                 ruleMap["animation"] = animType;
                             }
                         }
-                        FlightDeckWriter.updateLayerRule(editLayerRow.index, ruleMap);
-                        FlightDeckWriter.save();
+                        var masterIdx = root.findMasterLayerRuleIndex(editLayerRow.modelData);
+                        if (masterIdx !== -1) {
+                            FlightDeckWriter.updateLayerRule(masterIdx, ruleMap);
+                            FlightDeckWriter.save();
+                        }
                     }
                 }
 
@@ -354,8 +431,11 @@ PageBase {
                             type: IconButton.Text
                             font: Tokens.font.icon.small
                             onClicked: {
-                                FlightDeckWriter.removeLayerRule(editLayerRow.index);
-                                FlightDeckWriter.save();
+                                var masterIdx = root.findMasterLayerRuleIndex(editLayerRow.modelData);
+                                if (masterIdx !== -1) {
+                                    FlightDeckWriter.removeLayerRule(masterIdx);
+                                    FlightDeckWriter.save();
+                                }
                             }
                         }
                     }
@@ -508,6 +588,19 @@ PageBase {
             StyledText {
                 anchors.centerIn: parent
                 text: qsTr("No custom layer rules defined yet.")
+                color: Colours.palette.m3outline
+                font: Tokens.font.body.medium
+            }
+        }
+
+        Item {
+            visible: root.searchText.trim() !== "" && root.filteredLayerRules.length === 0 && FlightDeckWriter.layerRules.length > 0
+            Layout.fillWidth: true
+            Layout.preferredHeight: 80
+
+            StyledText {
+                anchors.centerIn: parent
+                text: qsTr("No layer rules matching \"%1\"").arg(root.searchText.trim())
                 color: Colours.palette.m3outline
                 font: Tokens.font.body.medium
             }

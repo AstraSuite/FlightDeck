@@ -78,6 +78,7 @@ public:
     Q_INVOKABLE void removeCustomBind(int index);
     Q_INVOKABLE void updateCustomBind(int index, const QVariantMap& bindMap);
 
+    Q_INVOKABLE void setMonitorConfig(const QVariantMap& mon);
     Q_INVOKABLE void setMonitorConfig(const QString& output, const QString& mode, const QString& position, qreal scale = 1.0, int transform = 0, bool disabled = false);
 
     Q_INVOKABLE bool save();

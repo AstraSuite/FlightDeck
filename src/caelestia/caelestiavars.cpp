@@ -595,16 +595,9 @@ void CaelestiaVars::applyKeywordToHyprland(const QString& key, const QVariant& v
     auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
     QString canonicalKey = schema->toHyprKey(key);
 
-    if (schema->hasOption(canonicalKey) && isNativeHyprOption(canonicalKey)) {
+    if (isNativeHyprOption(canonicalKey)) {
         FlightDeckWriter::instance()->setHyprOption(canonicalKey, value);
-
-        QString valStr;
-        if (value.typeId() == QMetaType::Bool) {
-            valStr = value.toBool() ? QStringLiteral("1") : QStringLiteral("0");
-        } else {
-            valStr = value.toString();
-        }
-        socket->send(QStringLiteral("keyword %1 %2").arg(canonicalKey, valStr));
+        socket->keyword(canonicalKey, value);
     } else if (schema->hasOption(canonicalKey)) {
         // Pure Caelestia variable (e.g. keyboard binds, cursor theme) - no native
         // Hyprland option. Only persist into hypr-vars.lua, never astra-flightdeck.lua.
@@ -644,30 +637,46 @@ QVariantMap CaelestiaVars::pendingVars() const {
 }
 
 QVariant CaelestiaVars::get(const QString& key, const QVariant& fallback) const {
-    if (m_pendingVars.contains(key)) {
-        return m_pendingVars.value(key);
-    }
-    if (m_savedVars.contains(key)) {
-        return m_savedVars.value(key);
+    auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
+    QString canonicalKey = schema ? schema->toHyprKey(key) : key;
+    QString shortKey = schema ? schema->toShortKey(canonicalKey) : key;
+
+    if (m_pendingVars.contains(key)) return m_pendingVars.value(key);
+    if (!canonicalKey.isEmpty() && m_pendingVars.contains(canonicalKey)) return m_pendingVars.value(canonicalKey);
+    if (!shortKey.isEmpty() && m_pendingVars.contains(shortKey)) return m_pendingVars.value(shortKey);
+
+    if (m_savedVars.contains(key)) return m_savedVars.value(key);
+    if (!canonicalKey.isEmpty() && m_savedVars.contains(canonicalKey)) return m_savedVars.value(canonicalKey);
+    if (!shortKey.isEmpty() && m_savedVars.contains(shortKey)) return m_savedVars.value(shortKey);
+
+    if (FlightDeckWriter::instance()->hasHyprOption(canonicalKey)) {
+        return FlightDeckWriter::instance()->getHyprOption(canonicalKey);
     }
     if (FlightDeckWriter::instance()->hasHyprOption(key)) {
         return FlightDeckWriter::instance()->getHyprOption(key);
     }
-    if (m_defaults.contains(key)) {
-        return m_defaults.value(key);
-    }
-    if (FlightDeck::Hyprland::HyprlandSchema::instance()->hasOption(key)) {
-        return FlightDeck::Hyprland::HyprlandSchema::instance()->getDefault(key, fallback);
+
+    if (m_defaults.contains(key)) return m_defaults.value(key);
+    if (!canonicalKey.isEmpty() && m_defaults.contains(canonicalKey)) return m_defaults.value(canonicalKey);
+    if (!shortKey.isEmpty() && m_defaults.contains(shortKey)) return m_defaults.value(shortKey);
+
+    if (schema && schema->hasOption(canonicalKey)) {
+        return schema->getDefault(canonicalKey, fallback);
     }
     return fallback;
 }
 
 QVariant CaelestiaVars::getDefault(const QString& key, const QVariant& fallback) const {
-    if (m_defaults.contains(key)) {
-        return m_defaults.value(key);
-    }
-    if (FlightDeck::Hyprland::HyprlandSchema::instance()->hasOption(key)) {
-        return FlightDeck::Hyprland::HyprlandSchema::instance()->getDefault(key, fallback);
+    auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
+    QString canonicalKey = schema ? schema->toHyprKey(key) : key;
+    QString shortKey = schema ? schema->toShortKey(canonicalKey) : key;
+
+    if (m_defaults.contains(key)) return m_defaults.value(key);
+    if (!canonicalKey.isEmpty() && m_defaults.contains(canonicalKey)) return m_defaults.value(canonicalKey);
+    if (!shortKey.isEmpty() && m_defaults.contains(shortKey)) return m_defaults.value(shortKey);
+
+    if (schema && schema->hasOption(canonicalKey)) {
+        return schema->getDefault(canonicalKey, fallback);
     }
     return fallback;
 }
@@ -708,7 +717,7 @@ void CaelestiaVars::set(const QString& key, const QVariant& value) {
     syncAlias(QStringLiteral("activeWindowBorderColour"), QStringLiteral("activeWindowBorderColor"));
     syncAlias(QStringLiteral("inactiveWindowBorderColour"), QStringLiteral("inactiveWindowBorderColor"));
 
-    if (schema->hasOption(canonicalKey) && isNativeHyprOption(canonicalKey)) {
+    if (isNativeHyprOption(canonicalKey)) {
         FlightDeckWriter::instance()->setHyprOption(canonicalKey, value);
     }
 
@@ -732,8 +741,25 @@ void CaelestiaVars::resetKey(const QString& key) {
 }
 
 void CaelestiaVars::remove(const QString& key) {
+    auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
+    QString canonicalKey = schema->toHyprKey(key);
+    QString shortKey = schema->toShortKey(canonicalKey);
+
     m_savedVars.remove(key);
+    if (!canonicalKey.isEmpty()) m_savedVars.remove(canonicalKey);
+    if (!shortKey.isEmpty()) m_savedVars.remove(shortKey);
+
     m_pendingVars.remove(key);
+    if (!canonicalKey.isEmpty()) m_pendingVars.remove(canonicalKey);
+    if (!shortKey.isEmpty()) m_pendingVars.remove(shortKey);
+
+    if (isNativeHyprOption(canonicalKey)) {
+        FlightDeckWriter::instance()->removeHyprOption(canonicalKey);
+    }
+    if (isNativeHyprOption(key)) {
+        FlightDeckWriter::instance()->removeHyprOption(key);
+    }
+
     save();
     emit varsChanged();
     emit pendingChanged();
@@ -752,6 +778,13 @@ void CaelestiaVars::resetToDefault(const QString& key) {
     m_pendingVars.remove(key);
     if (!canonicalKey.isEmpty()) m_pendingVars.remove(canonicalKey);
     if (!shortKey.isEmpty()) m_pendingVars.remove(shortKey);
+
+    if (isNativeHyprOption(canonicalKey)) {
+        FlightDeckWriter::instance()->removeHyprOption(canonicalKey);
+    }
+    if (isNativeHyprOption(key)) {
+        FlightDeckWriter::instance()->removeHyprOption(key);
+    }
 
     auto removeAlias = [&](const QString& k1, const QString& k2) {
         if (key == k1) {
