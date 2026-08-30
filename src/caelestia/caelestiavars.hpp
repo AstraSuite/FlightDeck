@@ -58,15 +58,22 @@ public:
     Q_INVOKABLE QVariantMap parseColor(const QString& colorStr) const;
     Q_INVOKABLE QString formatColor(bool isScheme, const QString& tokenOrHex, int alphaPercent) const;
 
+    Q_PROPERTY(QVariantList sections READ sections NOTIFY schemaLoaded)
+
     // Keybinds convenience methods
     Q_INVOKABLE QStringList getBinds(const QString& key) const;
     Q_INVOKABLE void setBinds(const QString& key, const QStringList& binds);
+
+    // Schema inspection
+    Q_INVOKABLE QVariantList sections() const;
+    Q_INVOKABLE QVariantMap getVariableSchema(const QString& key) const;
 
 signals:
     void varsChanged();
     void pendingChanged();
     void dirtyChanged();
     void schemeColorsChanged();
+    void schemaLoaded();
     void saveSucceeded();
     void saveFailed(const QString& error);
 
@@ -77,6 +84,8 @@ private:
     QString formatLua() const;
 
     QVariantMap m_defaults;
+    QVariantList m_sections;
+    QVariantMap m_schemaOptions;
     QVariantMap m_savedVars;
     QVariantMap m_pendingVars;
 };

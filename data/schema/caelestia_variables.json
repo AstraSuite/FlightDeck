@@ -1,0 +1,863 @@
+{
+  "id": "caelestia_variables",
+  "label": "Caelestia Variables",
+  "targetFile": "~/.config/hypr/variables.lua",
+  "description": "Configuration variables for Caelestia Hyprland environment and desktop shell.",
+  "sections": [
+    {
+      "id": "apps",
+      "label": "Default Applications",
+      "description": "Default application commands used by Caelestia keybinds and shortcuts.",
+      "options": [
+        {
+          "key": "terminal",
+          "label": "Terminal Emulator",
+          "type": "app_command",
+          "default": "foot",
+          "description": "Default terminal command"
+        },
+        {
+          "key": "browser",
+          "label": "Web Browser",
+          "type": "app_command",
+          "default": "firefox",
+          "description": "Default web browser executable"
+        },
+        {
+          "key": "editor",
+          "label": "Text / Code Editor",
+          "type": "app_command",
+          "default": "codium",
+          "description": "Default text or code editor executable"
+        },
+        {
+          "key": "fileExplorer",
+          "label": "File Manager",
+          "type": "app_command",
+          "default": "thunar",
+          "description": "Default graphical file manager"
+        },
+        {
+          "key": "audioSettings",
+          "label": "Audio Control Panel",
+          "type": "app_command",
+          "default": "pwvucontrol",
+          "description": "Default volume / audio mixer utility"
+        }
+      ]
+    },
+    {
+      "id": "touchpad",
+      "label": "Touchpad & Gestures",
+      "description": "Touchpad behavior and multi-finger swipe gestures.",
+      "options": [
+        {
+          "key": "touchpadDisableTyping",
+          "label": "Disable Touchpad While Typing",
+          "type": "bool",
+          "default": true,
+          "description": "Temporarily disable touchpad tap/move events while keys are pressed"
+        },
+        {
+          "key": "touchpadScrollFactor",
+          "label": "Touchpad Scroll Speed Factor",
+          "type": "float",
+          "min": 0.1,
+          "max": 3.0,
+          "step": 0.05,
+          "default": 0.3,
+          "description": "Sensitivity multiplier for two-finger touchpad scrolling"
+        },
+        {
+          "key": "gestureFingers",
+          "label": "Workspace Swipe Fingers",
+          "type": "int",
+          "min": 3,
+          "max": 5,
+          "step": 1,
+          "default": 3,
+          "description": "Number of fingers required for workspace horizontal swipe gesture"
+        },
+        {
+          "key": "workspaceSwipeFingers",
+          "label": "Hyprland Swipe Fingers",
+          "type": "int",
+          "min": 3,
+          "max": 5,
+          "step": 1,
+          "default": 4,
+          "description": "Hyprland gestures:workspace_swipe_fingers value"
+        },
+        {
+          "key": "gestureFingersMore",
+          "label": "Overview Swipe Fingers",
+          "type": "int",
+          "min": 3,
+          "max": 5,
+          "step": 1,
+          "default": 4,
+          "description": "Number of fingers required for overview or extended swipe gestures"
+        }
+      ]
+    },
+    {
+      "id": "blur",
+      "label": "Window & Layer Blur",
+      "description": "Dual Kawase blur effects for translucent windows and UI surfaces.",
+      "options": [
+        {
+          "key": "blurEnabled",
+          "label": "Enable Blur",
+          "type": "bool",
+          "default": true,
+          "description": "Global toggle for window and layer surface background blur"
+        },
+        {
+          "key": "blurSpecialWs",
+          "label": "Blur Special Workspaces",
+          "type": "bool",
+          "default": false,
+          "description": "Blur the active workspace behind special/scratchpad workspaces"
+        },
+        {
+          "key": "blurPopups",
+          "label": "Blur UI Popups",
+          "type": "bool",
+          "default": true,
+          "description": "Enable background blur behind UI popups and menus"
+        },
+        {
+          "key": "blurInputMethods",
+          "label": "Blur Input Methods",
+          "type": "bool",
+          "default": true,
+          "description": "Enable blur behind IME popups"
+        },
+        {
+          "key": "blurSize",
+          "label": "Blur Radius / Size",
+          "type": "int",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "default": 8,
+          "description": "Blur radius size in pixels"
+        },
+        {
+          "key": "blurPasses",
+          "label": "Blur Passes",
+          "type": "int",
+          "min": 1,
+          "max": 6,
+          "step": 1,
+          "default": 2,
+          "description": "Number of blur sampling passes (higher is smoother but more GPU intensive)"
+        },
+        {
+          "key": "blurXray",
+          "label": "Blur X-Ray Mode",
+          "type": "bool",
+          "default": false,
+          "description": "Floating windows do not blur underlying tiled windows"
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "label": "Window Shadows",
+      "description": "Drop shadow effects for floating and tiled windows.",
+      "options": [
+        {
+          "key": "shadowEnabled",
+          "label": "Enable Shadows",
+          "type": "bool",
+          "default": true,
+          "description": "Global toggle for window drop shadows"
+        },
+        {
+          "key": "shadowRange",
+          "label": "Shadow Range / Blur",
+          "type": "int",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "default": 15,
+          "description": "Shadow blur radius / spread size in pixels"
+        },
+        {
+          "key": "shadowRenderPower",
+          "label": "Shadow Falloff Power",
+          "type": "int",
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "default": 4,
+          "description": "Shadow decay power (1-4, higher drops off faster)"
+        },
+        {
+          "key": "shadowColour",
+          "label": "Shadow Color",
+          "type": "color",
+          "default": "rgba(\" .. scheme.shadow .. \"60)",
+          "description": "Drop shadow tint color and opacity"
+        }
+      ]
+    },
+    {
+      "id": "gaps",
+      "label": "Workspaces & Window Gaps",
+      "description": "Inner, outer, and workspace edge spacing.",
+      "options": [
+        {
+          "key": "workspaceGaps",
+          "label": "Workspace Gaps",
+          "type": "int",
+          "min": 0,
+          "max": 100,
+          "step": 2,
+          "default": 20,
+          "description": "Spacing between adjacent workspaces"
+        },
+        {
+          "key": "windowGapsIn",
+          "label": "Inner Window Gaps",
+          "type": "int",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 5,
+          "description": "Gaps between adjacent tiled windows"
+        },
+        {
+          "key": "windowGapsOut",
+          "label": "Outer Screen Gaps",
+          "type": "int",
+          "min": 0,
+          "max": 100,
+          "step": 2,
+          "default": 10,
+          "description": "Gaps between windows and monitor screen edges"
+        },
+        {
+          "key": "singleWindowGapsOut",
+          "label": "Single Window Outer Gaps",
+          "type": "int",
+          "min": 0,
+          "max": 100,
+          "step": 2,
+          "default": 20,
+          "description": "Outer gaps applied when only a single window is open on a workspace"
+        }
+      ]
+    },
+    {
+      "id": "window_styling",
+      "label": "Window Styling & Borders",
+      "description": "Window corner rounding, border thickness, and active border colors.",
+      "options": [
+        {
+          "key": "windowOpacity",
+          "label": "Window Opacity",
+          "type": "float",
+          "min": 0.1,
+          "max": 1.0,
+          "step": 0.05,
+          "default": 0.95,
+          "description": "Default window transparency opacity (1.0 = fully opaque)"
+        },
+        {
+          "key": "windowRounding",
+          "label": "Window Corner Radius",
+          "type": "int",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 15,
+          "description": "Window corner rounding radius in pixels"
+        },
+        {
+          "key": "windowBorderSize",
+          "label": "Window Border Width",
+          "type": "int",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "default": 1,
+          "description": "Window border outline thickness in pixels"
+        },
+        {
+          "key": "activeWindowBorderColour",
+          "label": "Active Window Border Color",
+          "type": "color",
+          "default": "rgba(\" .. scheme.primary .. \"e6)",
+          "description": "Border color applied to focused window"
+        },
+        {
+          "key": "inactiveWindowBorderColour",
+          "label": "Inactive Window Border Color",
+          "type": "color",
+          "default": "rgba(\" .. scheme.onSurfaceVariant .. \"11)",
+          "description": "Border color applied to unfocused windows"
+        }
+      ]
+    },
+    {
+      "id": "misc",
+      "label": "Miscellaneous & Cursor",
+      "description": "Volume increments, cursor theme, and power commands.",
+      "options": [
+        {
+          "key": "volumeStep",
+          "label": "Volume Step (%)",
+          "type": "int",
+          "min": 1,
+          "max": 25,
+          "step": 1,
+          "default": 10,
+          "description": "Volume percentage change per step"
+        },
+        {
+          "key": "volumeMax",
+          "label": "Max Volume Limit (%)",
+          "type": "int",
+          "min": 50,
+          "max": 150,
+          "step": 5,
+          "default": 100,
+          "description": "Maximum allowable volume amplification percentage"
+        },
+        {
+          "key": "cursorTheme",
+          "label": "Cursor Theme",
+          "type": "string",
+          "default": "sweet-cursors",
+          "description": "XCursor / Hyprcursor active theme name"
+        },
+        {
+          "key": "cursorSize",
+          "label": "Cursor Size (px)",
+          "type": "int",
+          "min": 16,
+          "max": 96,
+          "step": 4,
+          "default": 24,
+          "description": "Cursor size in pixels"
+        },
+        {
+          "key": "sleepGestureCmd",
+          "label": "Sleep Gesture Command",
+          "type": "string",
+          "default": "systemctl suspend-then-hibernate",
+          "description": "System command executed on sleep/lid gesture"
+        }
+      ]
+    },
+    {
+      "id": "keybinds",
+      "label": "Keybindings",
+      "description": "Modifier keys, workspace navigation, window controls, and application shortcuts.",
+      "options": [
+        {
+          "key": "kbGoToWs",
+          "label": "Go To Workspace (0-9)",
+          "type": "keybind_modifier",
+          "default": "SUPER",
+          "description": "Modifier key combination for switching to workspace 0-9"
+        },
+        {
+          "key": "kbGoToWsGroup",
+          "label": "Go To Workspace Group (0-9)",
+          "type": "keybind_modifier",
+          "default": "CTRL + SUPER",
+          "description": "Modifier key combination for workspace group navigation"
+        },
+        {
+          "key": "kbMoveWinToWs",
+          "label": "Move Window To Workspace (0-9)",
+          "type": "keybind_modifier",
+          "default": "SUPER + ALT",
+          "description": "Modifier key combination for moving active window to workspace 0-9"
+        },
+        {
+          "key": "kbMoveWinToWsGroup",
+          "label": "Move Window To Workspace Group (0-9)",
+          "type": "keybind_modifier",
+          "default": "CTRL + SUPER + ALT",
+          "description": "Modifier key combination for moving active window to workspace group 0-9"
+        },
+        {
+          "key": "kbMoveWinToWsSpecial",
+          "label": "Move Window To Special Workspace",
+          "type": "keybind",
+          "default": [
+            "SUPER + ALT + S",
+            "CTRL + SUPER + SHIFT + Up"
+          ],
+          "description": "Send active window to scratchpad / special workspace"
+        },
+        {
+          "key": "kbMoveWinFromWsSpecial",
+          "label": "Move Window From Special Workspace",
+          "type": "keybind",
+          "default": "CTRL + SUPER + SHIFT + Down",
+          "description": "Retrieve window from special workspace"
+        },
+        {
+          "key": "kbMoveWinToWsNext",
+          "label": "Move Window To Next Workspace",
+          "type": "keybind",
+          "default": [
+            "SUPER + ALT + mouse_down",
+            "SUPER + ALT + Page_Down",
+            "CTRL + SUPER + SHIFT + Right"
+          ],
+          "description": "Move active window to the next workspace"
+        },
+        {
+          "key": "kbMoveWinToWsPrev",
+          "label": "Move Window To Previous Workspace",
+          "type": "keybind",
+          "default": [
+            "SUPER + ALT + mouse_up",
+            "SUPER + ALT + Page_Up",
+            "CTRL + SUPER + SHIFT + Left"
+          ],
+          "description": "Move active window to the previous workspace"
+        },
+        {
+          "key": "kbNextWs",
+          "label": "Switch To Next Workspace",
+          "type": "keybind",
+          "default": [
+            "SUPER + mouse_down",
+            "CTRL + SUPER + Right",
+            "SUPER + Page_Down"
+          ],
+          "description": "Switch viewport to the next workspace"
+        },
+        {
+          "key": "kbPrevWs",
+          "label": "Switch To Previous Workspace",
+          "type": "keybind",
+          "default": [
+            "SUPER + mouse_up",
+            "CTRL + SUPER + Left",
+            "SUPER + Page_Up"
+          ],
+          "description": "Switch viewport to the previous workspace"
+        },
+        {
+          "key": "kbNextWsGroup",
+          "label": "Switch To Next Workspace Group",
+          "type": "keybind",
+          "default": "CTRL + SUPER + mouse_down",
+          "description": "Switch to next workspace group"
+        },
+        {
+          "key": "kbPrevWsGroup",
+          "label": "Switch To Previous Workspace Group",
+          "type": "keybind",
+          "default": "CTRL + SUPER + mouse_up",
+          "description": "Switch to previous workspace group"
+        },
+        {
+          "key": "kbWindowCycleNext",
+          "label": "Focus Next Window",
+          "type": "keybind",
+          "default": "ALT + TAB",
+          "description": "Cycle focus to next window"
+        },
+        {
+          "key": "kbWindowCyclePrev",
+          "label": "Focus Previous Window",
+          "type": "keybind",
+          "default": "SHIFT + ALT + TAB",
+          "description": "Cycle focus to previous window"
+        },
+        {
+          "key": "kbWindowGroupCycleNext",
+          "label": "Focus Next In Group",
+          "type": "keybind",
+          "default": "CTRL + ALT + TAB",
+          "description": "Cycle tabs inside tabbed group"
+        },
+        {
+          "key": "kbWindowGroupCyclePrev",
+          "label": "Focus Previous In Group",
+          "type": "keybind",
+          "default": "CTRL + SHIFT + ALT + TAB",
+          "description": "Cycle tabs backwards inside tabbed group"
+        },
+        {
+          "key": "kbUngroup",
+          "label": "Ungroup Window",
+          "type": "keybind",
+          "default": "SUPER + U",
+          "description": "Remove active window from current tabbed group"
+        },
+        {
+          "key": "kbToggleGroup",
+          "label": "Toggle Group / Tabbed Mode",
+          "type": "keybind",
+          "default": "SUPER + Comma",
+          "description": "Create or toggle tabbed window group"
+        },
+        {
+          "key": "kbGroupLockActive",
+          "label": "Lock Group",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + Comma",
+          "description": "Lock window group from receiving new windows"
+        },
+        {
+          "key": "kbWindowDecreaseWidth",
+          "label": "Decrease Window Width",
+          "type": "keybind",
+          "default": [
+            "SUPER + Minus",
+            "SUPER + ALT + Left"
+          ],
+          "description": "Shrink window width"
+        },
+        {
+          "key": "kbWindowIncreaseWidth",
+          "label": "Increase Window Width",
+          "type": "keybind",
+          "default": [
+            "SUPER + Equal",
+            "SUPER + ALT + Right"
+          ],
+          "description": "Expand window width"
+        },
+        {
+          "key": "kbWindowDecreaseHeight",
+          "label": "Decrease Window Height",
+          "type": "keybind",
+          "default": [
+            "SUPER + SHIFT + Minus",
+            "SUPER + ALT + Up"
+          ],
+          "description": "Shrink window height"
+        },
+        {
+          "key": "kbWindowIncreaseHeight",
+          "label": "Increase Window Height",
+          "type": "keybind",
+          "default": [
+            "SUPER + SHIFT + Equal",
+            "SUPER + ALT + Down"
+          ],
+          "description": "Expand window height"
+        },
+        {
+          "key": "kbMoveWindow",
+          "label": "Move Window Interactive",
+          "type": "keybind",
+          "default": "SUPER + Z",
+          "description": "Interactive window move mode"
+        },
+        {
+          "key": "kbResizeWindow",
+          "label": "Resize Window Interactive",
+          "type": "keybind",
+          "default": "SUPER + X",
+          "description": "Interactive window resize mode"
+        },
+        {
+          "key": "kbCenterWindow",
+          "label": "Center Window",
+          "type": "keybind",
+          "default": "CTRL + SUPER + Backslash",
+          "description": "Center floating window on screen"
+        },
+        {
+          "key": "kbNormalizeWindow",
+          "label": "Normalize Window Size",
+          "type": "keybind",
+          "default": "CTRL + SUPER + ALT + Backslash",
+          "description": "Reset split size to even proportions"
+        },
+        {
+          "key": "kbWindowPip",
+          "label": "Picture-in-Picture Mode",
+          "type": "keybind",
+          "default": "SUPER + ALT + Backslash",
+          "description": "Pin and float window in bottom corner"
+        },
+        {
+          "key": "kbPinWindow",
+          "label": "Pin Window (All Workspaces)",
+          "type": "keybind",
+          "default": "SUPER + P",
+          "description": "Pin floating window to remain visible across all workspaces"
+        },
+        {
+          "key": "kbWindowFullscreen",
+          "label": "Toggle Fullscreen",
+          "type": "keybind",
+          "default": "SUPER + F",
+          "description": "Toggle window true fullscreen"
+        },
+        {
+          "key": "kbWindowBorderedFullscreen",
+          "label": "Toggle Maximize / Fake Fullscreen",
+          "type": "keybind",
+          "default": "SUPER + ALT + F",
+          "description": "Maximize window keeping panel/borders"
+        },
+        {
+          "key": "kbToggleWindowFloating",
+          "label": "Toggle Window Floating",
+          "type": "keybind",
+          "default": "SUPER + ALT + Space",
+          "description": "Toggle between tiling and floating state"
+        },
+        {
+          "key": "kbCloseWindow",
+          "label": "Close Active Window",
+          "type": "keybind",
+          "default": "SUPER + Q",
+          "description": "Gracefully close active window"
+        },
+        {
+          "key": "kbSpecialWs",
+          "label": "Toggle Special Workspace (Scratchpad)",
+          "type": "keybind",
+          "default": "SUPER + S",
+          "description": "Toggle default special scratchpad workspace"
+        },
+        {
+          "key": "kbSystemMonitorWs",
+          "label": "Toggle System Monitor Special Workspace",
+          "type": "keybind",
+          "default": "CTRL + SHIFT + Escape",
+          "description": "Toggle dedicated system monitor scratchpad"
+        },
+        {
+          "key": "kbMusicWs",
+          "label": "Toggle Music Player Special Workspace",
+          "type": "keybind",
+          "default": "SUPER + M",
+          "description": "Toggle dedicated music scratchpad"
+        },
+        {
+          "key": "kbCommunicationWs",
+          "label": "Toggle Chat / Discord Special Workspace",
+          "type": "keybind",
+          "default": "SUPER + D",
+          "description": "Toggle dedicated communications scratchpad"
+        },
+        {
+          "key": "kbTodoWs",
+          "label": "Toggle Notes / Todo Special Workspace",
+          "type": "keybind",
+          "default": "SUPER + R",
+          "description": "Toggle dedicated todo notes scratchpad"
+        },
+        {
+          "key": "kbTerminal",
+          "label": "Launch Terminal",
+          "type": "keybind",
+          "default": "SUPER + T",
+          "description": "Launch configured terminal emulator"
+        },
+        {
+          "key": "kbBrowser",
+          "label": "Launch Browser",
+          "type": "keybind",
+          "default": "SUPER + W",
+          "description": "Launch configured web browser"
+        },
+        {
+          "key": "kbEditor",
+          "label": "Launch Code Editor",
+          "type": "keybind",
+          "default": "SUPER + C",
+          "description": "Launch configured code editor"
+        },
+        {
+          "key": "kbFileExplorer",
+          "label": "Launch File Manager",
+          "type": "keybind",
+          "default": "SUPER + E",
+          "description": "Launch configured file manager"
+        },
+        {
+          "key": "kbAudioSettings",
+          "label": "Launch Audio Settings",
+          "type": "keybind",
+          "default": "CTRL + ALT + V",
+          "description": "Launch configured audio control panel"
+        },
+        {
+          "key": "kbScreenshot",
+          "label": "Screenshot (Full Screen)",
+          "type": "keybind",
+          "default": "Print",
+          "description": "Capture full screen screenshot"
+        },
+        {
+          "key": "kbScreenshotFreeze",
+          "label": "Screenshot (Freeze Screen)",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + S",
+          "description": "Freeze display and open area selection for screenshot"
+        },
+        {
+          "key": "kbScreenshotRegion",
+          "label": "Screenshot (Region Direct)",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + ALT + S",
+          "description": "Capture selected region"
+        },
+        {
+          "key": "kbRecord",
+          "label": "Screen Record (Full)",
+          "type": "keybind",
+          "default": "CTRL + ALT + R",
+          "description": "Start screen recording full monitor"
+        },
+        {
+          "key": "kbRecordSound",
+          "label": "Screen Record (With Audio)",
+          "type": "keybind",
+          "default": "SUPER + ALT + R",
+          "description": "Start screen recording with internal audio"
+        },
+        {
+          "key": "kbRecordRegion",
+          "label": "Screen Record (Region)",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + ALT + R",
+          "description": "Start screen recording a selected rectangular area"
+        },
+        {
+          "key": "kbColorPicker",
+          "label": "Color Picker Eyedropper",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + C",
+          "description": "Open screen color picker and copy hex to clipboard"
+        },
+        {
+          "key": "kbMediaToggle",
+          "label": "Media Play / Pause",
+          "type": "keybind",
+          "default": "CTRL + SUPER + Space",
+          "description": "Play or pause current media track"
+        },
+        {
+          "key": "kbMediaNext",
+          "label": "Media Next Track",
+          "type": "keybind",
+          "default": "CTRL + SUPER + Equal",
+          "description": "Skip to next media track"
+        },
+        {
+          "key": "kbMediaPrev",
+          "label": "Media Previous Track",
+          "type": "keybind",
+          "default": "CTRL + SUPER + Minus",
+          "description": "Return to previous media track"
+        },
+        {
+          "key": "kbMediaStop",
+          "label": "Media Stop",
+          "type": "keybind",
+          "default": "CTRL + SUPER + Backspace",
+          "description": "Stop media playback"
+        },
+        {
+          "key": "kbVolumeMute",
+          "label": "Mute Audio Output",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + M",
+          "description": "Toggle master audio mute"
+        },
+        {
+          "key": "kbLauncher",
+          "label": "App Launcher / Search",
+          "type": "keybind",
+          "default": "SUPER + SUPER_L",
+          "description": "Open Caelestia application launcher"
+        },
+        {
+          "key": "kbSession",
+          "label": "Session Menu / Power Dialog",
+          "type": "keybind",
+          "default": "CTRL + ALT + Delete",
+          "description": "Open power / logout session menu"
+        },
+        {
+          "key": "kbShowSidebar",
+          "label": "Toggle Notification Sidebar",
+          "type": "keybind",
+          "default": "SUPER + N",
+          "description": "Open notifications and quick settings sidebar"
+        },
+        {
+          "key": "kbClearNotifs",
+          "label": "Clear All Notifications",
+          "type": "keybind",
+          "default": "CTRL + ALT + C",
+          "description": "Dismiss all active notifications"
+        },
+        {
+          "key": "kbShowPanels",
+          "label": "Toggle Panels / Bar Visibility",
+          "type": "keybind",
+          "default": "SUPER + K",
+          "description": "Show/hide status bars and docks"
+        },
+        {
+          "key": "kbLock",
+          "label": "Lock Screen",
+          "type": "keybind",
+          "default": "SUPER + L",
+          "description": "Lock session immediately"
+        },
+        {
+          "key": "kbRestoreLock",
+          "label": "Restore Lock Screen",
+          "type": "keybind",
+          "default": "SUPER + ALT + L",
+          "description": "Restore lock screen session"
+        },
+        {
+          "key": "kbSleep",
+          "label": "Sleep / Suspend System",
+          "type": "keybind",
+          "default": "SUPER + SHIFT + L",
+          "description": "Put system to sleep immediately"
+        },
+        {
+          "key": "kbClipboard",
+          "label": "Clipboard History Manager",
+          "type": "keybind",
+          "default": "SUPER + V",
+          "description": "Open clipboard history search popup"
+        },
+        {
+          "key": "kbClipboardDel",
+          "label": "Delete Clipboard Entry",
+          "type": "keybind",
+          "default": "SUPER + ALT + V",
+          "description": "Delete selected clipboard item"
+        },
+        {
+          "key": "kbClipboardPasteLatest",
+          "label": "Paste Latest Clipboard Entry",
+          "type": "keybind",
+          "default": "CTRL + SHIFT + ALT + V",
+          "description": "Directly paste latest clipboard text"
+        },
+        {
+          "key": "kbEmoji",
+          "label": "Emoji & Symbol Picker",
+          "type": "keybind",
+          "default": "SUPER + Period",
+          "description": "Open emoji and symbol picker popup"
+        }
+      ]
+    }
+  ]
+}

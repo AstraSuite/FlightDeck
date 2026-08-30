@@ -11,6 +11,7 @@
 #include <QStandardPaths>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QDebug>
 
 namespace FlightDeck::Caelestia {
@@ -194,153 +195,59 @@ QString CaelestiaVars::formatColor(bool isScheme, const QString& tokenOrHex, int
     return QStringLiteral("\"rgba(%1%2)\"").arg(cleanHex, alphaHex);
 }
 
+QVariantList CaelestiaVars::sections() const {
+    return m_sections;
+}
+
+QVariantMap CaelestiaVars::getVariableSchema(const QString& key) const {
+    return m_schemaOptions.value(key).toMap();
+}
+
 void CaelestiaVars::loadDefaults() {
-    m_defaults = QVariantMap{
-        // Apps
-        { QStringLiteral("terminal"), QStringLiteral("foot") },
-        { QStringLiteral("browser"), QStringLiteral("firefox") },
-        { QStringLiteral("editor"), QStringLiteral("codium") },
-        { QStringLiteral("fileExplorer"), QStringLiteral("thunar") },
-        { QStringLiteral("audioSettings"), QStringLiteral("pwvucontrol") },
+    m_defaults.clear();
+    m_sections.clear();
+    m_schemaOptions.clear();
 
-        // Touchpad & Gestures
-        { QStringLiteral("touchpadDisableTyping"), true },
-        { QStringLiteral("touchpadScrollFactor"), 0.3 },
-        { QStringLiteral("gestureFingers"), 3 },
-        { QStringLiteral("workspaceSwipeFingers"), 4 },
-        { QStringLiteral("gestureFingersMore"), 4 },
-        { QStringLiteral("sleepGestureCmd"), QStringLiteral("systemctl suspend-then-hibernate") },
-        { QStringLiteral("touchpadTapToClick"), true },
-        { QStringLiteral("touchpadClickfingerBehavior"), false },
-        { QStringLiteral("touchpadMiddleButtonEmulation"), false },
-        { QStringLiteral("touchpadDragLock"), 0 },
-        { QStringLiteral("touchpadTapButtonMap"), QStringLiteral("") },
-        { QStringLiteral("workspaceSwipeCreateNew"), true },
-        { QStringLiteral("workspaceSwipeForever"), false },
-        { QStringLiteral("workspaceSwipeCancelRatio"), 0.5 },
-        { QStringLiteral("workspaceSwipeMinSpeedToForce"), 30 },
-        { QStringLiteral("workspaceSwipeDirectionLock"), true },
-        { QStringLiteral("workspaceSwipeUseR"), false },
-        { QStringLiteral("workspaceSwipeDistance"), 300 },
-        { QStringLiteral("workspaceSwipeInvert"), false },
-
-        // Blur
-        { QStringLiteral("blurEnabled"), true },
-        { QStringLiteral("blurSpecialWs"), false },
-        { QStringLiteral("blurPopups"), true },
-        { QStringLiteral("blurInputMethods"), true },
-        { QStringLiteral("blurSize"), 8 },
-        { QStringLiteral("blurPasses"), 2 },
-        { QStringLiteral("blurXray"), false },
-        { QStringLiteral("blurIgnoreOpacity"), false },
-        { QStringLiteral("blurNoise"), 0.0117 },
-        { QStringLiteral("blurContrast"), 0.8916 },
-        { QStringLiteral("blurBrightness"), 0.8172 },
-        { QStringLiteral("blurVibrancy"), 0.1696 },
-        { QStringLiteral("blurVibrancyDarkness"), 0.0 },
-
-        // Shadow
-        { QStringLiteral("shadowEnabled"), true },
-        { QStringLiteral("shadowRange"), 15 },
-        { QStringLiteral("shadowRenderPower"), 4 },
-        { QStringLiteral("shadowOffset"), QStringLiteral("0 0") },
-        { QStringLiteral("shadowScale"), 1.0 },
-        { QStringLiteral("shadowColour"), QStringLiteral("rgba(\" .. scheme.shadow .. \"60)") },
-        { QStringLiteral("shadowColor"), QStringLiteral("rgba(\" .. scheme.shadow .. \"60)") },
-        { QStringLiteral("inactiveShadowColour"), QStringLiteral("rgba(\" .. scheme.shadow .. \"30)") },
-        { QStringLiteral("inactiveShadowColor"), QStringLiteral("rgba(\" .. scheme.shadow .. \"30)") },
-
-        // Gaps
-        { QStringLiteral("workspaceGaps"), 20 },
-        { QStringLiteral("windowGapsIn"), 5 },
-        { QStringLiteral("windowGapsOut"), 10 },
-        { QStringLiteral("singleWindowGapsOut"), 20 },
-
-        // Window styling & Borders
-        { QStringLiteral("windowOpacity"), 0.95 },
-        { QStringLiteral("windowRounding"), 15 },
-        { QStringLiteral("windowBorderSize"), 1 },
-        { QStringLiteral("activeWindowBorderColour"), QStringLiteral("rgba(\" .. scheme.primary .. \"e6)") },
-        { QStringLiteral("activeWindowBorderColor"), QStringLiteral("rgba(\" .. scheme.primary .. \"e6)") },
-        { QStringLiteral("inactiveWindowBorderColour"), QStringLiteral("rgba(\" .. scheme.onSurfaceVariant .. \"11)") },
-        { QStringLiteral("inactiveWindowBorderColor"), QStringLiteral("rgba(\" .. scheme.onSurfaceVariant .. \"11)") },
-
-        // Misc
-        { QStringLiteral("volumeStep"), 10 },
-        { QStringLiteral("volumeMax"), 100 },
-        { QStringLiteral("cursorTheme"), QStringLiteral("sweet-cursors") },
-        { QStringLiteral("cursorSize"), 24 },
-        { QStringLiteral("sleepGestureCmd"), QStringLiteral("systemctl suspend-then-hibernate") },
-
-        // Keybinds (single or arrays)
-        { QStringLiteral("kbGoToWs"), QStringLiteral("SUPER") },
-        { QStringLiteral("kbGoToWsGroup"), QStringLiteral("CTRL + SUPER") },
-        { QStringLiteral("kbMoveWinToWs"), QStringLiteral("SUPER + ALT") },
-        { QStringLiteral("kbMoveWinToWsGroup"), QStringLiteral("CTRL + SUPER + ALT") },
-        { QStringLiteral("kbMoveWinToWsSpecial"), QVariantList{ QStringLiteral("SUPER + ALT + S"), QStringLiteral("CTRL + SUPER + SHIFT + Up") } },
-        { QStringLiteral("kbMoveWinFromWsSpecial"), QStringLiteral("CTRL + SUPER + SHIFT + Down") },
-        { QStringLiteral("kbMoveWinToWsNext"), QVariantList{ QStringLiteral("SUPER + ALT + mouse_down"), QStringLiteral("SUPER + ALT + Page_Down"), QStringLiteral("CTRL + SUPER + SHIFT + Right") } },
-        { QStringLiteral("kbMoveWinToWsPrev"), QVariantList{ QStringLiteral("SUPER + ALT + mouse_up"), QStringLiteral("SUPER + ALT + Page_Up"), QStringLiteral("CTRL + SUPER + SHIFT + Left") } },
-        { QStringLiteral("kbNextWs"), QVariantList{ QStringLiteral("SUPER + mouse_down"), QStringLiteral("CTRL + SUPER + Right"), QStringLiteral("SUPER + Page_Down") } },
-        { QStringLiteral("kbPrevWs"), QVariantList{ QStringLiteral("SUPER + mouse_up"), QStringLiteral("CTRL + SUPER + Left"), QStringLiteral("SUPER + Page_Up") } },
-        { QStringLiteral("kbNextWsGroup"), QStringLiteral("CTRL + SUPER + mouse_down") },
-        { QStringLiteral("kbPrevWsGroup"), QStringLiteral("CTRL + SUPER + mouse_up") },
-        { QStringLiteral("kbWindowCycleNext"), QStringLiteral("ALT + TAB") },
-        { QStringLiteral("kbWindowCyclePrev"), QStringLiteral("SHIFT + ALT + TAB") },
-        { QStringLiteral("kbWindowGroupCycleNext"), QStringLiteral("CTRL + ALT + TAB") },
-        { QStringLiteral("kbWindowGroupCyclePrev"), QStringLiteral("CTRL + SHIFT + ALT + TAB") },
-        { QStringLiteral("kbUngroup"), QStringLiteral("SUPER + U") },
-        { QStringLiteral("kbToggleGroup"), QStringLiteral("SUPER + Comma") },
-        { QStringLiteral("kbGroupLockActive"), QStringLiteral("SUPER + SHIFT + Comma") },
-        { QStringLiteral("kbWindowDecreaseWidth"), QVariantList{ QStringLiteral("SUPER + Minus"), QStringLiteral("SUPER + ALT + Left") } },
-        { QStringLiteral("kbWindowIncreaseWidth"), QVariantList{ QStringLiteral("SUPER + Equal"), QStringLiteral("SUPER + ALT + Right") } },
-        { QStringLiteral("kbWindowDecreaseHeight"), QVariantList{ QStringLiteral("SUPER + SHIFT + Minus"), QStringLiteral("SUPER + ALT + Up") } },
-        { QStringLiteral("kbWindowIncreaseHeight"), QVariantList{ QStringLiteral("SUPER + SHIFT + Equal"), QStringLiteral("SUPER + ALT + Down") } },
-        { QStringLiteral("kbMoveWindow"), QStringLiteral("SUPER + Z") },
-        { QStringLiteral("kbResizeWindow"), QStringLiteral("SUPER + X") },
-        { QStringLiteral("kbCenterWindow"), QStringLiteral("CTRL + SUPER + Backslash") },
-        { QStringLiteral("kbNormalizeWindow"), QStringLiteral("CTRL + SUPER + ALT + Backslash") },
-        { QStringLiteral("kbWindowPip"), QStringLiteral("SUPER + ALT + Backslash") },
-        { QStringLiteral("kbPinWindow"), QStringLiteral("SUPER + P") },
-        { QStringLiteral("kbWindowFullscreen"), QStringLiteral("SUPER + F") },
-        { QStringLiteral("kbWindowBorderedFullscreen"), QStringLiteral("SUPER + ALT + F") },
-        { QStringLiteral("kbToggleWindowFloating"), QStringLiteral("SUPER + ALT + Space") },
-        { QStringLiteral("kbCloseWindow"), QStringLiteral("SUPER + Q") },
-        { QStringLiteral("kbSpecialWs"), QStringLiteral("SUPER + S") },
-        { QStringLiteral("kbSystemMonitorWs"), QStringLiteral("CTRL + SHIFT + Escape") },
-        { QStringLiteral("kbMusicWs"), QStringLiteral("SUPER + M") },
-        { QStringLiteral("kbCommunicationWs"), QStringLiteral("SUPER + D") },
-        { QStringLiteral("kbTodoWs"), QStringLiteral("SUPER + R") },
-        { QStringLiteral("kbTerminal"), QStringLiteral("SUPER + T") },
-        { QStringLiteral("kbBrowser"), QStringLiteral("SUPER + W") },
-        { QStringLiteral("kbEditor"), QStringLiteral("SUPER + C") },
-        { QStringLiteral("kbFileExplorer"), QStringLiteral("SUPER + E") },
-        { QStringLiteral("kbAudioSettings"), QStringLiteral("CTRL + ALT + V") },
-        { QStringLiteral("kbScreenshot"), QStringLiteral("Print") },
-        { QStringLiteral("kbScreenshotFreeze"), QStringLiteral("SUPER + SHIFT + S") },
-        { QStringLiteral("kbScreenshotRegion"), QStringLiteral("SUPER + SHIFT + ALT + S") },
-        { QStringLiteral("kbRecord"), QStringLiteral("CTRL + ALT + R") },
-        { QStringLiteral("kbRecordSound"), QStringLiteral("SUPER + ALT + R") },
-        { QStringLiteral("kbRecordRegion"), QStringLiteral("SUPER + SHIFT + ALT + R") },
-        { QStringLiteral("kbColorPicker"), QStringLiteral("SUPER + SHIFT + C") },
-        { QStringLiteral("kbMediaToggle"), QStringLiteral("CTRL + SUPER + Space") },
-        { QStringLiteral("kbMediaNext"), QStringLiteral("CTRL + SUPER + Equal") },
-        { QStringLiteral("kbMediaPrev"), QStringLiteral("CTRL + SUPER + Minus") },
-        { QStringLiteral("kbMediaStop"), QStringLiteral("CTRL + SUPER + Backspace") },
-        { QStringLiteral("kbVolumeMute"), QStringLiteral("SUPER + SHIFT + M") },
-        { QStringLiteral("kbLauncher"), QStringLiteral("SUPER + SUPER_L") },
-        { QStringLiteral("kbSession"), QStringLiteral("CTRL + ALT + Delete") },
-        { QStringLiteral("kbShowSidebar"), QStringLiteral("SUPER + N") },
-        { QStringLiteral("kbClearNotifs"), QStringLiteral("CTRL + ALT + C") },
-        { QStringLiteral("kbShowPanels"), QStringLiteral("SUPER + K") },
-        { QStringLiteral("kbLock"), QStringLiteral("SUPER + L") },
-        { QStringLiteral("kbRestoreLock"), QStringLiteral("SUPER + ALT + L") },
-        { QStringLiteral("kbSleep"), QStringLiteral("SUPER + SHIFT + L") },
-        { QStringLiteral("kbClipboard"), QStringLiteral("SUPER + V") },
-        { QStringLiteral("kbClipboardDel"), QStringLiteral("SUPER + ALT + V") },
-        { QStringLiteral("kbClipboardPasteLatest"), QStringLiteral("CTRL + SHIFT + ALT + V") },
-        { QStringLiteral("kbEmoji"), QStringLiteral("SUPER + Period") }
+    QStringList candidatePaths = {
+        QStringLiteral(":/schema/caelestia_variables.json"),
+        QStringLiteral("/home/dim/Projects/AstraSuite/FlightDeck/data/schema/caelestia_variables.json")
     };
+
+    QByteArray schemaData;
+    for (const auto& path : candidatePaths) {
+        QFile file(path);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            schemaData = file.readAll();
+            break;
+        }
+    }
+
+    if (!schemaData.isEmpty()) {
+        QJsonDocument doc = QJsonDocument::fromJson(schemaData);
+        if (doc.isObject()) {
+            QJsonObject root = doc.object();
+            if (root.contains(QStringLiteral("sections"))) {
+                QJsonArray sections = root.value(QStringLiteral("sections")).toArray();
+                for (const auto& sVal : sections) {
+                    QJsonObject sObj = sVal.toObject();
+                    m_sections.append(sObj.toVariantMap());
+                    if (sObj.contains(QStringLiteral("options"))) {
+                        QJsonArray opts = sObj.value(QStringLiteral("options")).toArray();
+                        for (const auto& optVal : opts) {
+                            QJsonObject optObj = optVal.toObject();
+                            QString key = optObj.value(QStringLiteral("key")).toString();
+                            if (!key.isEmpty()) {
+                                m_schemaOptions[key] = optObj.toVariantMap();
+                                m_defaults[key] = optObj.value(QStringLiteral("default")).toVariant();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    emit schemaLoaded();
 
     const QString defPath = defaultVarsFilePath();
     QFile defFile(defPath);
@@ -898,55 +805,17 @@ QString CaelestiaVars::formatLua() const {
         out += QStringLiteral("\n");
     };
 
-    writeSection(QStringLiteral("Apps"), {
-        QStringLiteral("terminal"), QStringLiteral("browser"), QStringLiteral("editor"),
-        QStringLiteral("fileExplorer"), QStringLiteral("audioSettings")
-    });
-
-    writeSection(QStringLiteral("Touchpad"), {
-        QStringLiteral("touchpadDisableTyping"), QStringLiteral("touchpadScrollFactor"),
-        QStringLiteral("gestureFingers"), QStringLiteral("workspaceSwipeFingers"),
-        QStringLiteral("gestureFingersMore")
-    });
-
-    writeSection(QStringLiteral("Blur"), {
-        QStringLiteral("blurEnabled"), QStringLiteral("blurSpecialWs"), QStringLiteral("blurPopups"),
-        QStringLiteral("blurInputMethods"), QStringLiteral("blurSize"), QStringLiteral("blurPasses"),
-        QStringLiteral("blurXray")
-    });
-
-    writeSection(QStringLiteral("Shadow"), {
-        QStringLiteral("shadowEnabled"), QStringLiteral("shadowRange"),
-        QStringLiteral("shadowRenderPower"), QStringLiteral("shadowColour")
-    });
-
-    writeSection(QStringLiteral("Gaps"), {
-        QStringLiteral("workspaceGaps"), QStringLiteral("windowGapsIn"),
-        QStringLiteral("windowGapsOut"), QStringLiteral("singleWindowGapsOut")
-    });
-
-    writeSection(QStringLiteral("Window styling"), {
-        QStringLiteral("windowOpacity"), QStringLiteral("windowRounding"),
-        QStringLiteral("windowBorderSize"), QStringLiteral("activeWindowBorderColour"),
-        QStringLiteral("inactiveWindowBorderColour")
-    });
-
-    writeSection(QStringLiteral("Misc"), {
-        QStringLiteral("volumeStep"), QStringLiteral("volumeMax"),
-        QStringLiteral("cursorTheme"), QStringLiteral("cursorSize"),
-        QStringLiteral("sleepGestureCmd")
-    });
-
-    // Keybinds
-    QStringList kbKeys;
-    for (auto it = fullVars.constBegin(); it != fullVars.constEnd(); ++it) {
-        if (it.key().startsWith(QLatin1String("kb"))) {
-            kbKeys.append(it.key());
+    for (const auto& sVal : m_sections) {
+        const QVariantMap sec = sVal.toMap();
+        const QString title = sec.value(QStringLiteral("label")).toString();
+        const QVariantList opts = sec.value(QStringLiteral("options")).toList();
+        QStringList keys;
+        for (const auto& oVal : opts) {
+            keys.append(oVal.toMap().value(QStringLiteral("key")).toString());
         }
-    }
-    kbKeys.sort();
-    if (!kbKeys.isEmpty()) {
-        writeSection(QStringLiteral("Keybinds"), kbKeys);
+        if (!keys.isEmpty()) {
+            writeSection(title, keys);
+        }
     }
 
     out += QStringLiteral("}\n");

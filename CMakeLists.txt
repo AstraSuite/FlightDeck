@@ -103,6 +103,7 @@ qt_add_resources(flightdeck "resources"
         data/schema/hyprland_options.json
         data/schema/options.json
         data/schema/plugins/hypr-dynamic-cursors.json
+        data/schema/caelestia_variables.json
 )
 
 # Add QML files with CONFIGURE_DEPENDS
