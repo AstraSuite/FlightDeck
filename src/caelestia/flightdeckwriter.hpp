@@ -20,6 +20,7 @@ class FlightDeckWriter : public QObject {
     Q_PROPERTY(QStringList autostartCommands READ autostartCommands WRITE setAutostartCommands NOTIFY autostartChanged)
     Q_PROPERTY(QVariantList autostartEntries READ autostartEntries WRITE setAutostartEntries NOTIFY autostartChanged)
     Q_PROPERTY(QVariantMap pluginConfigs READ pluginConfigs WRITE setPluginConfigs NOTIFY pluginsChanged)
+    Q_PROPERTY(QVariantMap hyprOptions READ hyprOptions WRITE setHyprOptions NOTIFY hyprOptionsChanged)
 
 public:
     static FlightDeckWriter* instance();
@@ -52,7 +53,14 @@ public:
     QVariantMap pluginConfigs() const;
     void setPluginConfigs(const QVariantMap& plugins);
 
+    QVariantMap hyprOptions() const;
+    void setHyprOptions(const QVariantMap& options);
+
     // QML-invokable mutations
+    Q_INVOKABLE void setHyprOption(const QString& key, const QVariant& value);
+    Q_INVOKABLE QVariant getHyprOption(const QString& key, const QVariant& fallback = QVariant()) const;
+    Q_INVOKABLE bool hasHyprOption(const QString& key) const;
+
     Q_INVOKABLE void addWindowRule(const QVariantMap& rule);
     Q_INVOKABLE void removeWindowRule(int index);
     Q_INVOKABLE void updateWindowRule(int index, const QVariantMap& rule);
@@ -90,6 +98,7 @@ signals:
     void customBindsChanged();
     void autostartChanged();
     void pluginsChanged();
+    void hyprOptionsChanged();
     void saveSucceeded();
     void saveFailed(const QString& error);
 
@@ -105,6 +114,7 @@ private:
     QStringList m_autostartCommands;
     QVariantList m_autostartEntries;
     QVariantMap m_pluginConfigs;
+    QVariantMap m_hyprOptions;
 };
 
 using AstraHelmWriter = FlightDeckWriter;
