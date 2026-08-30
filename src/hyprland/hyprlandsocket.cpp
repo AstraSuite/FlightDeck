@@ -1,4 +1,5 @@
 #include "hyprlandsocket.hpp"
+#include "hyprlandschema.hpp"
 
 #include <QDir>
 #include <QFile>
@@ -98,6 +99,19 @@ QJsonDocument HyprlandSocket::queryJson(const QString& command, int timeoutMs) c
 }
 
 bool HyprlandSocket::keyword(const QString& key, const QVariant& value) {
+    auto schema = HyprlandSchema::instance();
+    QString canonicalKey = schema ? schema->toHyprKey(key) : key;
+    if (canonicalKey.isEmpty()) canonicalKey = key;
+
+    QVariantMap optMap;
+    optMap[canonicalKey] = value;
+    QString luaConfig = schema ? schema->serializeToLuaConfig(optMap) : QString();
+    if (!luaConfig.isEmpty()) {
+        if (evalLua(luaConfig)) {
+            return true;
+        }
+    }
+
     QString valStr;
     if (value.typeId() == QMetaType::Bool) {
         valStr = value.toBool() ? QStringLiteral("1") : QStringLiteral("0");
@@ -105,16 +119,10 @@ bool HyprlandSocket::keyword(const QString& key, const QVariant& value) {
         valStr = value.toString();
     }
 
-    const QString resp = send(QStringLiteral("/keyword %1 %2").arg(key, valStr));
+    const QString resp = send(QStringLiteral("keyword %1 %2").arg(canonicalKey, valStr));
     const QString trimmed = resp.trimmed();
     if (trimmed.compare(QLatin1String("ok"), Qt::CaseInsensitive) == 0) {
         return true;
-    }
-
-    // Hyprland 0.55+ with Lua config manager might ask for eval
-    if (trimmed.contains(QLatin1String("eval"), Qt::CaseInsensitive)) {
-        // Construct Lua fallback: hl.config({ ... })
-        return evalLua(QStringLiteral("hl.set_option(\"%1\", %2)").arg(key, valStr));
     }
 
     emit commandFailed(key, resp);
@@ -136,9 +144,9 @@ bool HyprlandSocket::keywordBatch(const QList<QPair<QString, QVariant>>& command
 }
 
 bool HyprlandSocket::evalLua(const QString& luaCode) {
-    const QString resp = send(QStringLiteral("/eval %1").arg(luaCode));
+    const QString resp = send(QStringLiteral("eval %1").arg(luaCode));
     const QString trimmed = resp.trimmed();
-    if (trimmed.compare(QLatin1String("ok"), Qt::CaseInsensitive) == 0) {
+    if (trimmed.compare(QLatin1String("ok"), Qt::CaseInsensitive) == 0 || trimmed.isEmpty()) {
         return true;
     }
     emit commandFailed(luaCode, resp);

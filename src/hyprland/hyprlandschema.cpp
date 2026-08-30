@@ -396,10 +396,13 @@ QString HyprlandSchema::serializeToLuaConfig(const QVariantMap& options) const {
                 }
             }
             if (checkKey.isEmpty()) {
-                checkKey = QStringLiteral("plugin:%1").arg(pluginName);
+                checkKey = QStringLiteral("plugin.%1").arg(pluginName);
+            } else {
+                checkKey.replace(QLatin1Char('-'), QLatin1Char('_'));
+                checkKey.replace(QLatin1Char(':'), QLatin1Char('.'));
             }
 
-            result += QStringLiteral("if hl.get_config and hl.get_config(\"%1\") ~= nil then\n").arg(checkKey);
+            result += QStringLiteral("if (hl.plugin and hl.plugin.%1) or (hl.get_config and hl.get_config(\"%2\") ~= nil) then\n").arg(pluginName, checkKey);
             result += QStringLiteral("    hl.config({\n");
             result += QStringLiteral("        plugin = {\n");
             result += QStringLiteral("            %1 = {\n").arg(pluginName);
