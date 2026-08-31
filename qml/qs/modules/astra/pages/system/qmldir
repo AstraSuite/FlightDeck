@@ -3,3 +3,4 @@ DefaultAppsSubPage 1.0 DefaultAppsSubPage.qml
 XWaylandSubPage 1.0 XWaylandSubPage.qml
 ThemeAirlockSubPage 1.0 ThemeAirlockSubPage.qml
 CompositorSubPage 1.0 CompositorSubPage.qml
+DiagnosticsSubPage 1.0 DiagnosticsSubPage.qml

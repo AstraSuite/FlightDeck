@@ -622,17 +622,25 @@ QString HyprlandSchema::serializeToLuaConfig(const QVariantMap& options) const {
     QMap<QString, QString> pluginFirstKeys;
 
     for (auto it = options.constBegin(); it != options.constEnd(); ++it) {
+        if (it.value().isNull() || !it.value().isValid() || (it.value().typeId() == QMetaType::QString && it.value().toString().trimmed().isEmpty())) {
+            continue;
+        }
         QString hyprKey = toHyprKey(it.key());
+        QString optType = getType(hyprKey);
+        QVariant val = it.value();
+        if (optType == QStringLiteral("bool") && val.typeId() != QMetaType::Bool) {
+            val = (val.toString().compare(QStringLiteral("true"), Qt::CaseInsensitive) == 0 || val.toInt() == 1 || val.toBool());
+        }
         QStringList parts = hyprKey.split(QLatin1Char(':'));
         if (parts.first() == QStringLiteral("plugin")) {
-            insertNestedOption(pluginTree, parts.mid(1), it.value());
+            insertNestedOption(pluginTree, parts.mid(1), val);
             QString pluginName = parts.size() > 1 ? parts[1] : QString();
             pluginName.replace(QLatin1Char('-'), QLatin1Char('_'));
             if (!pluginFirstKeys.contains(pluginName)) {
                 pluginFirstKeys[pluginName] = hyprKey;
             }
         } else {
-            insertNestedOption(nativeTree, parts, it.value());
+            insertNestedOption(nativeTree, parts, val);
         }
     }
 

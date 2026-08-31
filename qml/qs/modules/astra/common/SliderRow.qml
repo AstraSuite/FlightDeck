@@ -16,6 +16,28 @@ ConnectedRect {
     property bool showReset: false
     signal reset()
 
+    readonly property bool isOverridden: (CaelestiaVars.revision >= 0 && root.varKey !== "") ? CaelestiaVars.isOverridden(root.varKey) : false
+
+    Connections {
+        target: CaelestiaVars
+        function onVarsChanged() {
+            if (root.varKey !== "") {
+                root.value = CaelestiaVars.get(root.varKey, CaelestiaVars.getDefault(root.varKey, root.from));
+            }
+        }
+        function onPendingChanged() {
+            if (root.varKey !== "") {
+                root.value = CaelestiaVars.get(root.varKey, CaelestiaVars.getDefault(root.varKey, root.from));
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        if (root.varKey !== "") {
+            root.value = CaelestiaVars.get(root.varKey, CaelestiaVars.getDefault(root.varKey, root.from));
+        }
+    }
+
     property alias icon: icon.text
     property alias label: label.text
     property alias text: label.text
@@ -30,10 +52,10 @@ ConnectedRect {
     signal interaction(value: real)
     signal released(value: real)
 
-    Binding on value {
-        when: root.varKey !== ""
-        value: CaelestiaVars.pendingVars[root.varKey] ?? CaelestiaVars.currentVars[root.varKey] ?? CaelestiaVars.getDefault(root.varKey, root.from)
-        restoreMode: Binding.RestoreBinding
+    onMoved: (v) => {
+        if (root.varKey !== "") {
+            CaelestiaVars.set(root.varKey, v);
+        }
     }
 
     Layout.fillWidth: true
@@ -74,11 +96,10 @@ ConnectedRect {
                     icon: "restart_alt"
                     type: IconButton.Text
                     font: Tokens.font.icon.small
-                    visible: root.showReset || (root.varKey !== "" && (root.varKey in CaelestiaVars.currentVars || root.varKey in CaelestiaVars.pendingVars))
+                    visible: root.showReset || root.isOverridden
                     onClicked: {
                         if (root.varKey !== "") {
                             CaelestiaVars.resetToDefault(root.varKey);
-                            root.value = CaelestiaVars.getDefault(root.varKey, root.from);
                         }
                         root.reset();
                     }

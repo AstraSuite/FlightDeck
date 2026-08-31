@@ -4,3 +4,4 @@ GapsRoundingSubPage 1.0 GapsRoundingSubPage.qml
 DimmingSnappingSubPage 1.0 DimmingSnappingSubPage.qml
 BlurSubPage 1.0 BlurSubPage.qml
 ShadowsSubPage 1.0 ShadowsSubPage.qml
+WindowGroupsSubPage 1.0 WindowGroupsSubPage.qml

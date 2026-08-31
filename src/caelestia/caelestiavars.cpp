@@ -684,11 +684,25 @@ QVariant CaelestiaVars::getDefault(const QString& key, const QVariant& fallback)
 
 bool CaelestiaVars::isOverridden(const QString& key) const {
     auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
-    QString canonicalKey = schema->toHyprKey(key);
-    QString shortKey = schema->toShortKey(canonicalKey);
-    return m_savedVars.contains(key) || m_savedVars.contains(canonicalKey) || m_savedVars.contains(shortKey)
-        || m_pendingVars.contains(key) || m_pendingVars.contains(canonicalKey) || m_pendingVars.contains(shortKey)
-        || FlightDeckWriter::instance()->hasHyprOption(canonicalKey) || FlightDeckWriter::instance()->hasHyprOption(key);
+    QString canonicalKey = schema ? schema->toHyprKey(key) : key;
+    QString shortKey = schema ? schema->toShortKey(canonicalKey) : key;
+
+    auto checkVal = [&](const QString& k) {
+        if (k.isEmpty()) return false;
+        QVariant def = getDefault(k);
+        if (m_pendingVars.contains(k)) {
+            return def.isValid() ? (m_pendingVars.value(k) != def) : true;
+        }
+        if (m_savedVars.contains(k)) {
+            return def.isValid() ? (m_savedVars.value(k) != def) : true;
+        }
+        if (FlightDeckWriter::instance()->hasHyprOption(k)) {
+            return def.isValid() ? (FlightDeckWriter::instance()->getHyprOption(k) != def) : true;
+        }
+        return false;
+    };
+
+    return checkVal(key) || checkVal(canonicalKey) || checkVal(shortKey);
 }
 
 void CaelestiaVars::set(const QString& key, const QVariant& value) {
@@ -720,10 +734,12 @@ void CaelestiaVars::set(const QString& key, const QVariant& value) {
 
     if (isNativeHyprOption(canonicalKey)) {
         FlightDeckWriter::instance()->setHyprOption(canonicalKey, value);
+        FlightDeckWriter::instance()->save();
     }
 
     applyKeywordToHyprland(key, value);
     save();
+    m_revision++;
     emit varsChanged();
     emit pendingChanged();
     emit dirtyChanged();
@@ -736,6 +752,7 @@ void CaelestiaVars::setVar(const QString& key, const QVariant& value) {
 void CaelestiaVars::resetKey(const QString& key) {
     if (m_pendingVars.contains(key)) {
         m_pendingVars.remove(key);
+        m_revision++;
         emit pendingChanged();
         emit dirtyChanged();
     }
@@ -754,14 +771,13 @@ void CaelestiaVars::remove(const QString& key) {
     if (!canonicalKey.isEmpty()) m_pendingVars.remove(canonicalKey);
     if (!shortKey.isEmpty()) m_pendingVars.remove(shortKey);
 
-    if (isNativeHyprOption(canonicalKey)) {
-        FlightDeckWriter::instance()->removeHyprOption(canonicalKey);
-    }
-    if (isNativeHyprOption(key)) {
-        FlightDeckWriter::instance()->removeHyprOption(key);
-    }
+    FlightDeckWriter::instance()->removeHyprOption(canonicalKey);
+    FlightDeckWriter::instance()->removeHyprOption(key);
+    if (!shortKey.isEmpty()) FlightDeckWriter::instance()->removeHyprOption(shortKey);
+    FlightDeckWriter::instance()->save();
 
     save();
+    m_revision++;
     emit varsChanged();
     emit pendingChanged();
     emit dirtyChanged();
@@ -780,13 +796,6 @@ void CaelestiaVars::resetToDefault(const QString& key) {
     if (!canonicalKey.isEmpty()) m_pendingVars.remove(canonicalKey);
     if (!shortKey.isEmpty()) m_pendingVars.remove(shortKey);
 
-    if (isNativeHyprOption(canonicalKey)) {
-        FlightDeckWriter::instance()->removeHyprOption(canonicalKey);
-    }
-    if (isNativeHyprOption(key)) {
-        FlightDeckWriter::instance()->removeHyprOption(key);
-    }
-
     auto removeAlias = [&](const QString& k1, const QString& k2) {
         if (key == k1) {
             m_savedVars.remove(k2);
@@ -803,6 +812,7 @@ void CaelestiaVars::resetToDefault(const QString& key) {
 
     FlightDeckWriter::instance()->removeHyprOption(canonicalKey);
     FlightDeckWriter::instance()->removeHyprOption(key);
+    if (!shortKey.isEmpty()) FlightDeckWriter::instance()->removeHyprOption(shortKey);
     FlightDeckWriter::instance()->save();
 
     save();
@@ -812,6 +822,7 @@ void CaelestiaVars::resetToDefault(const QString& key) {
         applyKeywordToHyprland(canonicalKey.isEmpty() ? key : canonicalKey, defaultVal);
     }
 
+    m_revision++;
     emit varsChanged();
     emit pendingChanged();
     emit dirtyChanged();

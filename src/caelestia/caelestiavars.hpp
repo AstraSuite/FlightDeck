@@ -16,6 +16,7 @@ class CaelestiaVars : public QObject {
 
     Q_PROPERTY(bool isDirty READ isDirty NOTIFY dirtyChanged)
     Q_PROPERTY(int dirtyCount READ dirtyCount NOTIFY dirtyChanged)
+    Q_PROPERTY(int revision READ revision NOTIFY varsChanged)
     Q_PROPERTY(QStringList pendingKeys READ pendingKeys NOTIFY pendingChanged)
     Q_PROPERTY(QVariantMap currentVars READ currentVars NOTIFY varsChanged)
     Q_PROPERTY(QVariantMap pendingVars READ pendingVars NOTIFY pendingChanged)
@@ -34,6 +35,7 @@ public:
 
     bool isDirty() const;
     int dirtyCount() const;
+    int revision() const { return m_revision; }
     QStringList pendingKeys() const;
 
     QVariantMap currentVars() const;
@@ -85,6 +87,7 @@ private:
     void applyKeywordToHyprland(const QString& key, const QVariant& value);
     QString formatLua() const;
 
+    int m_revision = 0;
     QVariantMap m_defaults;
     QVariantList m_sections;
     QVariantMap m_schemaOptions;

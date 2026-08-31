@@ -8,6 +8,7 @@ import qs.services
 import qs.modules.astra.common
 import FlightDeck.Caelestia 1.0
 import FlightDeck.Hyprland 1.0
+import FlightDeck.Managers 1.0
 
 Popup {
     id: root
@@ -17,8 +18,12 @@ Popup {
     property string args: ""
     property bool recording: false
 
+    readonly property var chordInfo: KeybindValidator.checkChord(root.bindKey)
+    readonly property bool hasCustomConflict: chordInfo && chordInfo.customCount > 0
+    readonly property bool isOverridingSystem: chordInfo && chordInfo.customCount === 0 && chordInfo.systemCount > 0
+
     width: Math.min(480, parent.width - 40)
-    height: Math.min(460, parent.height - 40)
+    height: Math.min(520, parent.height - 40)
     anchors.centerIn: parent
 
     modal: true
@@ -103,6 +108,70 @@ Popup {
                     text: root.recording ? "stop_circle" : "fiber_manual_record"
                     color: root.recording ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
                     fontStyle: Tokens.font.icon.small
+                }
+            }
+        }
+
+        // Duplicate Custom Conflict Warning Banner
+        StyledRect {
+            visible: root.hasCustomConflict
+            Layout.fillWidth: true
+            implicitHeight: conflictLayout.implicitHeight + Tokens.padding.small * 2
+            radius: Tokens.rounding.small
+            color: Colours.palette.m3errorContainer
+
+            RowLayout {
+                id: conflictLayout
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Tokens.padding.small
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "warning"
+                    color: Colours.palette.m3onErrorContainer
+                    fontStyle: Tokens.font.icon.small
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: qsTr("Key chord '%1' is already used by another custom shortcut").arg(root.chordInfo ? root.chordInfo.chord : "")
+                    font: Tokens.font.body.small
+                    color: Colours.palette.m3onErrorContainer
+                    wrapMode: Text.WordWrap
+                }
+            }
+        }
+
+        // System Override Notice Banner
+        StyledRect {
+            visible: root.isOverridingSystem
+            Layout.fillWidth: true
+            implicitHeight: overrideLayout.implicitHeight + Tokens.padding.small * 2
+            radius: Tokens.rounding.small
+            color: Colours.palette.m3surfaceContainerHigh
+
+            RowLayout {
+                id: overrideLayout
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Tokens.padding.small
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "info"
+                    color: Colours.palette.m3primary
+                    fontStyle: Tokens.font.icon.small
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: qsTr("Overrides default action '%1' via unbind").arg(root.chordInfo && root.chordInfo.systemShadowed ? root.chordInfo.systemShadowed.label : "")
+                    font: Tokens.font.body.small
+                    color: Colours.palette.m3onSurface
+                    wrapMode: Text.WordWrap
                 }
             }
         }

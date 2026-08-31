@@ -62,11 +62,18 @@ StackPage {
                     }
 
                     NavRow {
-                        last: true
                         label: qsTr("Drop shadows")
                         subtext: qsTr("Dynamic window shadow radius, colors, and offsets")
                         icon: "filter_drama"
                         onClicked: root.nState.openSubPage(5)
+                    }
+
+                    NavRow {
+                        last: true
+                        label: qsTr("Window groups & tabs")
+                        subtext: qsTr("Groupbar tab heights, title rendering, gradients, and tab drag behavior")
+                        icon: "tab"
+                        onClicked: root.nState.openSubPage(6)
                     }
 
                     Item {
@@ -103,6 +110,12 @@ StackPage {
 
         Component {
             ShadowsSubPage {
+                nState: root.nState
+            }
+        },
+
+        Component {
+            WindowGroupsSubPage {
                 nState: root.nState
             }
         }

@@ -328,6 +328,99 @@
       ]
     },
     {
+      "id": "window_groups",
+      "label": "Window Groups & Tabs",
+      "description": "Tabbed window groupings, drag-to-group behavior, and titlebar indicators.",
+      "options": [
+        {
+          "key": "groupInsertAfterCurrent",
+          "hyprKeyword": "group:insert_after_current",
+          "label": "Insert After Current Window",
+          "type": "bool",
+          "default": true,
+          "description": "Spawn new windows inside a group directly after the active window"
+        },
+        {
+          "key": "groupFocusRemovedWindow",
+          "hyprKeyword": "group:focus_removed_window",
+          "label": "Focus Removed Window",
+          "type": "bool",
+          "default": true,
+          "description": "Transfer focus to window when dragged out of a group"
+        },
+        {
+          "key": "groupMergeGroupsOnDrag",
+          "hyprKeyword": "group:merge_groups_on_drag",
+          "label": "Merge Groups On Drag",
+          "type": "bool",
+          "default": true,
+          "description": "Allow dragging one window group into another to combine tabs"
+        },
+        {
+          "key": "groupbarEnabled",
+          "hyprKeyword": "group:groupbar:enabled",
+          "label": "Enable Groupbar Tabs",
+          "type": "bool",
+          "default": true,
+          "description": "Render tab bar indicators above grouped windows"
+        },
+        {
+          "key": "groupbarRenderTitles",
+          "hyprKeyword": "group:groupbar:render_titles",
+          "label": "Render Window Titles in Tabs",
+          "type": "bool",
+          "default": true,
+          "description": "Display window application titles on top of tab bars"
+        },
+        {
+          "key": "groupbarGradients",
+          "hyprKeyword": "group:groupbar:gradients",
+          "label": "Tabbar Gradients",
+          "type": "bool",
+          "default": true,
+          "description": "Draw subtle gradient lighting on group tabs"
+        },
+        {
+          "key": "groupbarHeight",
+          "hyprKeyword": "group:groupbar:height",
+          "label": "Groupbar Height",
+          "type": "int",
+          "min": 8,
+          "max": 40,
+          "step": 1,
+          "default": 16,
+          "description": "Height of tab bars in pixels"
+        },
+        {
+          "key": "groupbarIndicatorHeight",
+          "hyprKeyword": "group:groupbar:indicator_height",
+          "label": "Indicator Thickness",
+          "type": "int",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "default": 3,
+          "description": "Thickness of active tab indicator strip"
+        },
+        {
+          "key": "groupbarStacked",
+          "hyprKeyword": "group:groupbar:stacked",
+          "label": "Stacked Vertical Tabs",
+          "type": "bool",
+          "default": false,
+          "description": "Render group tabs vertically stacked instead of horizontal tabs"
+        },
+        {
+          "key": "groupbarScrolling",
+          "hyprKeyword": "group:groupbar:scrolling",
+          "label": "Scroll To Switch Tabs",
+          "type": "bool",
+          "default": true,
+          "description": "Mouse wheel scroll on groupbar switches active tab"
+        }
+      ]
+    },
+    {
       "id": "misc",
       "label": "Miscellaneous & Cursor",
       "description": "Volume increments, cursor theme, and power commands.",

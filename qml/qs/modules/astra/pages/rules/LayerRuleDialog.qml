@@ -7,6 +7,7 @@ import qs.components.controls
 import qs.services
 import qs.modules.astra.common
 import FlightDeck.Caelestia 1.0
+import FlightDeck.Managers 1.0
 
 Popup {
     id: root

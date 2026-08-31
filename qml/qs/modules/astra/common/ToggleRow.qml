@@ -13,6 +13,28 @@ StyledSwitch {
     property bool showReset: false
     signal reset()
 
+    readonly property bool isOverridden: (CaelestiaVars.revision >= 0 && root.varKey !== "") ? CaelestiaVars.isOverridden(root.varKey) : false
+
+    Connections {
+        target: CaelestiaVars
+        function onVarsChanged() {
+            if (root.varKey !== "") {
+                root.checked = CaelestiaVars.get(root.varKey, CaelestiaVars.getDefault(root.varKey, false));
+            }
+        }
+        function onPendingChanged() {
+            if (root.varKey !== "") {
+                root.checked = CaelestiaVars.get(root.varKey, CaelestiaVars.getDefault(root.varKey, false));
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        if (root.varKey !== "") {
+            root.checked = CaelestiaVars.get(root.varKey, CaelestiaVars.getDefault(root.varKey, false));
+        }
+    }
+
     property bool showDelete: false
     signal deleted()
 
@@ -27,10 +49,10 @@ StyledSwitch {
 
     Layout.fillWidth: true
 
-    Binding on checked {
-        when: root.varKey !== ""
-        value: CaelestiaVars.pendingVars[root.varKey] ?? CaelestiaVars.currentVars[root.varKey] ?? CaelestiaVars.getDefault(root.varKey, false)
-        restoreMode: Binding.RestoreBinding
+    onToggled: {
+        if (root.varKey !== "") {
+            CaelestiaVars.set(root.varKey, root.checked);
+        }
     }
 
     horizontalPadding: Tokens.padding.largeIncreased
@@ -59,17 +81,11 @@ StyledSwitch {
     }
 
     contentItem: Item {
-        anchors.left: parent.left
-        anchors.right: root.indicator.left
-        anchors.leftMargin: root.horizontalPadding
-        anchors.rightMargin: Tokens.spacing.medium
+        implicitWidth: col.implicitWidth
+        implicitHeight: col.implicitHeight
 
-        implicitWidth: column.implicitWidth
-        implicitHeight: column.implicitHeight
-
-        Column {
-            id: column
-
+        ColumnLayout {
+            id: col
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
@@ -90,11 +106,10 @@ StyledSwitch {
                     icon: "restart_alt"
                     type: IconButton.Text
                     font: Tokens.font.icon.small
-                    visible: root.showReset || (root.varKey !== "" && (root.varKey in CaelestiaVars.currentVars || root.varKey in CaelestiaVars.pendingVars))
+                    visible: root.showReset || root.isOverridden
                     onClicked: {
                         if (root.varKey !== "") {
                             CaelestiaVars.resetToDefault(root.varKey);
-                            root.checked = CaelestiaVars.getDefault(root.varKey, false);
                         }
                         root.reset();
                     }
@@ -120,9 +135,6 @@ StyledSwitch {
             }
 
             StyledText {
-                anchors.left: parent.left
-                anchors.right: parent.right
-
                 visible: root.subtext !== ""
                 text: root.subtext
                 color: Colours.palette.m3outline

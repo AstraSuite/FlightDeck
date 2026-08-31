@@ -4,6 +4,8 @@
 #include "../hyprland/hyprlandsocket.hpp"
 #include "../hyprland/hyprlandschema.hpp"
 #include "../managers/profilemanager.hpp"
+#include "../managers/diagnosticsmanager.hpp"
+#include "../managers/keybindvalidator.hpp"
 
 #include <QCommandLineParser>
 #include <QDir>
@@ -27,8 +29,11 @@ int CliHandler::run(int argc, char* argv[]) {
     parser.addHelpOption();
     parser.addVersionOption();
 
-    parser.addPositionalArgument(QStringLiteral("command"), QStringLiteral("Command to execute (get, set, reload, profile)"));
+    parser.addPositionalArgument(QStringLiteral("command"), QStringLiteral("Command to execute (get, set, reload, profile, doctor, bind)"));
     parser.addPositionalArgument(QStringLiteral("args"), QStringLiteral("Arguments for command"), QStringLiteral("[args...]"));
+
+    parser.addOption(QCommandLineOption(QStringList() << QStringLiteral("c") << QStringLiteral("conflicts"), QStringLiteral("Show conflicting bindings only")));
+    parser.addOption(QCommandLineOption(QStringList() << QStringLiteral("val-only"), QStringLiteral("Output raw value only without formatting")));
 
     QStringList args;
     for (int i = 0; i < argc; ++i) {
@@ -274,6 +279,17 @@ int CliHandler::run(int argc, char* argv[]) {
         return ok ? 0 : 1;
     }
 
+    if (cmd == QStringLiteral("reset")) {
+        if (posArgs.size() < 2) {
+            std::cerr << "Usage: flightdeck reset <key>\n";
+            return 1;
+        }
+        const QString key = posArgs.at(1);
+        Caelestia::CaelestiaVars::instance()->resetToDefault(key);
+        std::cout << "Reset " << key.toStdString() << " to default.\n";
+        return 0;
+    }
+
     if (cmd == QStringLiteral("profile")) {
         if (posArgs.size() < 2) {
             std::cerr << "Usage: flightdeck profile <list|create|restore|delete> [name]\n";
@@ -300,6 +316,123 @@ int CliHandler::run(int argc, char* argv[]) {
         if (sub == QStringLiteral("delete")) {
             return Managers::ProfileManager::instance()->deleteProfile(name) ? 0 : 1;
         }
+    }
+
+    if (cmd == QStringLiteral("doctor")) {
+        auto diag = Managers::DiagnosticsManager::instance();
+        diag->runAllChecks();
+
+        const QVariantList results = diag->results();
+        std::cout << "\033[1;36m=== FlightDeck Compositor Doctor ===\033[0m\n\n";
+
+        for (const auto& itemVal : results) {
+            const QVariantMap item = itemVal.toMap();
+            const QString category = item.value(QStringLiteral("category")).toString();
+            const QString title = item.value(QStringLiteral("title")).toString();
+            const QString status = item.value(QStringLiteral("status")).toString();
+            const QString message = item.value(QStringLiteral("message")).toString();
+            const QString detail = item.value(QStringLiteral("detail")).toString();
+            const QString fix = item.value(QStringLiteral("suggestedFix")).toString();
+
+            if (status == QStringLiteral("pass")) {
+                std::cout << "  \033[1;32m[PASS]\033[0m " << category.toStdString() << " :: " << title.toStdString() << "\n";
+                std::cout << "         " << message.toStdString() << "\n";
+            } else if (status == QStringLiteral("warning")) {
+                std::cout << "  \033[1;33m[WARN]\033[0m " << category.toStdString() << " :: " << title.toStdString() << "\n";
+                std::cout << "         " << message.toStdString() << "\n";
+                if (!fix.isEmpty()) {
+                    std::cout << "         \033[0;33m-> Suggested Fix: " << fix.toStdString() << "\033[0m\n";
+                }
+            } else if (status == QStringLiteral("error")) {
+                std::cout << "  \033[1;31m[FAIL]\033[0m " << category.toStdString() << " :: " << title.toStdString() << "\n";
+                std::cout << "         " << message.toStdString() << "\n";
+                if (!fix.isEmpty()) {
+                    std::cout << "         \033[0;31m-> Suggested Fix: " << fix.toStdString() << "\033[0m\n";
+                }
+            }
+            if (!detail.isEmpty()) {
+                std::cout << "         \033[0;90mDetail: " << detail.toStdString() << "\033[0m\n";
+            }
+            std::cout << "\n";
+        }
+
+        std::cout << "\033[1mSummary:\033[0m "
+                  << "\033[1;32m" << diag->passCount() << " Passed\033[0m, "
+                  << "\033[1;33m" << diag->warningCount() << " Warnings\033[0m, "
+                  << "\033[1;31m" << diag->errorCount() << " Errors\033[0m\n";
+
+        return diag->errorCount() > 0 ? 1 : 0;
+    }
+
+    if (cmd == QStringLiteral("bind")) {
+        const bool showConflictsOnly = (parser.isSet(QStringLiteral("conflicts")) || parser.isSet(QStringLiteral("c")) ||
+                                        posArgs.contains(QStringLiteral("conflicts")) || posArgs.contains(QStringLiteral("--conflicts")));
+        auto kv = Managers::KeybindValidator::instance();
+        kv->refresh();
+
+        if (showConflictsOnly) {
+            const QVariantList trueConflicts = kv->trueConflicts();
+            const QVariantList overrides = kv->overrides();
+
+            if (trueConflicts.isEmpty()) {
+                std::cout << "\033[1;32mNo unresolvable keybinding collisions detected.\033[0m\n";
+                if (!overrides.isEmpty()) {
+                    std::cout << "\033[0;36mActive Custom Overrides (" << overrides.size() << "):\033[0m\n";
+                    for (const auto& oVal : overrides) {
+                        const QVariantMap o = oVal.toMap();
+                        const QVariantMap c = o.value(QStringLiteral("customOverride")).toMap();
+                        const QVariantMap s = o.value(QStringLiteral("systemShadowed")).toMap();
+                        std::cout << "  \033[1m" << o.value(QStringLiteral("chord")).toString().toStdString() << "\033[0m: "
+                                  << c.value(QStringLiteral("label")).toString().toStdString()
+                                  << " \033[0;90m(Overrides default: " << s.value(QStringLiteral("label")).toString().toStdString() << ")\033[0m\n";
+                    }
+                }
+                return 0;
+            }
+
+            std::cout << "\033[1;31m=== Keybinding Collisions (" << trueConflicts.size() << ") ===\033[0m\n\n";
+            for (const auto& cVal : trueConflicts) {
+                const QVariantMap c = cVal.toMap();
+                std::cout << "  \033[1;31mChord:\033[0m " << c.value(QStringLiteral("chord")).toString().toStdString() << "\n";
+                const QVariantList sources = c.value(QStringLiteral("sources")).toList();
+                for (const auto& sVal : sources) {
+                    const QVariantMap s = sVal.toMap();
+                    std::cout << "    - [" << s.value(QStringLiteral("type")).toString().toStdString() << "] "
+                              << s.value(QStringLiteral("label")).toString().toStdString()
+                              << " (" << s.value(QStringLiteral("rawVal")).toString().toStdString() << ")\n";
+                }
+                std::cout << "\n";
+            }
+            return 1;
+        }
+
+        // List all bindings
+        std::cout << "\033[1;36m=== Active Keybindings ===\033[0m\n\n";
+        auto vars = Caelestia::CaelestiaVars::instance();
+        const QVariantList sections = vars->keybindSections();
+        for (const auto& sVal : sections) {
+            const QVariantMap sec = sVal.toMap();
+            std::cout << "\033[1m[" << sec.value(QStringLiteral("label")).toString().toStdString() << "]\033[0m\n";
+            const QVariantList options = sec.value(QStringLiteral("options")).toList();
+            for (const auto& optVal : options) {
+                const QVariantMap opt = optVal.toMap();
+                const QString keyName = opt.value(QStringLiteral("key")).toString();
+                const QString optLabel = opt.value(QStringLiteral("label")).toString();
+                QVariant val = vars->get(keyName);
+                if (val.isNull() || !val.isValid() || val.toString().isEmpty()) {
+                    val = vars->getDefault(keyName, QVariant());
+                }
+                QString chord = kv->normalizeChord(val);
+                bool isOvr = kv->isOverridden(chord);
+                std::cout << "  " << optLabel.toStdString() << ": \033[1;32m" << val.toString().toStdString() << "\033[0m";
+                if (isOvr) {
+                    std::cout << " \033[0;33m[Overridden by custom shortcut]\033[0m";
+                }
+                std::cout << "\n";
+            }
+            std::cout << "\n";
+        }
+        return 0;
     }
 
     std::cerr << "Unknown command: " << cmd.toStdString() << "\n";

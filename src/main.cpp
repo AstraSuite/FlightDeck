@@ -36,6 +36,9 @@
 #include "managers/autostartmanager.hpp"
 #include "managers/profilemanager.hpp"
 #include "managers/airlockmanager.hpp"
+#include "managers/keybindvalidator.hpp"
+#include "managers/targetinspector.hpp"
+#include "managers/diagnosticsmanager.hpp"
 #include "utils/cursorimageprovider.hpp"
 
 #ifndef ASTRA_VERSION
@@ -57,7 +60,9 @@ int main(int argc, char* argv[]) {
     if (argc > 1) {
         const QString firstArg = QString::fromUtf8(argv[1]);
         if (firstArg == QStringLiteral("get") || firstArg == QStringLiteral("set") ||
+            firstArg == QStringLiteral("reset") ||
             firstArg == QStringLiteral("reload") || firstArg == QStringLiteral("profile") ||
+            firstArg == QStringLiteral("doctor") || firstArg == QStringLiteral("bind") ||
             firstArg == QStringLiteral("-h") || firstArg == QStringLiteral("--help") ||
             firstArg == QStringLiteral("-v") || firstArg == QStringLiteral("--version")) {
             isCliCommand = true;
@@ -141,6 +146,9 @@ int main(int argc, char* argv[]) {
         qmlRegisterSingletonType<FlightDeck::Managers::AutostartManager>(uri, 1, 0, "AutostartManager", &FlightDeck::Managers::AutostartManager::create);
         qmlRegisterSingletonType<FlightDeck::Managers::ProfileManager>(uri, 1, 0, "ProfileManager", &FlightDeck::Managers::ProfileManager::create);
         qmlRegisterSingletonType<FlightDeck::Managers::AirlockManager>(uri, 1, 0, "AirlockManager", &FlightDeck::Managers::AirlockManager::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::KeybindValidator>(uri, 1, 0, "KeybindValidator", &FlightDeck::Managers::KeybindValidator::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::TargetInspector>(uri, 1, 0, "TargetInspector", &FlightDeck::Managers::TargetInspector::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::DiagnosticsManager>(uri, 1, 0, "DiagnosticsManager", &FlightDeck::Managers::DiagnosticsManager::create);
     }
 
     const char* configUris[] = { "FlightDeck.Config", "Helm.Config", "Foundry.Config", "Caelestia.Config" };

@@ -57,11 +57,18 @@ StackPage {
                     }
 
                     NavRow {
-                        last: true
                         label: qsTr("Compositor behavior")
                         subtext: qsTr("Focus activation, window animations, VFR, VRR, DPMS, and wallpapers")
                         icon: "settings"
                         onClicked: root.nState.openSubPage(4)
+                    }
+
+                    NavRow {
+                        last: true
+                        label: qsTr("System diagnostics & health")
+                        subtext: qsTr("Compositor socket, GPU environment, Lua syntax, daemons, and shortcuts")
+                        icon: "health_and_safety"
+                        onClicked: root.nState.openSubPage(5)
                     }
 
                     Item {
@@ -92,6 +99,12 @@ StackPage {
 
         Component {
             CompositorSubPage {
+                nState: root.nState
+            }
+        },
+
+        Component {
+            DiagnosticsSubPage {
                 nState: root.nState
             }
         }

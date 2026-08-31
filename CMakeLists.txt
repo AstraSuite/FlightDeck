@@ -146,6 +146,37 @@ qt_add_resources(test_autostart "test_schema_resources"
     FILES ${SCHEMA_FILES}
 )
 
+add_executable(test_phase1
+    tests/test_phase1.cpp
+    src/managers/keybindvalidator.cpp
+    src/managers/targetinspector.cpp
+    src/managers/diagnosticsmanager.cpp
+    src/caelestia/caelestiavars.cpp
+    src/caelestia/flightdeckwriter.cpp
+    src/caelestia/luavalidator.cpp
+    src/hyprland/hyprlandsocket.cpp
+    src/hyprland/hyprlandevents.cpp
+    src/hyprland/hyprlandstate.cpp
+    src/hyprland/hyprlandschema.cpp
+)
+target_include_directories(test_phase1 PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/managers
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/caelestia
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hyprland
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
+)
+target_link_libraries(test_phase1 PRIVATE
+    Qt6::Core
+    Qt6::Qml
+    Qt6::Network
+)
+qt_add_resources(test_phase1 "test_phase1_schema_resources"
+    PREFIX "/schema"
+    BASE_DIR "data/schema"
+    FILES ${SCHEMA_FILES}
+)
+
 # Installation
 include(GNUInstallDirs)
 

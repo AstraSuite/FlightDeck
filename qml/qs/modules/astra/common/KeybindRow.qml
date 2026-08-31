@@ -10,6 +10,7 @@ import qs.services
 import qs.modules.astra.common
 import FlightDeck.Caelestia 1.0
 import FlightDeck.Hyprland 1.0
+import FlightDeck.Managers 1.0
 
 DialogRowButton {
     id: root
@@ -26,11 +27,23 @@ DialogRowButton {
         return String(v);
     }
 
+    readonly property var chordInfo: KeybindValidator.checkChord(root.currentBindValue)
+    readonly property bool isOverridden: chordInfo && chordInfo.isOverride === true
+    readonly property bool isTrueConflict: chordInfo && chordInfo.isTrueConflict === true
+
     icon: root.isModifier ? "tune" : "keyboard"
     header: root.isModifier ? qsTr("Edit Modifier Combination") : qsTr("Edit Keybinding")
     acceptLabel: qsTr("Save Keybinding")
 
-    subtext: root.currentBindValue
+    subtext: {
+        if (root.isTrueConflict) {
+            return qsTr("%1 (Conflict detected)").arg(root.currentBindValue);
+        }
+        if (root.isOverridden) {
+            return qsTr("%1 (Overridden by custom shortcut)").arg(root.currentBindValue);
+        }
+        return root.currentBindValue;
+    }
 
     onOpenChanged: {
         if (open) {
@@ -54,6 +67,31 @@ DialogRowButton {
     trailingActions: Component {
         RowLayout {
             spacing: Tokens.spacing.small
+
+            // True Conflict warning icon
+            MaterialIcon {
+                visible: root.isTrueConflict
+                text: "warning"
+                color: Colours.palette.m3error
+                fontStyle: Tokens.font.icon.small
+            }
+
+            // Override Badge
+            StyledRect {
+                visible: root.isOverridden
+                implicitWidth: ovrTxt.implicitWidth + 12
+                implicitHeight: 22
+                radius: Tokens.rounding.extraSmall
+                color: Colours.palette.m3surfaceContainerHigh
+
+                StyledText {
+                    id: ovrTxt
+                    anchors.centerIn: parent
+                    text: qsTr("Overridden")
+                    font: Tokens.font.label.small
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+            }
 
             // Reset button if overridden
             IconButton {
@@ -142,6 +180,72 @@ DialogRowButton {
                             font: Tokens.font.label.medium
                             color: root.recording ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                         }
+                    }
+                }
+            }
+
+            // Live modal conflict warning
+            StyledRect {
+                readonly property var modalConflict: KeybindValidator.checkChord(root.recordedKey)
+                visible: modalConflict && modalConflict.isTrueConflict === true && root.recordedKey.trim() !== ""
+                Layout.fillWidth: true
+                implicitHeight: modalConflictRow.implicitHeight + Tokens.padding.small * 2
+                radius: Tokens.rounding.small
+                color: Colours.palette.m3errorContainer
+
+                RowLayout {
+                    id: modalConflictRow
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: Tokens.padding.small
+                    spacing: Tokens.spacing.small
+
+                    MaterialIcon {
+                        text: "warning"
+                        color: Colours.palette.m3onErrorContainer
+                        fontStyle: Tokens.font.icon.small
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: qsTr("Key chord '%1' conflicts with another system action").arg(parent.parent.modalConflict ? parent.parent.modalConflict.chord : "")
+                        font: Tokens.font.body.small
+                        color: Colours.palette.m3onErrorContainer
+                        wrapMode: Text.WordWrap
+                    }
+                }
+            }
+
+            // Live modal override notice
+            StyledRect {
+                readonly property var modalConflict: KeybindValidator.checkChord(root.recordedKey)
+                visible: modalConflict && modalConflict.isOverride === true && root.recordedKey.trim() !== ""
+                Layout.fillWidth: true
+                implicitHeight: modalOverrideRow.implicitHeight + Tokens.padding.small * 2
+                radius: Tokens.rounding.small
+                color: Colours.palette.m3surfaceContainerHigh
+
+                RowLayout {
+                    id: modalOverrideRow
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: Tokens.padding.small
+                    spacing: Tokens.spacing.small
+
+                    MaterialIcon {
+                        text: "info"
+                        color: Colours.palette.m3primary
+                        fontStyle: Tokens.font.icon.small
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: qsTr("Shadowed by custom shortcut '%1'").arg(parent.parent.modalConflict && parent.parent.modalConflict.customOverride ? parent.parent.modalConflict.customOverride.label : "")
+                        font: Tokens.font.body.small
+                        color: Colours.palette.m3onSurface
+                        wrapMode: Text.WordWrap
                     }
                 }
             }

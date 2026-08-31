@@ -12,6 +12,7 @@ import qs.services
 import qs.modules.astra.common
 import FlightDeck.Caelestia 1.0
 import FlightDeck.Hyprland 1.0
+import FlightDeck.Managers 1.0
 
 PageBase {
     id: root
@@ -203,6 +204,72 @@ PageBase {
                                     font: Tokens.font.label.medium
                                     color: addBindBtn.recording ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                                 }
+                            }
+                        }
+                    }
+
+                    // Duplicate Custom Conflict Warning Banner
+                    StyledRect {
+                        readonly property var chordInfo: KeybindValidator.checkChord(addBindBtn.shortcutKey)
+                        visible: chordInfo && chordInfo.customCount > 0
+                        Layout.fillWidth: true
+                        implicitHeight: addConflictLayout.implicitHeight + Tokens.padding.small * 2
+                        radius: Tokens.rounding.small
+                        color: Colours.palette.m3errorContainer
+
+                        RowLayout {
+                            id: addConflictLayout
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.margins: Tokens.padding.small
+                            spacing: Tokens.spacing.small
+
+                            MaterialIcon {
+                                text: "warning"
+                                color: Colours.palette.m3onErrorContainer
+                                fontStyle: Tokens.font.icon.small
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: qsTr("Key chord '%1' is already bound to another custom shortcut").arg(parent.parent.chordInfo ? parent.parent.chordInfo.chord : "")
+                                font: Tokens.font.body.small
+                                color: Colours.palette.m3onErrorContainer
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+
+                    // System Override Notice Banner
+                    StyledRect {
+                        readonly property var chordInfo: KeybindValidator.checkChord(addBindBtn.shortcutKey)
+                        visible: chordInfo && chordInfo.customCount === 0 && chordInfo.systemCount > 0
+                        Layout.fillWidth: true
+                        implicitHeight: addOverrideLayout.implicitHeight + Tokens.padding.small * 2
+                        radius: Tokens.rounding.small
+                        color: Colours.palette.m3surfaceContainerHigh
+
+                        RowLayout {
+                            id: addOverrideLayout
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.margins: Tokens.padding.small
+                            spacing: Tokens.spacing.small
+
+                            MaterialIcon {
+                                text: "info"
+                                color: Colours.palette.m3primary
+                                fontStyle: Tokens.font.icon.small
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: qsTr("Overrides default action '%1' via unbind").arg(parent.parent.chordInfo && parent.parent.chordInfo.systemShadowed ? parent.parent.chordInfo.systemShadowed.label : "")
+                                font: Tokens.font.body.small
+                                color: Colours.palette.m3onSurface
+                                wrapMode: Text.WordWrap
                             }
                         }
                     }
@@ -522,6 +589,72 @@ PageBase {
                                         font: Tokens.font.label.medium
                                         color: editBindRow.recording ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                                     }
+                                }
+                            }
+                        }
+
+                        // Duplicate Custom Conflict Warning Banner
+                        StyledRect {
+                            readonly property var chordInfo: KeybindValidator.checkChord(editBindRow.shortcutKey, editBindRow.index)
+                            visible: chordInfo && chordInfo.customCount > 0
+                            Layout.fillWidth: true
+                            implicitHeight: editConflictLayout.implicitHeight + Tokens.padding.small * 2
+                            radius: Tokens.rounding.small
+                            color: Colours.palette.m3errorContainer
+
+                            RowLayout {
+                                id: editConflictLayout
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.margins: Tokens.padding.small
+                                spacing: Tokens.spacing.small
+
+                                MaterialIcon {
+                                    text: "warning"
+                                    color: Colours.palette.m3onErrorContainer
+                                    fontStyle: Tokens.font.icon.small
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: qsTr("Key chord '%1' is already bound to another custom shortcut").arg(parent.parent.chordInfo ? parent.parent.chordInfo.chord : "")
+                                    font: Tokens.font.body.small
+                                    color: Colours.palette.m3onErrorContainer
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+
+                        // System Override Notice Banner
+                        StyledRect {
+                            readonly property var chordInfo: KeybindValidator.checkChord(editBindRow.shortcutKey, editBindRow.index)
+                            visible: chordInfo && chordInfo.customCount === 0 && chordInfo.systemCount > 0
+                            Layout.fillWidth: true
+                            implicitHeight: editOverrideLayout.implicitHeight + Tokens.padding.small * 2
+                            radius: Tokens.rounding.small
+                            color: Colours.palette.m3surfaceContainerHigh
+
+                            RowLayout {
+                                id: editOverrideLayout
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.margins: Tokens.padding.small
+                                spacing: Tokens.spacing.small
+
+                                MaterialIcon {
+                                    text: "info"
+                                    color: Colours.palette.m3primary
+                                    fontStyle: Tokens.font.icon.small
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: qsTr("Overrides default action '%1' via unbind").arg(parent.parent.chordInfo && parent.parent.chordInfo.systemShadowed ? parent.parent.chordInfo.systemShadowed.label : "")
+                                    font: Tokens.font.body.small
+                                    color: Colours.palette.m3onSurface
+                                    wrapMode: Text.WordWrap
                                 }
                             }
                         }
