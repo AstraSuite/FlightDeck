@@ -860,9 +860,29 @@ QtObject {
             type: "action"
         },
 
-        // Autostart (PageIdx: 9)
+        // Workspace Rules (PageIdx: 8)
         {
-            pageIdx: 9,
+            pageIdx: 8,
+            category: "Workspace rules",
+            title: "Add Workspace Rule",
+            breadcrumb: "Workspace rules › Management",
+            subtext: "Configure monitor pinning, persistence, and smart gaps for workspaces",
+            icon: "space_dashboard",
+            type: "action"
+        },
+        {
+            pageIdx: 8,
+            category: "Workspace rules",
+            title: "Configured Workspace Rules",
+            breadcrumb: "Workspace rules › Active Rules",
+            subtext: "List and manage existing Hyprland workspace rules",
+            icon: "list_alt",
+            type: "action"
+        },
+
+        // Autostart (PageIdx: 10)
+        {
+            pageIdx: 10,
             category: "Autostart",
             title: "Add Application Autostart",
             breadcrumb: "Autostart › Applications",
@@ -871,9 +891,9 @@ QtObject {
             type: "action"
         },
 
-        // Profiles (PageIdx: 10)
+        // Profiles (PageIdx: 11)
         {
-            pageIdx: 10,
+            pageIdx: 11,
             category: "Profiles & backup",
             title: "Create Snapshot",
             breadcrumb: "Profiles & backup › Snapshots",
@@ -884,7 +904,7 @@ QtObject {
 
         // System & Compositor (PageIdx: 11) - Subpage 1: Default apps
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 1,
             category: "System & compositor",
             title: "Default Terminal",
@@ -895,7 +915,7 @@ QtObject {
             varKey: "terminal"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 1,
             category: "System & compositor",
             title: "Web Browser",
@@ -906,7 +926,7 @@ QtObject {
             varKey: "browser"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 1,
             category: "System & compositor",
             title: "Code Editor",
@@ -917,7 +937,7 @@ QtObject {
             varKey: "editor"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 1,
             category: "System & compositor",
             title: "File Manager",
@@ -928,7 +948,7 @@ QtObject {
             varKey: "fileExplorer"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 1,
             category: "System & compositor",
             title: "Audio Mixer GUI",
@@ -939,7 +959,7 @@ QtObject {
             varKey: "audioSettings"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 1,
             category: "System & compositor",
             title: "Volume Step Size",
@@ -950,7 +970,7 @@ QtObject {
             varKey: "volumeStep"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 1,
             category: "System & compositor",
             title: "Maximum Volume Limit",
@@ -963,7 +983,7 @@ QtObject {
 
         // System & Compositor (PageIdx: 11) - Subpage 2: XWayland & compatibility
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 2,
             category: "System & compositor",
             title: "XWayland Compatibility",
@@ -974,7 +994,7 @@ QtObject {
             varKey: "xwaylandEnabled"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 2,
             category: "System & compositor",
             title: "Force Zero Scaling",
@@ -985,7 +1005,7 @@ QtObject {
             varKey: "xwaylandForceZeroScaling"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 2,
             category: "System & compositor",
             title: "Nearest Neighbor Filter",
@@ -996,7 +1016,7 @@ QtObject {
             varKey: "xwaylandUseNearestNeighbor"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 2,
             category: "System & compositor",
             title: "Disable Update News",
@@ -1007,7 +1027,7 @@ QtObject {
             varKey: "noUpdateNews"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 2,
             category: "System & compositor",
             title: "Disable Donation Nag",
@@ -1018,7 +1038,7 @@ QtObject {
             varKey: "noDonationNag"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 2,
             category: "System & compositor",
             title: "Enforce Permissions",
@@ -1031,7 +1051,7 @@ QtObject {
 
         // System & Compositor (PageIdx: 11) - Subpage 3: Theme sync & airlock
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 3,
             category: "System & compositor",
             title: "Theme Synchronization",
@@ -1041,7 +1061,7 @@ QtObject {
             type: "toggle"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 3,
             category: "System & compositor",
             title: "Airlock Greeter Integration",
@@ -1053,7 +1073,7 @@ QtObject {
 
         // System & Compositor (PageIdx: 11) - Subpage 4: Compositor behavior
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 4,
             category: "System & compositor",
             title: "Focus on Activate",
@@ -1064,7 +1084,7 @@ QtObject {
             varKey: "focusOnActivate"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 4,
             category: "System & compositor",
             title: "Disable Config Autoreload",
@@ -1075,7 +1095,7 @@ QtObject {
             varKey: "disableAutoreload"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 4,
             category: "System & compositor",
             title: "Animate Manual Resizes",
@@ -1086,7 +1106,7 @@ QtObject {
             varKey: "animateManualResizes"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 4,
             category: "System & compositor",
             title: "Variable Frame Rate (VFR)",
@@ -1097,7 +1117,7 @@ QtObject {
             varKey: "vfr"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 4,
             category: "System & compositor",
             title: "Variable Refresh Rate (VRR)",
@@ -1108,7 +1128,7 @@ QtObject {
             varKey: "vrr"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 4,
             category: "System & compositor",
             title: "Disable Hyprland Logo",
@@ -1119,7 +1139,7 @@ QtObject {
             varKey: "disableHyprlandLogo"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 4,
             category: "System & compositor",
             title: "Disable Splash Text",
@@ -1130,7 +1150,7 @@ QtObject {
             varKey: "disableSplashRendering"
         },
         {
-            pageIdx: 11,
+            pageIdx: 12,
             subPageIdx: 4,
             category: "System & compositor",
             title: "Force Default Wallpaper",

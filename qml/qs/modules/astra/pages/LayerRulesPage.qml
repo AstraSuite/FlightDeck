@@ -32,7 +32,7 @@ PageBase {
             onTextChanged: root.searchText = text
         }
     }
-    headerContentWidth: 240
+    headerContentWidth: 260
 
     property string searchText: ""
 
@@ -79,9 +79,18 @@ PageBase {
     }
 
     function findMasterLayerRuleIndex(ruleData) {
+        if (!ruleData) return -1;
         const list = FlightDeckWriter.layerRules;
+        const targetStr = JSON.stringify(ruleData);
         for (let i = 0; i < list.length; i++) {
-            if (list[i] === ruleData) return i;
+            if (list[i] === ruleData || JSON.stringify(list[i]) === targetStr) return i;
+        }
+        var targetNs = (ruleData.match && ruleData.match.namespace) || ruleData.namespace || "";
+        if (targetNs) {
+            for (let i = 0; i < list.length; i++) {
+                var itemNs = (list[i].match && list[i].match.namespace) || list[i].namespace || "";
+                if (itemNs === targetNs) return i;
+            }
         }
         return -1;
     }
@@ -90,7 +99,7 @@ PageBase {
         id: mainCol
         anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
         anchors.top: parent ? parent.top : undefined
-        width: root.cappedWidth
+        width: root ? root.cappedWidth : 800
         spacing: Tokens.spacing.extraSmall / 2
 
         SectionHeader {

@@ -16,6 +16,7 @@ class FlightDeckWriter : public QObject {
     Q_PROPERTY(QVariantList monitors READ monitors WRITE setMonitors NOTIFY monitorsChanged)
     Q_PROPERTY(QVariantList windowRules READ windowRules WRITE setWindowRules NOTIFY windowRulesChanged)
     Q_PROPERTY(QVariantList layerRules READ layerRules WRITE setLayerRules NOTIFY layerRulesChanged)
+    Q_PROPERTY(QVariantList workspaceRules READ workspaceRules WRITE setWorkspaceRules NOTIFY workspaceRulesChanged)
     Q_PROPERTY(QVariantList customBinds READ customBinds WRITE setCustomBinds NOTIFY customBindsChanged)
     Q_PROPERTY(QStringList autostartCommands READ autostartCommands WRITE setAutostartCommands NOTIFY autostartChanged)
     Q_PROPERTY(QVariantList autostartEntries READ autostartEntries WRITE setAutostartEntries NOTIFY autostartChanged)
@@ -40,6 +41,9 @@ public:
 
     QVariantList layerRules() const;
     void setLayerRules(const QVariantList& rules);
+
+    QVariantList workspaceRules() const;
+    void setWorkspaceRules(const QVariantList& rules);
 
     QVariantList customBinds() const;
     void setCustomBinds(const QVariantList& binds);
@@ -70,6 +74,10 @@ public:
     Q_INVOKABLE void removeLayerRule(int index);
     Q_INVOKABLE void updateLayerRule(int index, const QVariantMap& rule);
 
+    Q_INVOKABLE void addWorkspaceRule(const QVariantMap& rule);
+    Q_INVOKABLE void removeWorkspaceRule(int index);
+    Q_INVOKABLE void updateWorkspaceRule(int index, const QVariantMap& rule);
+
     Q_INVOKABLE void addAutostart(const QString& cmd, bool onReload = false);
     Q_INVOKABLE void removeAutostart(int index);
     Q_INVOKABLE void updateAutostart(int index, const QString& cmd, bool onReload = false);
@@ -88,9 +96,12 @@ public:
     Q_INVOKABLE QVariantList activeHyprlandClients() const;
     Q_INVOKABLE QVariantList activeHyprlandWindowRules() const;
     Q_INVOKABLE QVariantList activeHyprlandLayers() const;
+    Q_INVOKABLE QVariantList activeHyprlandWorkspaceRules() const;
+    Q_INVOKABLE QVariantList activeHyprlandWorkspaces() const;
 
     Q_INVOKABLE void applyWindowRuleOverIPC(const QVariantMap& rule);
     Q_INVOKABLE void applyLayerRuleOverIPC(const QVariantMap& rule);
+    Q_INVOKABLE void applyWorkspaceRuleOverIPC(const QVariantMap& rule);
 
     static QString flightDeckFilePath();
     static QString astraHelmFilePath();
@@ -101,6 +112,7 @@ signals:
     void monitorsChanged();
     void windowRulesChanged();
     void layerRulesChanged();
+    void workspaceRulesChanged();
     void customBindsChanged();
     void autostartChanged();
     void pluginsChanged();
@@ -115,6 +127,7 @@ private:
     QVariantList m_monitors;
     QVariantList m_windowRules;
     QVariantList m_layerRules;
+    QVariantList m_workspaceRules;
     QVariantList m_customBinds;
     QStringList m_autostartCommands;
     QVariantList m_autostartEntries;

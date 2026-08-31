@@ -33,7 +33,7 @@ PageBase {
             onTextChanged: root.searchText = text
         }
     }
-    headerContentWidth: 240
+    headerContentWidth: 260
 
     property string searchText: ""
 
@@ -50,11 +50,18 @@ PageBase {
         }
         let acts = [];
         if (r.float) acts.push("float");
+        if (r.tile) acts.push("tile");
         if (r.opaque) acts.push("opaque");
         if (r.pin) acts.push("pin");
         if (r.center) acts.push("center");
-        if (r.noblur || r.no_blur) acts.push("no_blur noblur");
         if (r.fullscreen) acts.push("fullscreen");
+        if (r.focusonactivate || r.focus_on_activate) acts.push("focus_on_activate focusonactivate");
+        if (r.keepaspectratio || r.keep_aspect_ratio) acts.push("keep_aspect_ratio keepaspectratio");
+        if (r.noinitialfocus || r.no_initial_focus) acts.push("no_initial_focus noinitialfocus");
+        if (r.noblur || r.no_blur) acts.push("no_blur noblur");
+        if (r.noshadow || r.no_shadow) acts.push("no_shadow noshadow");
+        if (r.nodim || r.no_dim) acts.push("no_dim nodim");
+        if (r.immediate) acts.push("immediate tearing");
         if (r.workspace) acts.push("workspace " + r.workspace);
         if (r.size) acts.push("size " + r.size);
         if (r.move) acts.push("move " + r.move);
@@ -84,9 +91,11 @@ PageBase {
     }
 
     function findMasterWindowRuleIndex(ruleData) {
+        if (!ruleData) return -1;
         const list = FlightDeckWriter.windowRules;
+        const targetStr = JSON.stringify(ruleData);
         for (let i = 0; i < list.length; i++) {
-            if (list[i] === ruleData) return i;
+            if (list[i] === ruleData || JSON.stringify(list[i]) === targetStr) return i;
         }
         return -1;
     }
@@ -95,7 +104,7 @@ PageBase {
         id: mainCol
         anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
         anchors.top: parent ? parent.top : undefined
-        width: root.cappedWidth
+        width: root ? root.cappedWidth : 800
         spacing: Tokens.spacing.extraSmall / 2
 
         SectionHeader {
@@ -133,11 +142,18 @@ PageBase {
             property bool matchPinned: false
 
             property bool isFloat: true
+            property bool isTile: false
             property bool isPin: false
             property bool isCenter: false
+            property bool isFullscreen: false
             property bool isOpaque: false
             property bool isNoBlur: false
-            property bool isFullscreen: false
+            property bool isNoShadow: false
+            property bool isNoDim: false
+            property bool isFocusOnActivate: false
+            property bool isKeepAspectRatio: false
+            property bool isNoInitialFocus: false
+            property bool isImmediate: false
             property string targetWorkspace: ""
             property string targetSize: ""
             property string targetMove: ""
@@ -160,11 +176,18 @@ PageBase {
                 matchPinned = false;
 
                 isFloat = true;
+                isTile = false;
                 isPin = false;
                 isCenter = false;
+                isFullscreen = false;
                 isOpaque = false;
                 isNoBlur = false;
-                isFullscreen = false;
+                isNoShadow = false;
+                isNoDim = false;
+                isFocusOnActivate = false;
+                isKeepAspectRatio = false;
+                isNoInitialFocus = false;
+                isImmediate = false;
                 targetWorkspace = "";
                 targetSize = "";
                 targetMove = "";
@@ -189,11 +212,18 @@ PageBase {
                 if (matchPinned) ruleMap.match["pin"] = true;
 
                 if (isFloat) ruleMap["float"] = true;
+                if (isTile) ruleMap["tile"] = true;
                 if (isPin) ruleMap["pin"] = true;
                 if (isCenter) ruleMap["center"] = true;
+                if (isFullscreen) ruleMap["fullscreen"] = true;
                 if (isOpaque) ruleMap["opaque"] = true;
                 if (isNoBlur) ruleMap["no_blur"] = true;
-                if (isFullscreen) ruleMap["fullscreen"] = true;
+                if (isNoShadow) ruleMap["no_shadow"] = true;
+                if (isNoDim) ruleMap["no_dim"] = true;
+                if (isFocusOnActivate) ruleMap["focus_on_activate"] = true;
+                if (isKeepAspectRatio) ruleMap["keep_aspect_ratio"] = true;
+                if (isNoInitialFocus) ruleMap["no_initial_focus"] = true;
+                if (isImmediate) ruleMap["immediate"] = true;
                 if (targetWorkspace.trim() !== "") ruleMap["workspace"] = targetWorkspace.trim();
                 if (targetSize.trim() !== "") ruleMap["size"] = targetSize.trim();
                 if (targetMove.trim() !== "") ruleMap["move"] = targetMove.trim();
@@ -298,16 +328,23 @@ PageBase {
 
                             ToggleRow {
                                 text: qsTr("Modal Dialog Only")
-                                subtext: qsTr("Match dialog and confirmation windows")
+                                subtext: qsTr("Match transient modal dialog windows")
                                 checked: addRuleBtn.matchModal
                                 onToggled: addRuleBtn.matchModal = checked
                             }
 
                             ToggleRow {
                                 text: qsTr("Floating Window Only")
-                                subtext: qsTr("Match currently floating windows")
+                                subtext: qsTr("Match windows that are already floating")
                                 checked: addRuleBtn.matchFloating
                                 onToggled: addRuleBtn.matchFloating = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Fullscreen Window Only")
+                                subtext: qsTr("Match windows that are currently fullscreen")
+                                checked: addRuleBtn.matchFullscreen
+                                onToggled: addRuleBtn.matchFullscreen = checked
                             }
 
                             ToggleRow {
@@ -335,7 +372,20 @@ PageBase {
                                 text: qsTr("Float Window")
                                 subtext: qsTr("Open matched windows in floating mode")
                                 checked: addRuleBtn.isFloat
-                                onToggled: addRuleBtn.isFloat = checked
+                                onToggled: {
+                                    addRuleBtn.isFloat = checked;
+                                    if (checked) addRuleBtn.isTile = false;
+                                }
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Tile Window")
+                                subtext: qsTr("Force window into tiled mode")
+                                checked: addRuleBtn.isTile
+                                onToggled: {
+                                    addRuleBtn.isTile = checked;
+                                    if (checked) addRuleBtn.isFloat = false;
+                                }
                             }
 
                             ToggleRow {
@@ -360,6 +410,27 @@ PageBase {
                             }
 
                             ToggleRow {
+                                text: qsTr("Focus on Activate")
+                                subtext: qsTr("Grant focus when window requests activation")
+                                checked: addRuleBtn.isFocusOnActivate
+                                onToggled: addRuleBtn.isFocusOnActivate = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("Keep Aspect Ratio")
+                                subtext: qsTr("Maintain aspect ratio when resizing floating window")
+                                checked: addRuleBtn.isKeepAspectRatio
+                                onToggled: addRuleBtn.isKeepAspectRatio = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("No Initial Focus")
+                                subtext: qsTr("Prevent window from stealing focus upon initial launch")
+                                checked: addRuleBtn.isNoInitialFocus
+                                onToggled: addRuleBtn.isNoInitialFocus = checked
+                            }
+
+                            ToggleRow {
                                 text: qsTr("Force Opaque")
                                 subtext: qsTr("Disable transparency for this application")
                                 checked: addRuleBtn.isOpaque
@@ -367,11 +438,32 @@ PageBase {
                             }
 
                             ToggleRow {
-                                last: true
                                 text: qsTr("No Blur")
                                 subtext: qsTr("Disable backdrop blur behind window")
                                 checked: addRuleBtn.isNoBlur
                                 onToggled: addRuleBtn.isNoBlur = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("No Shadow")
+                                subtext: qsTr("Disable drop shadow behind window")
+                                checked: addRuleBtn.isNoShadow
+                                onToggled: addRuleBtn.isNoShadow = checked
+                            }
+
+                            ToggleRow {
+                                text: qsTr("No Dim")
+                                subtext: qsTr("Disable inactive window dimming for this window")
+                                checked: addRuleBtn.isNoDim
+                                onToggled: addRuleBtn.isNoDim = checked
+                            }
+
+                            ToggleRow {
+                                last: true
+                                text: qsTr("Immediate / Tearing")
+                                subtext: qsTr("Allow direct page-flipping with tearing for lower latency")
+                                checked: addRuleBtn.isImmediate
+                                onToggled: addRuleBtn.isImmediate = checked
                             }
                         }
 
@@ -451,11 +543,18 @@ PageBase {
                     var r = editRuleRow.modelData;
                     var acts = [];
                     if (r.float) acts.push(qsTr("Float"));
+                    if (r.tile) acts.push(qsTr("Tile"));
                     if (r.opaque) acts.push(qsTr("Force opaque"));
                     if (r.pin) acts.push(qsTr("Pin"));
                     if (r.center) acts.push(qsTr("Center"));
-                    if (r.noblur || r.no_blur) acts.push(qsTr("No blur"));
                     if (r.fullscreen) acts.push(qsTr("Fullscreen"));
+                    if (r.focusonactivate || r.focus_on_activate) acts.push(qsTr("Focus on activate"));
+                    if (r.keepaspectratio || r.keep_aspect_ratio) acts.push(qsTr("Keep aspect ratio"));
+                    if (r.noinitialfocus || r.no_initial_focus) acts.push(qsTr("No initial focus"));
+                    if (r.noblur || r.no_blur) acts.push(qsTr("No blur"));
+                    if (r.noshadow || r.no_shadow) acts.push(qsTr("No shadow"));
+                    if (r.nodim || r.no_dim) acts.push(qsTr("No dim"));
+                    if (r.immediate) acts.push(qsTr("Immediate"));
                     if (r.workspace) acts.push(qsTr("Workspace %1").arg(r.workspace));
                     if (r.size) acts.push(qsTr("Size %1").arg(r.size));
                     if (r.opacity) acts.push(qsTr("Opacity %1").arg(r.opacity));
@@ -503,11 +602,18 @@ PageBase {
                 property bool matchPinned: false
 
                 property bool isFloat: false
+                property bool isTile: false
                 property bool isPin: false
                 property bool isCenter: false
+                property bool isFullscreen: false
                 property bool isOpaque: false
                 property bool isNoBlur: false
-                property bool isFullscreen: false
+                property bool isNoShadow: false
+                property bool isNoDim: false
+                property bool isFocusOnActivate: false
+                property bool isKeepAspectRatio: false
+                property bool isNoInitialFocus: false
+                property bool isImmediate: false
                 property string targetWorkspace: ""
                 property string targetSize: ""
                 property string targetMove: ""
@@ -533,11 +639,18 @@ PageBase {
                         matchPinned = !!(m["pin"] || m["pinned"]);
 
                         isFloat = !!r.float;
+                        isTile = !!r.tile;
                         isPin = !!r.pin;
                         isCenter = !!r.center;
+                        isFullscreen = !!r.fullscreen;
                         isOpaque = !!r.opaque;
                         isNoBlur = !!(r.noblur || r.no_blur);
-                        isFullscreen = !!r.fullscreen;
+                        isNoShadow = !!(r.noshadow || r.no_shadow);
+                        isNoDim = !!(r.nodim || r.no_dim);
+                        isFocusOnActivate = !!(r.focusonactivate || r.focus_on_activate);
+                        isKeepAspectRatio = !!(r.keepaspectratio || r.keep_aspect_ratio);
+                        isNoInitialFocus = !!(r.noinitialfocus || r.no_initial_focus);
+                        isImmediate = !!r.immediate;
                         targetWorkspace = r.workspace || "";
                         targetSize = r.size ? String(r.size) : "";
                         targetMove = r.move ? String(r.move) : "";
@@ -563,11 +676,18 @@ PageBase {
                     if (matchPinned) ruleMap.match["pin"] = true;
 
                     if (isFloat) ruleMap["float"] = true;
+                    if (isTile) ruleMap["tile"] = true;
                     if (isPin) ruleMap["pin"] = true;
                     if (isCenter) ruleMap["center"] = true;
+                    if (isFullscreen) ruleMap["fullscreen"] = true;
                     if (isOpaque) ruleMap["opaque"] = true;
                     if (isNoBlur) ruleMap["no_blur"] = true;
-                    if (isFullscreen) ruleMap["fullscreen"] = true;
+                    if (isNoShadow) ruleMap["no_shadow"] = true;
+                    if (isNoDim) ruleMap["no_dim"] = true;
+                    if (isFocusOnActivate) ruleMap["focus_on_activate"] = true;
+                    if (isKeepAspectRatio) ruleMap["keep_aspect_ratio"] = true;
+                    if (isNoInitialFocus) ruleMap["no_initial_focus"] = true;
+                    if (isImmediate) ruleMap["immediate"] = true;
                     if (targetWorkspace.trim() !== "") ruleMap["workspace"] = targetWorkspace.trim();
                     if (targetSize.trim() !== "") ruleMap["size"] = targetSize.trim();
                     if (targetMove.trim() !== "") ruleMap["move"] = targetMove.trim();
@@ -731,7 +851,20 @@ PageBase {
                                     text: qsTr("Float Window")
                                     subtext: qsTr("Open matched windows in floating mode")
                                     checked: editRuleRow.isFloat
-                                    onToggled: editRuleRow.isFloat = checked
+                                    onToggled: {
+                                        editRuleRow.isFloat = checked;
+                                        if (checked) editRuleRow.isTile = false;
+                                    }
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("Tile Window")
+                                    subtext: qsTr("Force window into tiled mode")
+                                    checked: editRuleRow.isTile
+                                    onToggled: {
+                                        editRuleRow.isTile = checked;
+                                        if (checked) editRuleRow.isFloat = false;
+                                    }
                                 }
 
                                 ToggleRow {
@@ -756,6 +889,27 @@ PageBase {
                                 }
 
                                 ToggleRow {
+                                    text: qsTr("Focus on Activate")
+                                    subtext: qsTr("Grant focus when window requests activation")
+                                    checked: editRuleRow.isFocusOnActivate
+                                    onToggled: editRuleRow.isFocusOnActivate = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("Keep Aspect Ratio")
+                                    subtext: qsTr("Maintain aspect ratio when resizing floating window")
+                                    checked: editRuleRow.isKeepAspectRatio
+                                    onToggled: editRuleRow.isKeepAspectRatio = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("No Initial Focus")
+                                    subtext: qsTr("Prevent window from stealing focus upon initial launch")
+                                    checked: editRuleRow.isNoInitialFocus
+                                    onToggled: editRuleRow.isNoInitialFocus = checked
+                                }
+
+                                ToggleRow {
                                     text: qsTr("Force Opaque")
                                     subtext: qsTr("Disable transparency for this application")
                                     checked: editRuleRow.isOpaque
@@ -763,11 +917,32 @@ PageBase {
                                 }
 
                                 ToggleRow {
-                                    last: true
                                     text: qsTr("No Blur")
                                     subtext: qsTr("Disable backdrop blur behind window")
                                     checked: editRuleRow.isNoBlur
                                     onToggled: editRuleRow.isNoBlur = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("No Shadow")
+                                    subtext: qsTr("Disable drop shadow behind window")
+                                    checked: editRuleRow.isNoShadow
+                                    onToggled: editRuleRow.isNoShadow = checked
+                                }
+
+                                ToggleRow {
+                                    text: qsTr("No Dim")
+                                    subtext: qsTr("Disable inactive window dimming for this window")
+                                    checked: editRuleRow.isNoDim
+                                    onToggled: editRuleRow.isNoDim = checked
+                                }
+
+                                ToggleRow {
+                                    last: true
+                                    text: qsTr("Immediate / Tearing")
+                                    subtext: qsTr("Allow direct page-flipping with tearing for lower latency")
+                                    checked: editRuleRow.isImmediate
+                                    onToggled: editRuleRow.isImmediate = checked
                                 }
                             }
 

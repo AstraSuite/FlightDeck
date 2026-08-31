@@ -15,6 +15,7 @@
 
 namespace FlightDeck::Caelestia {
 
+static QString escapeLuaString(const QString& str);
 static QString unescapeLuaString(const QString& str);
 
 FlightDeckWriter* FlightDeckWriter::instance() {
@@ -91,6 +92,19 @@ void FlightDeckWriter::setLayerRules(const QVariantList& rules) {
         m_layerRules = rules;
         m_isDirty = true;
         emit layerRulesChanged();
+        emit dirtyChanged();
+    }
+}
+
+QVariantList FlightDeckWriter::workspaceRules() const {
+    return m_workspaceRules;
+}
+
+void FlightDeckWriter::setWorkspaceRules(const QVariantList& rules) {
+    if (m_workspaceRules != rules) {
+        m_workspaceRules = rules;
+        m_isDirty = true;
+        emit workspaceRulesChanged();
         emit dirtyChanged();
     }
 }
@@ -214,32 +228,149 @@ void FlightDeckWriter::removeHyprOption(const QString& key) {
     }
 }
 
+static QString formatWindowRuleLua(const QVariantMap& rule) {
+    QString windowRulesStr = QStringLiteral("hl.window_rule({\n");
+    if (rule.contains(QStringLiteral("match"))) {
+        const QVariantMap match = rule.value(QStringLiteral("match")).toMap();
+        windowRulesStr += QStringLiteral("    match = {\n");
+        for (auto it = match.constBegin(); it != match.constEnd(); ++it) {
+            if (it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath")) continue;
+            if (it.value().typeId() == QMetaType::Bool) {
+                windowRulesStr += QStringLiteral("        %1 = %2,\n").arg(it.key(), it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+            } else {
+                windowRulesStr += QStringLiteral("        %1 = \"%2\",\n").arg(it.key(), escapeLuaString(it.value().toString()));
+            }
+        }
+        windowRulesStr += QStringLiteral("    },\n");
+    }
+
+    static const QMap<QString, QString> keyMap = {
+        { QStringLiteral("noblur"), QStringLiteral("no_blur") },
+        { QStringLiteral("no_blur"), QStringLiteral("no_blur") },
+        { QStringLiteral("noshadow"), QStringLiteral("no_shadow") },
+        { QStringLiteral("no_shadow"), QStringLiteral("no_shadow") },
+        { QStringLiteral("nodim"), QStringLiteral("no_dim") },
+        { QStringLiteral("no_dim"), QStringLiteral("no_dim") },
+        { QStringLiteral("focusonactivate"), QStringLiteral("focus_on_activate") },
+        { QStringLiteral("focus_on_activate"), QStringLiteral("focus_on_activate") },
+        { QStringLiteral("keepaspectratio"), QStringLiteral("keep_aspect_ratio") },
+        { QStringLiteral("keep_aspect_ratio"), QStringLiteral("keep_aspect_ratio") },
+        { QStringLiteral("noinitialfocus"), QStringLiteral("no_initial_focus") },
+        { QStringLiteral("no_initial_focus"), QStringLiteral("no_initial_focus") },
+    };
+
+    for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
+        if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath") || it.key() == QStringLiteral("call") || it.key() == QStringLiteral("args")) continue;
+
+        const QString k = keyMap.value(it.key(), it.key());
+        if (it.value().typeId() == QMetaType::Bool) {
+            if (it.value().toBool()) {
+                windowRulesStr += QStringLiteral("    %1 = true,\n").arg(k);
+            }
+        } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
+            windowRulesStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toString());
+        } else if (!it.value().toString().trimmed().isEmpty()) {
+            windowRulesStr += QStringLiteral("    %1 = \"%2\",\n").arg(k, escapeLuaString(it.value().toString()));
+        }
+    }
+    windowRulesStr += QStringLiteral("})");
+    return windowRulesStr;
+}
+
 void FlightDeckWriter::applyWindowRuleOverIPC(const QVariantMap& rule) {
     auto socket = Hyprland::HyprlandSocket::instance();
     if (!socket || !socket->isOnline()) return;
 
-    QString ruleStr = QStringLiteral("hl.window_rule({\n");
+    socket->evalLua(formatWindowRuleLua(rule));
+}
+
+static QString formatLayerRuleLua(const QVariantMap& rule) {
+    QString str = QStringLiteral("hl.layer_rule({\n");
+
+    QVariantMap match;
     if (rule.contains(QStringLiteral("match"))) {
-        const QVariantMap match = rule.value(QStringLiteral("match")).toMap();
-        ruleStr += QStringLiteral("    match = {\n");
-        for (auto it = match.constBegin(); it != match.constEnd(); ++it) {
-            if (it.value().typeId() == QMetaType::Bool) {
-                ruleStr += QStringLiteral("        %1 = %2,\n").arg(it.key(), it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
-            } else {
-                ruleStr += QStringLiteral("        %1 = \"%2\",\n").arg(it.key(), it.value().toString());
-            }
-        }
-        ruleStr += QStringLiteral("    },\n");
+        match = rule.value(QStringLiteral("match")).toMap();
     }
+    if (rule.contains(QStringLiteral("namespace")) && !match.contains(QStringLiteral("namespace"))) {
+        const QString ns = rule.value(QStringLiteral("namespace")).toString().trimmed();
+        if (!ns.isEmpty()) {
+            match[QStringLiteral("namespace")] = ns;
+        }
+    }
+    if (rule.contains(QStringLiteral("address")) && !match.contains(QStringLiteral("address"))) {
+        const QString addr = rule.value(QStringLiteral("address")).toString().trimmed();
+        if (!addr.isEmpty()) {
+            match[QStringLiteral("address")] = addr;
+        }
+    }
+
+    if (!match.isEmpty()) {
+        str += QStringLiteral("    match = {\n");
+        for (auto it = match.constBegin(); it != match.constEnd(); ++it) {
+            if (it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath")) continue;
+            str += QStringLiteral("        %1 = \"%2\",\n").arg(it.key(), escapeLuaString(it.value().toString()));
+        }
+        str += QStringLiteral("    },\n");
+    }
+
+    static const QMap<QString, QString> keyMap = {
+        { QStringLiteral("noanim"), QStringLiteral("no_anim") },
+        { QStringLiteral("no_anim"), QStringLiteral("no_anim") },
+        { QStringLiteral("dimaround"), QStringLiteral("dim_around") },
+        { QStringLiteral("dim_around"), QStringLiteral("dim_around") },
+        { QStringLiteral("ignorealpha"), QStringLiteral("ignore_alpha") },
+        { QStringLiteral("ignore_alpha"), QStringLiteral("ignore_alpha") },
+        { QStringLiteral("blurpopups"), QStringLiteral("blur_popups") },
+        { QStringLiteral("blur_popups"), QStringLiteral("blur_popups") },
+        { QStringLiteral("noblur"), QStringLiteral("no_blur") },
+        { QStringLiteral("no_blur"), QStringLiteral("no_blur") },
+        { QStringLiteral("blur"), QStringLiteral("blur") },
+        { QStringLiteral("xray"), QStringLiteral("xray") },
+        { QStringLiteral("animation"), QStringLiteral("animation") }
+    };
+
     for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
-        if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source")) continue;
-        const QString k = (it.key() == QStringLiteral("noblur")) ? QStringLiteral("no_blur") : it.key();
+        if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("namespace") || it.key() == QStringLiteral("address") ||
+            it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath") ||
+            it.key() == QStringLiteral("call") || it.key() == QStringLiteral("args")) {
+            continue;
+        }
+
+        const QString k = keyMap.value(it.key(), it.key());
         if (it.value().typeId() == QMetaType::Bool) {
-            ruleStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+            if (it.value().toBool()) {
+                str += QStringLiteral("    %1 = true,\n").arg(k);
+            }
         } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
-            ruleStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toString());
+            str += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toString());
+        } else if (!it.value().toString().trimmed().isEmpty()) {
+            str += QStringLiteral("    %1 = \"%2\",\n").arg(k, escapeLuaString(it.value().toString()));
+        }
+    }
+    str += QStringLiteral("})");
+    return str;
+}
+
+void FlightDeckWriter::applyLayerRuleOverIPC(const QVariantMap& rule) {
+    auto socket = Hyprland::HyprlandSocket::instance();
+    if (!socket || !socket->isOnline()) return;
+
+    socket->evalLua(formatLayerRuleLua(rule));
+}
+
+void FlightDeckWriter::applyWorkspaceRuleOverIPC(const QVariantMap& rule) {
+    auto socket = Hyprland::HyprlandSocket::instance();
+    if (!socket || !socket->isOnline()) return;
+
+    QString ruleStr = QStringLiteral("hl.workspace_rule({\n");
+    for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
+        if (it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath")) continue;
+        if (it.value().typeId() == QMetaType::Bool) {
+            ruleStr += QStringLiteral("    %1 = %2,\n").arg(it.key(), it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+        } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
+            ruleStr += QStringLiteral("    %1 = %2,\n").arg(it.key(), it.value().toString());
         } else {
-            ruleStr += QStringLiteral("    %1 = \"%2\",\n").arg(k, it.value().toString());
+            ruleStr += QStringLiteral("    %1 = \"%2\",\n").arg(it.key(), it.value().toString());
         }
     }
     ruleStr += QStringLiteral("})");
@@ -247,33 +378,60 @@ void FlightDeckWriter::applyWindowRuleOverIPC(const QVariantMap& rule) {
     socket->evalLua(ruleStr);
 }
 
-void FlightDeckWriter::applyLayerRuleOverIPC(const QVariantMap& rule) {
+void FlightDeckWriter::addWorkspaceRule(const QVariantMap& rule) {
+    QVariantMap r = rule;
+    r[QStringLiteral("isReadOnly")] = false;
+    r[QStringLiteral("source")] = QStringLiteral("flightdeck");
+    m_workspaceRules.append(r);
+    m_isDirty = true;
+    applyWorkspaceRuleOverIPC(r);
+    emit workspaceRulesChanged();
+    emit dirtyChanged();
+}
+
+void FlightDeckWriter::removeWorkspaceRule(int index) {
+    if (index >= 0 && index < m_workspaceRules.size()) {
+        if (m_workspaceRules[index].toMap().value(QStringLiteral("isReadOnly")).toBool()) {
+            return;
+        }
+        m_workspaceRules.removeAt(index);
+        m_isDirty = true;
+        emit workspaceRulesChanged();
+        emit dirtyChanged();
+    }
+}
+
+void FlightDeckWriter::updateWorkspaceRule(int index, const QVariantMap& rule) {
+    if (index >= 0 && index < m_workspaceRules.size()) {
+        QVariantMap r = rule;
+        r[QStringLiteral("isReadOnly")] = false;
+        r[QStringLiteral("source")] = QStringLiteral("flightdeck");
+        m_workspaceRules[index] = r;
+        m_isDirty = true;
+        applyWorkspaceRuleOverIPC(r);
+        emit workspaceRulesChanged();
+        emit dirtyChanged();
+    }
+}
+
+QVariantList FlightDeckWriter::activeHyprlandWorkspaceRules() const {
     auto socket = Hyprland::HyprlandSocket::instance();
-    if (!socket || !socket->isOnline()) return;
-
-    QString ruleStr = QStringLiteral("hl.layer_rule({\n");
-    if (rule.contains(QStringLiteral("match"))) {
-        const QVariantMap match = rule.value(QStringLiteral("match")).toMap();
-        ruleStr += QStringLiteral("    match = {\n");
-        for (auto it = match.constBegin(); it != match.constEnd(); ++it) {
-            ruleStr += QStringLiteral("        %1 = \"%2\",\n").arg(it.key(), it.value().toString());
-        }
-        ruleStr += QStringLiteral("    },\n");
+    if (!socket || !socket->isOnline()) return {};
+    QJsonDocument doc = socket->queryJson(QStringLiteral("workspacerules"));
+    if (doc.isArray()) {
+        return doc.array().toVariantList();
     }
-    for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
-        if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source")) continue;
-        const QString k = (it.key() == QStringLiteral("noblur")) ? QStringLiteral("no_blur") : it.key();
-        if (it.value().typeId() == QMetaType::Bool) {
-            ruleStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
-        } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
-            ruleStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toString());
-        } else {
-            ruleStr += QStringLiteral("    %1 = \"%2\",\n").arg(k, it.value().toString());
-        }
-    }
-    ruleStr += QStringLiteral("})");
+    return {};
+}
 
-    socket->evalLua(ruleStr);
+QVariantList FlightDeckWriter::activeHyprlandWorkspaces() const {
+    auto socket = Hyprland::HyprlandSocket::instance();
+    if (!socket || !socket->isOnline()) return {};
+    QJsonDocument doc = socket->queryJson(QStringLiteral("workspaces"));
+    if (doc.isArray()) {
+        return doc.array().toVariantList();
+    }
+    return {};
 }
 
 void FlightDeckWriter::addWindowRule(const QVariantMap& rule) {
@@ -605,6 +763,20 @@ static QVariantList parseLayerRulesFromContent(const QString& content) {
     return list;
 }
 
+static QVariantList parseWorkspaceRulesFromContent(const QString& content) {
+    QVariantList list;
+    static const QRegularExpression ruleRe(QStringLiteral(R"(hl\.(?:workspace_rule|workspace)\s*\(\s*\{([\s\S]*?)\}\s*\))"));
+    auto it = ruleRe.globalMatch(content);
+    while (it.hasNext()) {
+        QString body = it.next().captured(1);
+        QVariantMap r = parseLuaTable(body);
+        if (!r.isEmpty()) {
+            list.append(r);
+        }
+    }
+    return list;
+}
+
 static QVariantList parseCustomBindsFromContent(const QString& content) {
     QVariantList list;
     static const QRegularExpression bindRe(QStringLiteral(R"RAW(hl\.bind\s*\(\s*["']([^"']+)["']\s*,\s*(?:hl\.dsp\.)?([a-zA-Z0-9_]+)\s*\(\s*(?:["']((?:\\.|[^"\\])*)["'])?\s*\))RAW"));
@@ -803,6 +975,7 @@ hl.animation = function(t) record("animation", t) end
 hl.window_rule = function(t) record("window_rule", t) end
 hl.layer_rule = function(t) record("layer_rule", t) end
 hl.workspace_rule = function(t) record("workspace_rule", t) end
+hl.workspace = function(t) record("workspace_rule", t) end
 hl.gesture = function(t) record("gesture", t) end
 hl.permission = function(...) record("permission", ...) end
 hl.device = function(t) record("device", t) end
@@ -897,6 +1070,7 @@ void FlightDeckWriter::loadFromFile() {
     m_monitors.clear();
     m_windowRules.clear();
     m_layerRules.clear();
+    m_workspaceRules.clear();
     m_customBinds.clear();
     m_autostartCommands.clear();
     m_autostartEntries.clear();
@@ -970,6 +1144,17 @@ void FlightDeckWriter::loadFromFile() {
                         if (existing.toMap() == r) { exists = true; break; }
                     }
                     if (!exists) m_layerRules.append(r);
+                } else if (call == QLatin1String("workspace_rule") && !args.isEmpty()) {
+                    QVariantMap r = args[0].toObject().toVariantMap();
+                    r[QStringLiteral("isReadOnly")] = !isManaged;
+                    r[QStringLiteral("source")] = isManaged ? QStringLiteral("flightdeck") : QStringLiteral("system");
+                    r[QStringLiteral("sourcePath")] = sourcePath;
+
+                    bool exists = false;
+                    for (const auto& existing : m_workspaceRules) {
+                        if (existing.toMap() == r) { exists = true; break; }
+                    }
+                    if (!exists) m_workspaceRules.append(r);
                 } else if (call == QLatin1String("exec_cmd") && !args.isEmpty()) {
                     QString cmd = args[0].toString();
                     if (!cmd.isEmpty()) {
@@ -1089,6 +1274,13 @@ void FlightDeckWriter::loadFromFile() {
                 m_layerRules.append(r);
             }
 
+            for (const auto& rItem : parseWorkspaceRulesFromContent(content)) {
+                QVariantMap r = rItem.toMap();
+                r[QStringLiteral("isReadOnly")] = false;
+                r[QStringLiteral("source")] = QStringLiteral("flightdeck");
+                m_workspaceRules.append(r);
+            }
+
             for (const auto& entryItem : parseAutostartEntriesFromContent(content)) {
                 QVariantMap entry = entryItem.toMap();
                 entry[QStringLiteral("isReadOnly")] = false;
@@ -1110,6 +1302,7 @@ void FlightDeckWriter::loadFromFile() {
     emit monitorsChanged();
     emit windowRulesChanged();
     emit layerRulesChanged();
+    emit workspaceRulesChanged();
     emit customBindsChanged();
     emit autostartChanged();
     emit pluginsChanged();
@@ -1210,33 +1403,7 @@ QString FlightDeckWriter::formatLua() const {
             if (rule.value(QStringLiteral("isReadOnly")).toBool()) {
                 continue;
             }
-            windowRulesStr += QStringLiteral("hl.window_rule({\n");
-            if (rule.contains(QStringLiteral("match"))) {
-                const QVariantMap match = rule.value(QStringLiteral("match")).toMap();
-                windowRulesStr += QStringLiteral("    match = {\n");
-                for (auto it = match.constBegin(); it != match.constEnd(); ++it) {
-                    if (it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath")) continue;
-                    if (it.value().typeId() == QMetaType::Bool) {
-                        windowRulesStr += QStringLiteral("        %1 = %2,\n").arg(it.key(), it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
-                    } else {
-                        windowRulesStr += QStringLiteral("        %1 = \"%2\",\n").arg(it.key(), escapeLuaString(it.value().toString()));
-                    }
-                }
-                windowRulesStr += QStringLiteral("    },\n");
-            }
-            for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
-                if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath") || it.key() == QStringLiteral("call") || it.key() == QStringLiteral("args")) continue;
-                if (it.key() == QStringLiteral("noblur")) continue; // written as no_blur
-                const QString k = (it.key() == QStringLiteral("noblur")) ? QStringLiteral("no_blur") : it.key();
-                if (it.value().typeId() == QMetaType::Bool) {
-                    windowRulesStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
-                } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
-                    windowRulesStr += QStringLiteral("    %1 = %2,\n").arg(k, it.value().toString());
-                } else {
-                    windowRulesStr += QStringLiteral("    %1 = \"%2\",\n").arg(k, escapeLuaString(it.value().toString()));
-                }
-            }
-            windowRulesStr += QStringLiteral("})\n");
+            windowRulesStr += formatWindowRuleLua(rule) + QStringLiteral("\n");
         }
         if (!windowRulesStr.isEmpty()) {
             out += QStringLiteral("-- Window rules\n") + windowRulesStr + QStringLiteral("\n");
@@ -1251,28 +1418,36 @@ QString FlightDeckWriter::formatLua() const {
             if (rule.value(QStringLiteral("isReadOnly")).toBool()) {
                 continue;
             }
-            layerRulesStr += QStringLiteral("hl.layer_rule({\n");
-            if (rule.contains(QStringLiteral("match"))) {
-                const QVariantMap match = rule.value(QStringLiteral("match")).toMap();
-                layerRulesStr += QStringLiteral("    match = {\n");
-                for (auto it = match.constBegin(); it != match.constEnd(); ++it) {
-                    if (it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath")) continue;
-                    layerRulesStr += QStringLiteral("        %1 = \"%2\",\n").arg(it.key(), escapeLuaString(it.value().toString()));
-                }
-                layerRulesStr += QStringLiteral("    },\n");
-            }
-            for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
-                if (it.key() == QStringLiteral("match") || it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath") || it.key() == QStringLiteral("call") || it.key() == QStringLiteral("args")) continue;
-                if (it.value().typeId() == QMetaType::Bool) {
-                    layerRulesStr += QStringLiteral("    %1 = %2,\n").arg(it.key(), it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
-                } else {
-                    layerRulesStr += QStringLiteral("    %1 = \"%2\",\n").arg(it.key(), escapeLuaString(it.value().toString()));
-                }
-            }
-            layerRulesStr += QStringLiteral("})\n");
+            layerRulesStr += formatLayerRuleLua(rule) + QStringLiteral("\n");
         }
         if (!layerRulesStr.isEmpty()) {
             out += QStringLiteral("-- Layer rules\n") + layerRulesStr + QStringLiteral("\n");
+        }
+    }
+
+    // Workspace Rules (only serialize user-defined rules)
+    if (!m_workspaceRules.isEmpty()) {
+        QString workspaceRulesStr;
+        for (const auto& item : m_workspaceRules) {
+            const QVariantMap rule = item.toMap();
+            if (rule.value(QStringLiteral("isReadOnly")).toBool()) {
+                continue;
+            }
+            workspaceRulesStr += QStringLiteral("hl.workspace_rule({\n");
+            for (auto it = rule.constBegin(); it != rule.constEnd(); ++it) {
+                if (it.key() == QStringLiteral("isReadOnly") || it.key() == QStringLiteral("source") || it.key() == QStringLiteral("sourcePath") || it.key() == QStringLiteral("call") || it.key() == QStringLiteral("args")) continue;
+                if (it.value().typeId() == QMetaType::Bool) {
+                    workspaceRulesStr += QStringLiteral("    %1 = %2,\n").arg(it.key(), it.value().toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+                } else if (it.value().typeId() == QMetaType::Double || it.value().typeId() == QMetaType::Int) {
+                    workspaceRulesStr += QStringLiteral("    %1 = %2,\n").arg(it.key(), it.value().toString());
+                } else {
+                    workspaceRulesStr += QStringLiteral("    %1 = \"%2\",\n").arg(it.key(), escapeLuaString(it.value().toString()));
+                }
+            }
+            workspaceRulesStr += QStringLiteral("})\n");
+        }
+        if (!workspaceRulesStr.isEmpty()) {
+            out += QStringLiteral("-- Workspace rules\n") + workspaceRulesStr + QStringLiteral("\n");
         }
     }
 

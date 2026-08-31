@@ -15,9 +15,10 @@ PageBase {
     title: qsTr("Animations & Motion")
 
     ColumnLayout {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        width: root.cappedWidth
+        id: mainCol
+        anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
+        anchors.top: parent ? parent.top : undefined
+        width: root ? root.cappedWidth : 800
         spacing: Tokens.spacing.extraSmall / 2
 
         SectionHeader {

@@ -61,6 +61,12 @@ QtObject {
             description: qsTr("Blur and animation rules for desktop layers"),
             category: "rules"
         },
+        {
+            label: qsTr("Workspace rules"),
+            icon: "space_dashboard",
+            description: qsTr("Monitor pinning, persistent workspaces, smart gaps, and borders"),
+            category: "rules"
+        },
 
         // Extensions
         {

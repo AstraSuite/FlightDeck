@@ -84,7 +84,16 @@ QtObject {
             }
         },
 
-        // 8: Plugins & Extensions
+        // 8: Workspace Rules
+        Component {
+            StackPage {
+                Component {
+                    WorkspaceRulesPage {}
+                }
+            }
+        },
+
+        // 9: Plugins & Extensions
         Component {
             StackPage {
                 Component {

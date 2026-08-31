@@ -19,7 +19,7 @@ PageBase {
         id: mainCol
         anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
         anchors.top: parent ? parent.top : undefined
-        width: root.cappedWidth
+        width: root ? root.cappedWidth : 800
         spacing: Tokens.spacing.extraSmall / 2
 
         SectionHeader {
