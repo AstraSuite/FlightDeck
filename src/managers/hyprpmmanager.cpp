@@ -69,17 +69,23 @@ int HyprpmManager::availableCount() const {
     return m_availablePlugins.size();
 }
 
+static QString stripAnsiCodes(const QString& str) {
+    static const QRegularExpression ansiRegex(QStringLiteral(R"(\x1B\[[0-9;]*[a-zA-Z])"));
+    return QString(str).remove(ansiRegex);
+}
+
 QList<PluginRepoInfo> HyprpmManager::parseHyprpmList(const QString& text) {
     QList<PluginRepoInfo> list;
-    const QStringList lines = text.split(QLatin1Char('\n'));
+    const QString cleanText = stripAnsiCodes(text);
+    const QStringList lines = cleanText.split(QLatin1Char('\n'));
 
     PluginRepoInfo currentRepo;
     bool inRepo = false;
 
-    // Matches: "→ Repository HyprGlass (by hyprnux):" or "→ Repository dynamic-cursors (by virtcode):" or "→ Repository https://github.com/...:"
-    static const QRegularExpression repoRegex(QStringLiteral(R"(→\s+Repository\s+([^\s(:]+)(?:\s+\(by\s+([^)]+)\))?)"));
-    static const QRegularExpression pluginRegex(QStringLiteral(R"([│\s]+\s*Plugin\s+([^\s]+))"));
-    static const QRegularExpression enabledRegex(QStringLiteral(R"([└─\s]+\s*enabled:\s*(true|false))"));
+    // Matches: "Repository HyprGlass (by hyprnux):" or "Repository dynamic-cursors (by virtcode):" or "Repository https://github.com/...:"
+    static const QRegularExpression repoRegex(QStringLiteral(R"(Repository\s+([^\s(:]+)(?:\s+\(by\s+([^)]+)\))?)"));
+    static const QRegularExpression pluginRegex(QStringLiteral(R"(Plugin\s+([^\s]+))"));
+    static const QRegularExpression enabledRegex(QStringLiteral(R"(enabled:\s*(true|false))"), QRegularExpression::CaseInsensitiveOption);
 
     for (const QString& line : lines) {
         QString trimmed = line.trimmed();
@@ -113,7 +119,7 @@ QList<PluginRepoInfo> HyprpmManager::parseHyprpmList(const QString& text) {
 
         QRegularExpressionMatch matchEnabled = enabledRegex.match(trimmed);
         if (matchEnabled.hasMatch() && inRepo) {
-            currentRepo.enabled = (matchEnabled.captured(1).toLower() == QStringLiteral("true"));
+            currentRepo.enabled = (matchEnabled.captured(1).compare(QStringLiteral("true"), Qt::CaseInsensitive) == 0);
             continue;
         }
     }
