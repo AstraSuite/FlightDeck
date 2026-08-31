@@ -83,8 +83,11 @@ void CursorManager::scanThemes() {
     const QStringList searchDirs = {
         QDir::homePath() + QStringLiteral("/.local/share/icons"),
         QDir::homePath() + QStringLiteral("/.icons"),
+        QDir::homePath() + QStringLiteral("/.local/share/hyprcursor/themes"),
         QStringLiteral("/usr/share/icons"),
-        QStringLiteral("/usr/local/share/icons")
+        QStringLiteral("/usr/local/share/icons"),
+        QStringLiteral("/usr/share/hyprcursor/themes"),
+        QStringLiteral("/usr/local/share/hyprcursor/themes")
     };
 
     QSet<QString> seen;
@@ -103,9 +106,11 @@ void CursorManager::scanThemes() {
             const QString cursorsDir = entry.filePath() + QStringLiteral("/cursors");
             const QString hyprDir = entry.filePath() + QStringLiteral("/hyprcursors");
             const QString manifestFile = entry.filePath() + QStringLiteral("/manifest.hl");
+            const QString manifestToml = entry.filePath() + QStringLiteral("/manifest.toml");
+            const QString metaHl = entry.filePath() + QStringLiteral("/meta.hl");
             const QString cursorTheme = entry.filePath() + QStringLiteral("/cursor.theme");
 
-            bool isHyprcursor = QDir(hyprDir).exists() || QFile::exists(manifestFile);
+            bool isHyprcursor = QDir(hyprDir).exists() || QFile::exists(manifestFile) || QFile::exists(manifestToml) || QFile::exists(metaHl);
             bool isXcursor = QDir(cursorsDir).exists() || QFile::exists(cursorTheme);
 
             if (isHyprcursor || isXcursor) {
@@ -402,8 +407,11 @@ QImage CursorManager::loadCursorPreview(const QString& themeName, int targetSize
     const QStringList searchDirs = {
         QDir::homePath() + QStringLiteral("/.local/share/icons/") + themeName,
         QDir::homePath() + QStringLiteral("/.icons/") + themeName,
+        QDir::homePath() + QStringLiteral("/.local/share/hyprcursor/themes/") + themeName,
         QStringLiteral("/usr/share/icons/") + themeName,
-        QStringLiteral("/usr/local/share/icons/") + themeName
+        QStringLiteral("/usr/local/share/icons/") + themeName,
+        QStringLiteral("/usr/share/hyprcursor/themes/") + themeName,
+        QStringLiteral("/usr/local/share/hyprcursor/themes/") + themeName
     };
 
     const QStringList cursorNames = {

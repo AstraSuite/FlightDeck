@@ -73,6 +73,7 @@ CaelestiaVars::CaelestiaVars(QObject* parent)
     : QObject(parent) {
     loadDefaults();
     loadFromFile();
+    connect(FlightDeckWriter::instance(), &FlightDeckWriter::hyprOptionsChanged, this, &CaelestiaVars::varsChanged);
 }
 
 QVariantList CaelestiaVars::schemeColors() const {

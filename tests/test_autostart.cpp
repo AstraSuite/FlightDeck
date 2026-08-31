@@ -138,7 +138,19 @@ int main(int argc, char* argv[]) {
     if (!isValid) {
         qCritical() << "Generated Lua validation error:" << valErr;
     }
-    assert(isValid);
+    // Test 16: Hyprcursor detection & aliases
+    assert(schema->toHyprKey("cursorEnableHyprcursor") == "cursor:enable_hyprcursor");
+    assert(schema->toHyprKey("cursor_enable_hyprcursor") == "cursor:enable_hyprcursor");
+    assert(schema->toHyprKey("cursor:hyprcursor") == "cursor:enable_hyprcursor");
+    assert(schema->toHyprKey("cursor.hyprcursor") == "cursor:enable_hyprcursor");
+    assert(schema->toHyprKey("cursor.enable_hyprcursor") == "cursor:enable_hyprcursor");
+    assert(schema->toHyprKey("enable_hyprcursor") == "cursor:enable_hyprcursor");
+
+    writer->setHyprOption("cursor:enable_hyprcursor", true);
+    assert(writer->hasHyprOption("cursorEnableHyprcursor"));
+    assert(writer->hasHyprOption("cursor:enable_hyprcursor"));
+    assert(writer->getHyprOption("cursorEnableHyprcursor").toBool() == true);
+    assert(writer->getHyprOption("cursor:enable_hyprcursor").toBool() == true);
 
     qDebug() << "=== ALL AUTOSTART & SCHEMA UNIT TESTS PASSED SUCCESSFULLY! ===";
     return 0;

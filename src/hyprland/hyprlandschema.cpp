@@ -409,6 +409,11 @@ void HyprlandSchema::buildAliases() {
         { QStringLiteral("masterSmartResizing"), QStringLiteral("master:smart_resizing") },
         { QStringLiteral("masterDropAtCursor"), QStringLiteral("master:drop_at_cursor") },
         { QStringLiteral("cursorEnableHyprcursor"), QStringLiteral("cursor:enable_hyprcursor") },
+        { QStringLiteral("cursor_enable_hyprcursor"), QStringLiteral("cursor:enable_hyprcursor") },
+        { QStringLiteral("cursor:hyprcursor"), QStringLiteral("cursor:enable_hyprcursor") },
+        { QStringLiteral("cursor.hyprcursor"), QStringLiteral("cursor:enable_hyprcursor") },
+        { QStringLiteral("cursor.enable_hyprcursor"), QStringLiteral("cursor:enable_hyprcursor") },
+        { QStringLiteral("enable_hyprcursor"), QStringLiteral("cursor:enable_hyprcursor") },
         { QStringLiteral("cursorNoHardwareCursors"), QStringLiteral("cursor:no_hardware_cursors") },
         { QStringLiteral("cursorPersistentWarps"), QStringLiteral("cursor:persistent_warps") },
         { QStringLiteral("cursorWarpOnChangeWorkspace"), QStringLiteral("cursor:warp_on_change_workspace") },
@@ -510,6 +515,14 @@ QStringList HyprlandSchema::allKeys() const {
 QString HyprlandSchema::toHyprKey(const QString& key) const {
     if (m_aliasToHyprKey.contains(key)) {
         return m_aliasToHyprKey.value(key);
+    }
+    QString dotReplaced = key;
+    dotReplaced.replace(QLatin1Char('.'), QLatin1Char(':'));
+    if (m_aliasToHyprKey.contains(dotReplaced)) {
+        return m_aliasToHyprKey.value(dotReplaced);
+    }
+    if (m_rawCatalog.contains(dotReplaced)) {
+        return dotReplaced;
     }
     return key;
 }

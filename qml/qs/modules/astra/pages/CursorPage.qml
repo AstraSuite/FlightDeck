@@ -41,10 +41,17 @@ PageBase {
 
             subtext: {
                 const theme = CursorManager.currentTheme;
+                const hyprcursorEnabled = CaelestiaVars.pendingVars.cursorEnableHyprcursor ?? CaelestiaVars.currentVars.cursorEnableHyprcursor ?? CaelestiaVars.getDefault("cursorEnableHyprcursor", true);
                 let type = "";
                 for (let i = 0; i < CursorManager.availableThemes.length; i++) {
                     if (CursorManager.availableThemes[i].name === theme) {
-                        type = CursorManager.availableThemes[i].isHyprcursor ? qsTr("Hyprcursor") : qsTr("XCursor");
+                        if (CursorManager.availableThemes[i].isHyprcursor && hyprcursorEnabled) {
+                            type = qsTr("Hyprcursor");
+                        } else if (CursorManager.availableThemes[i].isXcursor) {
+                            type = qsTr("XCursor");
+                        } else if (CursorManager.availableThemes[i].isHyprcursor) {
+                            type = qsTr("Hyprcursor (Disabled in config)");
+                        }
                         break;
                     }
                 }

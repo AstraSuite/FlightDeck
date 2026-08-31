@@ -841,6 +841,42 @@ static QVariantList parseAutostartEntriesFromContent(const QString& content) {
     return list;
 }
 
+static void extractOptionsFromJsonTree(const QJsonObject& obj, const QString& prefix, QVariantMap& outOptions) {
+    auto schema = FlightDeck::Hyprland::HyprlandSchema::instance();
+    for (auto it = obj.constBegin(); it != obj.constEnd(); ++it) {
+        QString key = it.key();
+        if (it.value().isObject()) {
+            QString newPrefix = prefix.isEmpty() ? key : (prefix + QLatin1Char(':') + key);
+            extractOptionsFromJsonTree(it.value().toObject(), newPrefix, outOptions);
+        } else {
+            QString fullKey = prefix.isEmpty() ? key : (prefix + QLatin1Char(':') + key);
+            QString canonKey = schema ? schema->toHyprKey(fullKey) : fullKey;
+            if (!schema || !schema->hasOption(canonKey)) {
+                QString dashed = fullKey;
+                dashed.replace(QLatin1Char('_'), QLatin1Char('-'));
+                if (schema && schema->hasOption(dashed)) {
+                    canonKey = dashed;
+                }
+            }
+            if (it.value().isBool()) {
+                outOptions[canonKey] = it.value().toBool();
+            } else if (it.value().isDouble()) {
+                double d = it.value().toDouble();
+                if (d == std::floor(d)) {
+                    outOptions[canonKey] = static_cast<qint64>(d);
+                } else {
+                    outOptions[canonKey] = d;
+                }
+            } else if (it.value().isString()) {
+                QString str = it.value().toString();
+                if (str == QStringLiteral("true")) outOptions[canonKey] = true;
+                else if (str == QStringLiteral("false")) outOptions[canonKey] = false;
+                else outOptions[canonKey] = str;
+            }
+        }
+    }
+}
+
 static void parseNestedLuaTable(const QString& tableBody, const QString& prefix, QVariantMap& outOptions) {
     int i = 0;
     int n = tableBody.length();
@@ -852,9 +888,21 @@ static void parseNestedLuaTable(const QString& tableBody, const QString& prefix,
             continue;
         }
 
-        int keyStart = i;
-        while (i < n && (tableBody[i].isLetterOrNumber() || tableBody[i] == QLatin1Char('_') || tableBody[i] == QLatin1Char('.'))) i++;
-        QString key = tableBody.mid(keyStart, i - keyStart).trimmed();
+        QString key;
+        if (tableBody[i] == QLatin1Char('[') || tableBody[i] == QLatin1Char('"') || tableBody[i] == QLatin1Char('\'')) {
+            bool bracket = (tableBody[i] == QLatin1Char('['));
+            i++;
+            while (i < n && (tableBody[i].isSpace() || tableBody[i] == QLatin1Char('"') || tableBody[i] == QLatin1Char('\''))) i++;
+            int keyStart = i;
+            while (i < n && tableBody[i] != QLatin1Char('"') && tableBody[i] != QLatin1Char('\'') && (!bracket || tableBody[i] != QLatin1Char(']'))) i++;
+            key = tableBody.mid(keyStart, i - keyStart).trimmed();
+            while (i < n && tableBody[i] != QLatin1Char('=')) i++;
+        } else {
+            int keyStart = i;
+            while (i < n && (tableBody[i].isLetterOrNumber() || tableBody[i] == QLatin1Char('_') || tableBody[i] == QLatin1Char('.') || tableBody[i] == QLatin1Char('-') || tableBody[i] == QLatin1Char(':'))) i++;
+            key = tableBody.mid(keyStart, i - keyStart).trimmed();
+        }
+
         if (key.isEmpty()) { i++; continue; }
 
         while (i < n && (tableBody[i].isSpace() || tableBody[i] == QLatin1Char('='))) i++;
@@ -877,6 +925,11 @@ static void parseNestedLuaTable(const QString& tableBody, const QString& prefix,
             int valStart = i;
             while (i < n && tableBody[i] != QLatin1Char(',') && tableBody[i] != QLatin1Char('\n') && tableBody[i] != QLatin1Char('}')) i++;
             QString valStr = tableBody.mid(valStart, i - valStart).trimmed();
+            int commentIdx = valStr.indexOf(QStringLiteral("--"));
+            if (commentIdx != -1) {
+                valStr = valStr.left(commentIdx).trimmed();
+            }
+
             QString fullKey = prefix.isEmpty() ? key : (prefix + QLatin1Char(':') + key);
 
             QString canonKey = FlightDeck::Hyprland::HyprlandSchema::instance()->toHyprKey(fullKey);
@@ -1196,6 +1249,10 @@ void FlightDeckWriter::loadFromFile() {
                     };
                     if (isManaged) {
                         m_customBinds.append(b);
+                    }
+                } else if (call == QLatin1String("config") && !args.isEmpty()) {
+                    if (isManaged && args[0].isObject()) {
+                        extractOptionsFromJsonTree(args[0].toObject(), QString(), m_hyprOptions);
                     }
                 }
             }
