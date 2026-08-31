@@ -33,10 +33,11 @@ StackPage {
 
                     SectionHeader {
                         first: true
-                        text: qsTr("Active Plugins (%1)").arg(HyprpmManager.installedPlugins.filter(p => p.isEnabled === true).length)
+                        text: qsTr("Active Plugins (%1)").arg(enabledRepeater.count)
                     }
 
                     Repeater {
+                        id: enabledRepeater
                         model: {
                             return HyprpmManager.installedPlugins.filter(p => p.isEnabled === true);
                         }
@@ -46,7 +47,7 @@ StackPage {
                             required property int index
 
                             first: index === 0
-                            last: index === parent.count - 1
+                            last: index === enabledRepeater.count - 1
                             label: modelData.label ?? modelData.name
                             subtext: modelData.description ?? ""
                             icon: modelData.icon ?? "tune"
@@ -62,10 +63,7 @@ StackPage {
                     }
 
                     OptionRow {
-                        visible: {
-                            const enabledList = HyprpmManager.installedPlugins.filter(p => p.isEnabled === true);
-                            return enabledList.length === 0;
-                        }
+                        visible: enabledRepeater.count === 0
                         first: true
                         last: true
                         text: qsTr("No Enabled Plugins Detected")

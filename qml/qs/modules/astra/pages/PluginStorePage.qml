@@ -26,7 +26,6 @@ StackPage {
                 property int selectedFilter: 0 // 0: All, 1: Installed, 2: Available
                 property int lastFilter: 0
                 property real animOffX: 0
-                property bool showCustomDialog: false
                 property bool showConsole: false
 
                 onSelectedFilterChanged: {
@@ -61,12 +60,6 @@ StackPage {
                     anchors.top: parent ? parent.top : undefined
                     width: storeMainHub ? storeMainHub.cappedWidth : 800
                     spacing: Tokens.spacing.extraSmall / 2
-
-                    CustomRepoDialog {
-                        id: customDialog
-                        visible: storeMainHub.showCustomDialog
-                        onClosed: storeMainHub.showCustomDialog = false
-                    }
 
                     // Top Toolbar: Filter Chips & Action Icons
                     RowLayout {
@@ -149,7 +142,7 @@ StackPage {
 
                         IconButton {
                             icon: "sync"
-                            type: IconButton.Outlined
+                            type: IconButton.Tonal
                             font: Tokens.font.icon.small
                             enabled: !HyprpmManager.isBusy
                             onClicked: HyprpmManager.reloadPlugins()
@@ -199,7 +192,7 @@ StackPage {
 
                                 TextButton {
                                     visible: HyprpmManager.isBusy
-                                    type: TextButton.Outlined
+                                    type: TextButton.Tonal
                                     text: qsTr("Cancel")
                                     onClicked: HyprpmManager.cancelCurrentOperation()
                                 }
