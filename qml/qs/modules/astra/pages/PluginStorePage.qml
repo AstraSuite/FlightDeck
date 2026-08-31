@@ -288,29 +288,10 @@ StackPage {
                                         ColumnLayout {
                                             spacing: 2
 
-                                            RowLayout {
-                                                spacing: Tokens.spacing.small
-
-                                                StyledText {
-                                                    text: instCard.modelData.label ?? instCard.modelData.name
-                                                    font: Tokens.font.title.small
-                                                    color: Colours.palette.m3onSurface
-                                                }
-
-                                                StyledRect {
-                                                    implicitHeight: 20
-                                                    implicitWidth: instBadgeText.implicitWidth + 12
-                                                    radius: Tokens.rounding.full
-                                                    color: instCard.modelData.isEnabled ? Colours.palette.m3primaryContainer : Colours.palette.m3surfaceContainerHigh
-
-                                                    StyledText {
-                                                        id: instBadgeText
-                                                        anchors.centerIn: parent
-                                                        text: instCard.modelData.isEnabled ? qsTr("Enabled") : qsTr("Disabled")
-                                                        font: Tokens.font.label.small
-                                                        color: instCard.modelData.isEnabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
-                                                    }
-                                                }
+                                            StyledText {
+                                                text: instCard.modelData.label ?? instCard.modelData.name
+                                                font: Tokens.font.title.small
+                                                color: Colours.palette.m3onSurface
                                             }
 
                                             StyledText {
@@ -414,31 +395,10 @@ StackPage {
                                         ColumnLayout {
                                             spacing: 2
 
-                                            RowLayout {
-                                                spacing: Tokens.spacing.small
-
-                                                StyledText {
-                                                    text: availCard.modelData.label ?? availCard.modelData.name
-                                                    font: Tokens.font.title.small
-                                                    color: Colours.palette.m3onSurface
-                                                }
-
-                                                StyledRect {
-                                                    implicitHeight: 20
-                                                    implicitWidth: availBadgeText.implicitWidth + 12
-                                                    radius: Tokens.rounding.full
-                                                    color: Colours.palette.m3surfaceContainerLowest
-                                                    border.width: 1
-                                                    border.color: Colours.palette.m3outlineVariant
-
-                                                    StyledText {
-                                                        id: availBadgeText
-                                                        anchors.centerIn: parent
-                                                        text: qsTr("Available")
-                                                        font: Tokens.font.label.small
-                                                        color: Colours.palette.m3outline
-                                                    }
-                                                }
+                                            StyledText {
+                                                text: availCard.modelData.label ?? availCard.modelData.name
+                                                font: Tokens.font.title.small
+                                                color: Colours.palette.m3onSurface
                                             }
 
                                             StyledText {
