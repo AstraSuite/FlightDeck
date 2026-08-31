@@ -177,6 +177,31 @@ qt_add_resources(test_phase1 "test_phase1_schema_resources"
     FILES ${SCHEMA_FILES}
 )
 
+add_executable(test_hyprpm
+    tests/test_hyprpm.cpp
+    src/managers/hyprpmmanager.cpp
+    src/caelestia/flightdeckwriter.cpp
+    src/caelestia/luavalidator.cpp
+    src/hyprland/hyprlandsocket.cpp
+    src/hyprland/hyprlandschema.cpp
+)
+target_include_directories(test_hyprpm PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/managers
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/caelestia
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hyprland
+)
+target_link_libraries(test_hyprpm PRIVATE
+    Qt6::Core
+    Qt6::Qml
+    Qt6::Network
+)
+qt_add_resources(test_hyprpm "test_hyprpm_schema_resources"
+    PREFIX "/schema"
+    BASE_DIR "data/schema"
+    FILES ${SCHEMA_FILES}
+)
+
 # Installation
 include(GNUInstallDirs)
 

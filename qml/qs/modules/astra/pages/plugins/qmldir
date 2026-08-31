@@ -2,4 +2,5 @@ module qs.modules.astra.pages.plugins
 
 DynamicCursorsSubPage 1.0 DynamicCursorsSubPage.qml
 GenericPluginSubPage 1.0 GenericPluginSubPage.qml
-
+PluginStoreSubPage 1.0 PluginStoreSubPage.qml
+CustomRepoDialog 1.0 CustomRepoDialog.qml

@@ -39,6 +39,7 @@
 #include "managers/keybindvalidator.hpp"
 #include "managers/targetinspector.hpp"
 #include "managers/diagnosticsmanager.hpp"
+#include "managers/hyprpmmanager.hpp"
 #include "utils/cursorimageprovider.hpp"
 
 #ifndef ASTRA_VERSION
@@ -63,6 +64,7 @@ int main(int argc, char* argv[]) {
             firstArg == QStringLiteral("reset") ||
             firstArg == QStringLiteral("reload") || firstArg == QStringLiteral("profile") ||
             firstArg == QStringLiteral("doctor") || firstArg == QStringLiteral("bind") ||
+            firstArg == QStringLiteral("plugin") || firstArg == QStringLiteral("store") ||
             firstArg == QStringLiteral("-h") || firstArg == QStringLiteral("--help") ||
             firstArg == QStringLiteral("-v") || firstArg == QStringLiteral("--version")) {
             isCliCommand = true;
@@ -149,6 +151,7 @@ int main(int argc, char* argv[]) {
         qmlRegisterSingletonType<FlightDeck::Managers::KeybindValidator>(uri, 1, 0, "KeybindValidator", &FlightDeck::Managers::KeybindValidator::create);
         qmlRegisterSingletonType<FlightDeck::Managers::TargetInspector>(uri, 1, 0, "TargetInspector", &FlightDeck::Managers::TargetInspector::create);
         qmlRegisterSingletonType<FlightDeck::Managers::DiagnosticsManager>(uri, 1, 0, "DiagnosticsManager", &FlightDeck::Managers::DiagnosticsManager::create);
+        qmlRegisterSingletonType<FlightDeck::Managers::HyprpmManager>(uri, 1, 0, "HyprpmManager", &FlightDeck::Managers::HyprpmManager::create);
     }
 
     const char* configUris[] = { "FlightDeck.Config", "Helm.Config", "Foundry.Config", "Caelestia.Config" };

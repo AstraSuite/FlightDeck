@@ -11,6 +11,7 @@ import qs.modules.astra.common
 import qs.modules.astra.pages.plugins
 import FlightDeck.Caelestia 1.0
 import FlightDeck.Hyprland 1.0
+import FlightDeck.Managers 1.0
 
 StackPage {
     id: root
@@ -32,20 +33,33 @@ StackPage {
 
                     SectionHeader {
                         first: true
-                        text: qsTr("Installed Plugins")
+                        text: qsTr("Plugin Store & Discovery")
+                    }
+
+                    NavRow {
+                        first: true
+                        last: true
+                        icon: "storefront"
+                        label: qsTr("Browse Plugin Store")
+                        subtext: qsTr("Explore, install, update, and manage official and community Hyprland plugins (%1 available)").arg(HyprpmManager.allPlugins.length)
+                        onClicked: root.nState.openSubPage(3)
+                    }
+
+                    SectionHeader {
+                        text: qsTr("Installed Plugins (%1)").arg(HyprpmManager.installedCount)
                     }
 
                     Repeater {
-                        model: HyprlandSchema.installedPlugins
+                        model: HyprpmManager.installedPlugins
 
                         NavRow {
                             required property var modelData
                             required property int index
 
                             first: index === 0
-                            last: index === HyprlandSchema.installedPlugins.length - 1
+                            last: index === HyprpmManager.installedPlugins.length - 1
                             label: modelData.label ?? modelData.name
-                            subtext: modelData.description ?? ""
+                            subtext: (modelData.isEnabled ? "● Enabled • " : "○ Disabled • ") + (modelData.description ?? "")
                             icon: modelData.icon ?? "extension"
                             onClicked: {
                                 if (modelData.id === "hypr-dynamic-cursors" || modelData.name === "dynamic-cursors") {
@@ -59,11 +73,11 @@ StackPage {
                     }
 
                     OptionRow {
-                        visible: HyprlandSchema.installedPlugins.length === 0
+                        visible: HyprpmManager.installedCount === 0
                         first: true
                         last: true
-                        text: qsTr("No Installed Plugins Detected")
-                        subtext: qsTr("Plugins installed via hyprpm or active in Hyprland will appear here with dedicated configuration pages.")
+                        text: qsTr("No Installed Plugins")
+                        subtext: qsTr("Visit the Plugin Store to install plugins like hyprbars, dynamic-cursors, hyprexpo, and more.")
                     }
 
                     Item {
@@ -83,6 +97,12 @@ StackPage {
         Component {
             GenericPluginSubPage {
                 pluginData: root.selectedPluginData
+                nState: root.nState
+            }
+        },
+
+        Component {
+            PluginStoreSubPage {
                 nState: root.nState
             }
         }

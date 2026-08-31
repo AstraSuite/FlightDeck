@@ -6,6 +6,7 @@
 #include "../managers/profilemanager.hpp"
 #include "../managers/diagnosticsmanager.hpp"
 #include "../managers/keybindvalidator.hpp"
+#include "../managers/hyprpmmanager.hpp"
 
 #include <QCommandLineParser>
 #include <QDir>
@@ -433,6 +434,84 @@ int CliHandler::run(int argc, char* argv[]) {
             std::cout << "\n";
         }
         return 0;
+    }
+
+    if (cmd == QStringLiteral("plugin")) {
+        auto pm = Managers::HyprpmManager::instance();
+        pm->refresh();
+
+        if (posArgs.size() < 2 || posArgs.at(1) == QStringLiteral("list")) {
+            std::cout << "\033[1;36m=== Hyprland Plugins & Store ===\033[0m\n\n";
+            std::cout << "\033[1;32mInstalled Plugins (" << pm->installedCount() << "):\033[0m\n";
+            for (const auto& pVal : pm->installedPlugins()) {
+                const QVariantMap p = pVal.toMap();
+                bool isEn = p.value(QStringLiteral("isEnabled")).toBool();
+                std::cout << "  • \033[1m" << p.value(QStringLiteral("name")).toString().toStdString() << "\033[0m: "
+                          << (isEn ? "\033[1;32mEnabled\033[0m" : "\033[1;33mDisabled\033[0m")
+                          << " - " << p.value(QStringLiteral("description")).toString().toStdString() << "\n";
+            }
+            std::cout << "\n\033[1;34mAvailable Store Catalog (" << pm->availableCount() << "):\033[0m\n";
+            for (const auto& pVal : pm->availablePlugins()) {
+                const QVariantMap p = pVal.toMap();
+                std::cout << "  • \033[1m" << p.value(QStringLiteral("name")).toString().toStdString() << "\033[0m ("
+                          << p.value(QStringLiteral("author")).toString().toStdString() << "): "
+                          << p.value(QStringLiteral("description")).toString().toStdString() << "\n";
+            }
+            return 0;
+        }
+
+        const QString sub = posArgs.at(1);
+        if (sub == QStringLiteral("install") || sub == QStringLiteral("add")) {
+            if (posArgs.size() < 3) {
+                std::cerr << "Usage: flightdeck plugin install <repository_url> [git_revision]\n";
+                return 1;
+            }
+            QString repo = posArgs.at(2);
+            QString rev = posArgs.size() > 3 ? posArgs.at(3) : QString();
+            pm->installPlugin(repo, rev);
+            return 0;
+        }
+
+        if (sub == QStringLiteral("enable")) {
+            if (posArgs.size() < 3) {
+                std::cerr << "Usage: flightdeck plugin enable <plugin_name>\n";
+                return 1;
+            }
+            pm->enablePlugin(posArgs.at(2));
+            return 0;
+        }
+
+        if (sub == QStringLiteral("disable")) {
+            if (posArgs.size() < 3) {
+                std::cerr << "Usage: flightdeck plugin disable <plugin_name>\n";
+                return 1;
+            }
+            pm->disablePlugin(posArgs.at(2));
+            return 0;
+        }
+
+        if (sub == QStringLiteral("remove") || sub == QStringLiteral("uninstall")) {
+            if (posArgs.size() < 3) {
+                std::cerr << "Usage: flightdeck plugin remove <plugin_name>\n";
+                return 1;
+            }
+            pm->removePlugin(posArgs.at(2));
+            return 0;
+        }
+
+        if (sub == QStringLiteral("update")) {
+            bool usePkexec = !posArgs.contains(QStringLiteral("--no-pkexec"));
+            pm->updateAll(usePkexec);
+            return 0;
+        }
+
+        if (sub == QStringLiteral("reload")) {
+            pm->reloadPlugins();
+            return 0;
+        }
+
+        std::cerr << "Unknown plugin action: " << sub.toStdString() << "\n";
+        return 1;
     }
 
     std::cerr << "Unknown command: " << cmd.toStdString() << "\n";
