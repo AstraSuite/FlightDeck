@@ -14,7 +14,7 @@ import FlightDeck.Managers 1.0
 PageBase {
     id: root
 
-    title: qsTr("Plugin Store")
+    title: qsTr("Plugin Manager & Store")
     isSubPage: true
 
     property string searchQuery: ""
@@ -212,21 +212,18 @@ PageBase {
             }
         }
 
+        // Section 1: Installed Plugins Management (when showing All or Installed)
         SectionHeader {
-            text: qsTr("Plugin Catalog")
+            visible: (root.selectedFilter === 0 || root.selectedFilter === 1) && HyprpmManager.installedCount > 0
+            text: qsTr("Manage Installed Plugins (%1)").arg(HyprpmManager.installedCount)
         }
 
-        // Plugin Cards List
         Repeater {
             model: {
-                let list = HyprpmManager.allPlugins;
-                if (root.selectedFilter === 1) list = HyprpmManager.installedPlugins;
-                else if (root.selectedFilter === 2) list = HyprpmManager.availablePlugins;
-
+                if (root.selectedFilter === 2) return [];
                 const q = root.searchQuery.trim().toLowerCase();
-                if (q === "") return list;
-
-                return list.filter(p => {
+                if (q === "") return HyprpmManager.installedPlugins;
+                return HyprpmManager.installedPlugins.filter(p => {
                     const name = (p.name || "").toLowerCase();
                     const label = (p.label || "").toLowerCase();
                     const desc = (p.description || "").toLowerCase();
@@ -236,17 +233,17 @@ PageBase {
             }
 
             ConnectedRect {
-                id: card
+                id: instCard
                 required property var modelData
                 required property int index
 
                 first: index === 0
                 last: index === parent.count - 1
                 Layout.fillWidth: true
-                implicitHeight: cardContent.implicitHeight + Tokens.padding.large * 2
+                implicitHeight: instCardContent.implicitHeight + Tokens.padding.large * 2
 
                 ColumnLayout {
-                    id: cardContent
+                    id: instCardContent
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
@@ -258,8 +255,8 @@ PageBase {
                         spacing: Tokens.spacing.medium
 
                         MaterialIcon {
-                            text: card.modelData.icon ?? "extension"
-                            color: card.modelData.isEnabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                            text: instCard.modelData.icon ?? "extension"
+                            color: instCard.modelData.isEnabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                             fontStyle: Tokens.font.icon.medium
                         }
 
@@ -271,102 +268,177 @@ PageBase {
                                 spacing: Tokens.spacing.small
 
                                 StyledText {
-                                    text: card.modelData.label ?? card.modelData.name
+                                    text: instCard.modelData.label ?? instCard.modelData.name
                                     font: Tokens.font.title.small
                                     color: Colours.palette.m3onSurface
                                 }
 
                                 StyledRect {
                                     implicitHeight: 20
-                                    implicitWidth: badgeText.implicitWidth + 12
+                                    implicitWidth: instBadgeText.implicitWidth + 12
                                     radius: Tokens.rounding.full
-                                    color: card.modelData.isInstalled
-                                           ? (card.modelData.isEnabled ? Colours.palette.m3primaryContainer : Colours.palette.m3surfaceContainerHigh)
-                                           : Colours.palette.m3surfaceContainerLowest
-                                    border.width: card.modelData.isInstalled ? 0 : 1
-                                    border.color: Colours.palette.m3outlineVariant
+                                    color: instCard.modelData.isEnabled ? Colours.palette.m3primaryContainer : Colours.palette.m3surfaceContainerHigh
 
                                     StyledText {
-                                        id: badgeText
+                                        id: instBadgeText
                                         anchors.centerIn: parent
-                                        text: card.modelData.statusText ?? ""
+                                        text: instCard.modelData.isEnabled ? qsTr("Enabled") : qsTr("Disabled")
                                         font: Tokens.font.label.small
-                                        color: card.modelData.isInstalled
-                                               ? (card.modelData.isEnabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant)
-                                               : Colours.palette.m3outline
+                                        color: instCard.modelData.isEnabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
                                     }
                                 }
                             }
 
                             StyledText {
-                                visible: card.modelData.author !== undefined && card.modelData.author !== ""
-                                text: qsTr("By %1").arg(card.modelData.author)
+                                visible: instCard.modelData.author !== undefined && instCard.modelData.author !== ""
+                                text: qsTr("By %1").arg(instCard.modelData.author)
                                 font: Tokens.font.label.small
                                 color: Colours.palette.m3outline
                             }
                         }
 
-                        // Actions for each plugin state
+                        // Enable / Disable Action Buttons
                         RowLayout {
                             spacing: Tokens.spacing.small
 
-                            // If available / not installed:
                             TextButton {
-                                visible: !card.modelData.isInstalled
-                                type: TextButton.Filled
-                                text: qsTr("Install")
-                                enabled: !HyprpmManager.isBusy
-                                onClicked: {
-                                    root.showConsole = true;
-                                    HyprpmManager.installPlugin(card.modelData.repository ?? card.modelData.name);
-                                }
-                            }
-
-                            // If installed & disabled:
-                            TextButton {
-                                visible: card.modelData.isInstalled && !card.modelData.isEnabled
+                                visible: !instCard.modelData.isEnabled
                                 type: TextButton.Filled
                                 text: qsTr("Enable")
                                 enabled: !HyprpmManager.isBusy
-                                onClicked: HyprpmManager.enablePlugin(card.modelData.name)
-                            }
-
-                            // If installed & enabled:
-                            TextButton {
-                                visible: card.modelData.isInstalled && card.modelData.isEnabled
-                                type: TextButton.Filled
-                                text: qsTr("Configure")
-                                onClicked: {
-                                    if (card.modelData.id === "hypr-dynamic-cursors" || card.modelData.name === "dynamic-cursors") {
-                                        root.nState.openSubPage(1);
-                                    } else {
-                                        root.nState.openSubPage(2);
-                                    }
-                                }
+                                onClicked: HyprpmManager.enablePlugin(instCard.modelData.name)
                             }
 
                             TextButton {
-                                visible: card.modelData.isInstalled && card.modelData.isEnabled
+                                visible: instCard.modelData.isEnabled
                                 type: TextButton.Outlined
                                 text: qsTr("Disable")
                                 enabled: !HyprpmManager.isBusy
-                                onClicked: HyprpmManager.disablePlugin(card.modelData.name)
+                                onClicked: HyprpmManager.disablePlugin(instCard.modelData.name)
                             }
 
                             IconButton {
-                                visible: card.modelData.isInstalled
                                 icon: "delete"
                                 type: IconButton.Text
                                 font: Tokens.font.icon.small
                                 enabled: !HyprpmManager.isBusy
-                                onClicked: HyprpmManager.removePlugin(card.modelData.name)
+                                onClicked: HyprpmManager.removePlugin(instCard.modelData.name)
                             }
                         }
                     }
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: card.modelData.description ?? ""
+                        text: instCard.modelData.description ?? ""
+                        font: Tokens.font.body.small
+                        color: Colours.palette.m3onSurfaceVariant
+                        wrapMode: Text.WordWrap
+                    }
+                }
+            }
+        }
+
+        // Section 2: Available Plugins (Store Catalog)
+        SectionHeader {
+            visible: root.selectedFilter === 0 || root.selectedFilter === 2
+            text: qsTr("Available Plugins Catalog (%1)").arg(HyprpmManager.availableCount)
+        }
+
+        Repeater {
+            model: {
+                if (root.selectedFilter === 1) return [];
+                const q = root.searchQuery.trim().toLowerCase();
+                if (q === "") return HyprpmManager.availablePlugins;
+                return HyprpmManager.availablePlugins.filter(p => {
+                    const name = (p.name || "").toLowerCase();
+                    const label = (p.label || "").toLowerCase();
+                    const desc = (p.description || "").toLowerCase();
+                    const author = (p.author || "").toLowerCase();
+                    return name.includes(q) || label.includes(q) || desc.includes(q) || author.includes(q);
+                });
+            }
+
+            ConnectedRect {
+                id: availCard
+                required property var modelData
+                required property int index
+
+                first: index === 0
+                last: index === parent.count - 1
+                Layout.fillWidth: true
+                implicitHeight: availCardContent.implicitHeight + Tokens.padding.large * 2
+
+                ColumnLayout {
+                    id: availCardContent
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: Tokens.padding.largeIncreased
+                    spacing: Tokens.spacing.small
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.medium
+
+                        MaterialIcon {
+                            text: availCard.modelData.icon ?? "extension"
+                            color: Colours.palette.m3onSurfaceVariant
+                            fontStyle: Tokens.font.icon.medium
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            RowLayout {
+                                spacing: Tokens.spacing.small
+
+                                StyledText {
+                                    text: availCard.modelData.label ?? availCard.modelData.name
+                                    font: Tokens.font.title.small
+                                    color: Colours.palette.m3onSurface
+                                }
+
+                                StyledRect {
+                                    implicitHeight: 20
+                                    implicitWidth: availBadgeText.implicitWidth + 12
+                                    radius: Tokens.rounding.full
+                                    color: Colours.palette.m3surfaceContainerLowest
+                                    border.width: 1
+                                    border.color: Colours.palette.m3outlineVariant
+
+                                    StyledText {
+                                        id: availBadgeText
+                                        anchors.centerIn: parent
+                                        text: qsTr("Available")
+                                        font: Tokens.font.label.small
+                                        color: Colours.palette.m3outline
+                                    }
+                                }
+                            }
+
+                            StyledText {
+                                visible: availCard.modelData.author !== undefined && availCard.modelData.author !== ""
+                                text: qsTr("By %1").arg(availCard.modelData.author)
+                                font: Tokens.font.label.small
+                                color: Colours.palette.m3outline
+                            }
+                        }
+
+                        TextButton {
+                            type: TextButton.Filled
+                            text: qsTr("Install")
+                            enabled: !HyprpmManager.isBusy
+                            onClicked: {
+                                root.showConsole = true;
+                                HyprpmManager.installPlugin(availCard.modelData.repository ?? availCard.modelData.name);
+                            }
+                        }
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: availCard.modelData.description ?? ""
                         font: Tokens.font.body.small
                         color: Colours.palette.m3onSurfaceVariant
                         wrapMode: Text.WordWrap

@@ -22,7 +22,7 @@ StackPage {
         Component {
             PageBase {
                 id: mainHub
-                title: qsTr("Plugins & extensions")
+                title: qsTr("Plugin Configuration")
                 nState: root.nState
 
                 ColumnLayout {
@@ -33,34 +33,36 @@ StackPage {
 
                     SectionHeader {
                         first: true
-                        text: qsTr("Plugin Store & Discovery")
+                        text: qsTr("Plugin Manager & Store")
                     }
 
                     NavRow {
                         first: true
                         last: true
                         icon: "storefront"
-                        label: qsTr("Browse Plugin Store")
-                        subtext: qsTr("Explore, install, update, and manage official and community Hyprland plugins (%1 available)").arg(HyprpmManager.allPlugins.length)
+                        label: qsTr("Open Plugin Manager & Store")
+                        subtext: qsTr("Enable, disable, install, remove, and update plugins (%1 installed, %2 available)").arg(HyprpmManager.installedCount).arg(HyprpmManager.availableCount)
                         onClicked: root.nState.openSubPage(3)
                     }
 
                     SectionHeader {
-                        text: qsTr("Installed Plugins (%1)").arg(HyprpmManager.installedCount)
+                        text: qsTr("Active Plugins Configuration")
                     }
 
                     Repeater {
-                        model: HyprpmManager.installedPlugins
+                        model: {
+                            return HyprpmManager.installedPlugins.filter(p => p.isEnabled === true);
+                        }
 
                         NavRow {
                             required property var modelData
                             required property int index
 
                             first: index === 0
-                            last: index === HyprpmManager.installedPlugins.length - 1
+                            last: index === parent.count - 1
                             label: modelData.label ?? modelData.name
-                            subtext: (modelData.isEnabled ? "● Enabled • " : "○ Disabled • ") + (modelData.description ?? "")
-                            icon: modelData.icon ?? "extension"
+                            subtext: modelData.description ?? ""
+                            icon: modelData.icon ?? "tune"
                             onClicked: {
                                 if (modelData.id === "hypr-dynamic-cursors" || modelData.name === "dynamic-cursors") {
                                     root.nState.openSubPage(1);
@@ -73,11 +75,16 @@ StackPage {
                     }
 
                     OptionRow {
-                        visible: HyprpmManager.installedCount === 0
+                        visible: {
+                            const enabledList = HyprpmManager.installedPlugins.filter(p => p.isEnabled === true);
+                            return enabledList.length === 0;
+                        }
                         first: true
                         last: true
-                        text: qsTr("No Installed Plugins")
-                        subtext: qsTr("Visit the Plugin Store to install plugins like hyprbars, dynamic-cursors, hyprexpo, and more.")
+                        text: qsTr("No Enabled Plugins")
+                        subtext: HyprpmManager.installedCount > 0
+                                 ? qsTr("You have %1 installed plugin(s) currently disabled. Open the Plugin Manager to enable them.").arg(HyprpmManager.installedCount)
+                                 : qsTr("Install and enable plugins from the Plugin Store to configure them here.")
                     }
 
                     Item {
