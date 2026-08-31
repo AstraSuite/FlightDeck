@@ -27,11 +27,31 @@ StackPage {
                 property bool showCustomDialog: false
                 property bool showConsole: false
 
+                headerContent: Component {
+                    SearchBar {
+                        topPadding: Tokens.padding.small
+                        bottomPadding: Tokens.padding.small
+
+                        placeholderText: qsTr("Search plugins...")
+                        font: Tokens.font.body.medium
+
+                        bg.color: Colours.tPalette.m3surfaceContainerLowest
+                        bg.border.color: Colours.palette.m3outlineVariant
+                        searchIcon.fontStyle: Tokens.font.icon.medium
+                        searchIcon.anchors.leftMargin: Tokens.padding.largeIncreased
+                        clearIcon.font: Tokens.font.icon.medium
+                        clearIcon.padding: Tokens.padding.extraSmall
+
+                        onTextChanged: storeMainHub.searchQuery = text
+                    }
+                }
+                headerContentWidth: 260
+
                 ColumnLayout {
                     anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
                     anchors.top: parent ? parent.top : undefined
                     width: storeMainHub ? storeMainHub.cappedWidth : 800
-                    spacing: Tokens.spacing.medium
+                    spacing: Tokens.spacing.extraSmall / 2
 
                     CustomRepoDialog {
                         id: customDialog
@@ -39,45 +59,10 @@ StackPage {
                         onClosed: storeMainHub.showCustomDialog = false
                     }
 
-                    // Top Store Toolbar
+                    // Top Toolbar: Filter Chips & Action Icons
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Tokens.spacing.small
-
-                        StyledTextField {
-                            Layout.fillWidth: true
-                            placeholderText: qsTr("Search plugins by name, description, author...")
-                            text: storeMainHub.searchQuery
-                            onTextEdited: storeMainHub.searchQuery = text
-                        }
-
-                        TextButton {
-                            type: TextButton.Filled
-                            text: qsTr("Update All")
-                            enabled: !HyprpmManager.isBusy
-                            onClicked: {
-                                storeMainHub.showConsole = true;
-                                HyprpmManager.updateAll(true);
-                            }
-                        }
-
-                        TextButton {
-                            type: TextButton.Outlined
-                            text: qsTr("Reload")
-                            enabled: !HyprpmManager.isBusy
-                            onClicked: HyprpmManager.reloadPlugins()
-                        }
-
-                        TextButton {
-                            type: TextButton.Outlined
-                            text: qsTr("Add Custom")
-                            onClicked: storeMainHub.showCustomDialog = true
-                        }
-                    }
-
-                    // Filter Tabs
-                    RowLayout {
-                        Layout.fillWidth: true
+                        Layout.bottomMargin: Tokens.spacing.extraSmall
                         spacing: Tokens.spacing.small
 
                         ButtonBase {
@@ -142,10 +127,37 @@ StackPage {
 
                         Item { Layout.fillWidth: true }
 
-                        TextButton {
+                        IconButton {
+                            icon: "system_update_alt"
+                            type: IconButton.Filled
+                            font: Tokens.font.icon.small
+                            enabled: !HyprpmManager.isBusy
+                            onClicked: {
+                                storeMainHub.showConsole = true;
+                                HyprpmManager.updateAll(true);
+                            }
+                        }
+
+                        IconButton {
+                            icon: "sync"
+                            type: IconButton.Outlined
+                            font: Tokens.font.icon.small
+                            enabled: !HyprpmManager.isBusy
+                            onClicked: HyprpmManager.reloadPlugins()
+                        }
+
+                        IconButton {
+                            icon: "add"
+                            type: IconButton.Outlined
+                            font: Tokens.font.icon.small
+                            onClicked: storeMainHub.showCustomDialog = true
+                        }
+
+                        IconButton {
                             visible: HyprpmManager.logOutput.length > 0 || HyprpmManager.isBusy
-                            type: TextButton.Text
-                            text: storeMainHub.showConsole ? qsTr("Hide Build Logs") : qsTr("Show Build Logs")
+                            icon: "terminal"
+                            type: storeMainHub.showConsole ? IconButton.Filled : IconButton.Text
+                            font: Tokens.font.icon.small
                             onClicked: storeMainHub.showConsole = !storeMainHub.showConsole
                         }
                     }
@@ -154,8 +166,8 @@ StackPage {
                     StyledRect {
                         visible: storeMainHub.showConsole || HyprpmManager.isBusy
                         Layout.fillWidth: true
-                        implicitHeight: Math.min(260, consoleCol.implicitHeight + Tokens.padding.medium * 2)
-                        radius: Tokens.rounding.medium
+                        implicitHeight: Math.min(240, consoleCol.implicitHeight + Tokens.padding.medium * 2)
+                        radius: Tokens.rounding.large
                         color: Colours.palette.m3surfaceContainerLowest
                         border.width: 1
                         border.color: HyprpmManager.isBusy ? Colours.palette.m3primary : Colours.palette.m3outlineVariant
@@ -219,11 +231,13 @@ StackPage {
 
                     // Section 1: Installed Plugins Management
                     SectionHeader {
+                        first: true
                         visible: (storeMainHub.selectedFilter === 0 || storeMainHub.selectedFilter === 1) && HyprpmManager.installedCount > 0
                         text: qsTr("Manage Installed Plugins (%1)").arg(HyprpmManager.installedCount)
                     }
 
                     Repeater {
+                        id: instRepeater
                         model: {
                             if (storeMainHub.selectedFilter === 2) return [];
                             const q = storeMainHub.searchQuery.trim().toLowerCase();
@@ -243,7 +257,7 @@ StackPage {
                             required property int index
 
                             first: index === 0
-                            last: index === parent.count - 1
+                            last: index === instRepeater.count - 1
                             Layout.fillWidth: true
                             implicitHeight: instCardContent.implicitHeight + Tokens.padding.large * 2
 
@@ -302,24 +316,20 @@ StackPage {
                                         }
                                     }
 
-                                    // Enable / Disable Action Buttons
+                                    // Material 3 Switch Component & Delete Action
                                     RowLayout {
-                                        spacing: Tokens.spacing.small
+                                        spacing: Tokens.spacing.medium
 
-                                        TextButton {
-                                            visible: !instCard.modelData.isEnabled
-                                            type: TextButton.Filled
-                                            text: qsTr("Enable")
+                                        StyledSwitch {
+                                            checked: instCard.modelData.isEnabled
                                             enabled: !HyprpmManager.isBusy
-                                            onClicked: HyprpmManager.enablePlugin(instCard.modelData.name)
-                                        }
-
-                                        TextButton {
-                                            visible: instCard.modelData.isEnabled
-                                            type: TextButton.Outlined
-                                            text: qsTr("Disable")
-                                            enabled: !HyprpmManager.isBusy
-                                            onClicked: HyprpmManager.disablePlugin(instCard.modelData.name)
+                                            onToggled: {
+                                                if (checked) {
+                                                    HyprpmManager.enablePlugin(instCard.modelData.name);
+                                                } else {
+                                                    HyprpmManager.disablePlugin(instCard.modelData.name);
+                                                }
+                                            }
                                         }
 
                                         IconButton {
@@ -345,11 +355,13 @@ StackPage {
 
                     // Section 2: Available Plugins (Store Catalog)
                     SectionHeader {
+                        first: HyprpmManager.installedCount === 0 || storeMainHub.selectedFilter === 2
                         visible: storeMainHub.selectedFilter === 0 || storeMainHub.selectedFilter === 2
                         text: qsTr("Available Plugins Catalog (%1)").arg(HyprpmManager.availableCount)
                     }
 
                     Repeater {
+                        id: availRepeater
                         model: {
                             if (storeMainHub.selectedFilter === 1) return [];
                             const q = storeMainHub.searchQuery.trim().toLowerCase();
@@ -369,7 +381,7 @@ StackPage {
                             required property int index
 
                             first: index === 0
-                            last: index === parent.count - 1
+                            last: index === availRepeater.count - 1
                             Layout.fillWidth: true
                             implicitHeight: availCardContent.implicitHeight + Tokens.padding.large * 2
 
