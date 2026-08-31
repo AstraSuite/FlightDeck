@@ -316,9 +316,18 @@ StackPage {
                                         }
                                     }
 
-                                    // Material 3 Switch Component & Delete Action
+                                    // Material 3 Switch Component & Delete Action (delete to the left of switch, aligned to right)
                                     RowLayout {
-                                        spacing: Tokens.spacing.medium
+                                        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                                        spacing: Tokens.spacing.small
+
+                                        IconButton {
+                                            icon: "delete"
+                                            type: IconButton.Text
+                                            font: Tokens.font.icon.small
+                                            enabled: !HyprpmManager.isBusy
+                                            onClicked: HyprpmManager.removePlugin(instCard.modelData.name)
+                                        }
 
                                         StyledSwitch {
                                             checked: instCard.modelData.isEnabled
@@ -330,14 +339,6 @@ StackPage {
                                                     HyprpmManager.disablePlugin(instCard.modelData.name);
                                                 }
                                             }
-                                        }
-
-                                        IconButton {
-                                            icon: "delete"
-                                            type: IconButton.Text
-                                            font: Tokens.font.icon.small
-                                            enabled: !HyprpmManager.isBusy
-                                            onClicked: HyprpmManager.removePlugin(instCard.modelData.name)
                                         }
                                     }
                                 }
@@ -443,6 +444,7 @@ StackPage {
                                     }
 
                                     TextButton {
+                                        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                                         type: TextButton.Filled
                                         text: qsTr("Install")
                                         enabled: !HyprpmManager.isBusy
