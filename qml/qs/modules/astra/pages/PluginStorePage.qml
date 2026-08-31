@@ -24,8 +24,17 @@ StackPage {
 
                 property string searchQuery: ""
                 property int selectedFilter: 0 // 0: All, 1: Installed, 2: Available
+                property int lastFilter: 0
+                property real animOffX: 0
                 property bool showCustomDialog: false
                 property bool showConsole: false
+
+                onSelectedFilterChanged: {
+                    filterAnim.complete();
+                    animOffX = (selectedFilter > lastFilter ? 1 : -1) * Tokens.padding.largeIncreased;
+                    filterAnim.start();
+                    lastFilter = selectedFilter;
+                }
 
                 headerContent: Component {
                     SearchBar {
@@ -147,13 +156,6 @@ StackPage {
                         }
 
                         IconButton {
-                            icon: "add"
-                            type: IconButton.Outlined
-                            font: Tokens.font.icon.small
-                            onClicked: storeMainHub.showCustomDialog = true
-                        }
-
-                        IconButton {
                             visible: HyprpmManager.logOutput.length > 0 || HyprpmManager.isBusy
                             icon: "terminal"
                             type: storeMainHub.showConsole ? IconButton.Filled : IconButton.Text
@@ -229,239 +231,280 @@ StackPage {
                         }
                     }
 
-                    // Section 1: Installed Plugins Management
-                    SectionHeader {
-                        first: true
-                        visible: (storeMainHub.selectedFilter === 0 || storeMainHub.selectedFilter === 1) && HyprpmManager.installedCount > 0
-                        text: qsTr("Manage Installed Plugins (%1)").arg(HyprpmManager.installedCount)
-                    }
+                    // Filtered List Container with Fading Swipe Animation
+                    ColumnLayout {
+                        id: listContainer
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.extraSmall / 2
 
-                    Repeater {
-                        id: instRepeater
-                        model: {
-                            if (storeMainHub.selectedFilter === 2) return [];
-                            const q = storeMainHub.searchQuery.trim().toLowerCase();
-                            if (q === "") return HyprpmManager.installedPlugins;
-                            return HyprpmManager.installedPlugins.filter(p => {
-                                const name = (p.name || "").toLowerCase();
-                                const label = (p.label || "").toLowerCase();
-                                const desc = (p.description || "").toLowerCase();
-                                const author = (p.author || "").toLowerCase();
-                                return name.includes(q) || label.includes(q) || desc.includes(q) || author.includes(q);
-                            });
+                        // Section 1: Installed Plugins Management
+                        SectionHeader {
+                            first: true
+                            visible: (storeMainHub.selectedFilter === 0 || storeMainHub.selectedFilter === 1) && HyprpmManager.installedCount > 0
+                            text: qsTr("Manage Installed Plugins (%1)").arg(HyprpmManager.installedCount)
                         }
 
-                        ConnectedRect {
-                            id: instCard
-                            required property var modelData
-                            required property int index
+                        Repeater {
+                            id: instRepeater
+                            model: {
+                                if (storeMainHub.selectedFilter === 2) return [];
+                                const q = storeMainHub.searchQuery.trim().toLowerCase();
+                                if (q === "") return HyprpmManager.installedPlugins;
+                                return HyprpmManager.installedPlugins.filter(p => {
+                                    const name = (p.name || "").toLowerCase();
+                                    const label = (p.label || "").toLowerCase();
+                                    const desc = (p.description || "").toLowerCase();
+                                    const author = (p.author || "").toLowerCase();
+                                    return name.includes(q) || label.includes(q) || desc.includes(q) || author.includes(q);
+                                });
+                            }
 
-                            first: index === 0
-                            last: index === instRepeater.count - 1
-                            Layout.fillWidth: true
-                            implicitHeight: instCardContent.implicitHeight + Tokens.padding.large * 2
+                            ConnectedRect {
+                                id: instCard
+                                required property var modelData
+                                required property int index
 
-                            ColumnLayout {
-                                id: instCardContent
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Tokens.padding.largeIncreased
-                                spacing: Tokens.spacing.small
+                                first: index === 0
+                                last: index === instRepeater.count - 1
+                                Layout.fillWidth: true
+                                implicitHeight: instCardContent.implicitHeight + Tokens.padding.large * 2
 
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: Tokens.spacing.medium
+                                ColumnLayout {
+                                    id: instCardContent
+                                    anchors.fill: parent
+                                    anchors.margins: Tokens.padding.largeIncreased
+                                    spacing: Tokens.spacing.small
 
-                                    MaterialIcon {
-                                        text: instCard.modelData.icon ?? "extension"
-                                        color: instCard.modelData.isEnabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                                        fontStyle: Tokens.font.icon.medium
-                                    }
-
-                                    ColumnLayout {
+                                    RowLayout {
                                         Layout.fillWidth: true
-                                        spacing: 2
+                                        spacing: Tokens.spacing.medium
 
+                                        MaterialIcon {
+                                            text: instCard.modelData.icon ?? "extension"
+                                            color: instCard.modelData.isEnabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                                            fontStyle: Tokens.font.icon.medium
+                                        }
+
+                                        ColumnLayout {
+                                            spacing: 2
+
+                                            RowLayout {
+                                                spacing: Tokens.spacing.small
+
+                                                StyledText {
+                                                    text: instCard.modelData.label ?? instCard.modelData.name
+                                                    font: Tokens.font.title.small
+                                                    color: Colours.palette.m3onSurface
+                                                }
+
+                                                StyledRect {
+                                                    implicitHeight: 20
+                                                    implicitWidth: instBadgeText.implicitWidth + 12
+                                                    radius: Tokens.rounding.full
+                                                    color: instCard.modelData.isEnabled ? Colours.palette.m3primaryContainer : Colours.palette.m3surfaceContainerHigh
+
+                                                    StyledText {
+                                                        id: instBadgeText
+                                                        anchors.centerIn: parent
+                                                        text: instCard.modelData.isEnabled ? qsTr("Enabled") : qsTr("Disabled")
+                                                        font: Tokens.font.label.small
+                                                        color: instCard.modelData.isEnabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
+                                                    }
+                                                }
+                                            }
+
+                                            StyledText {
+                                                visible: instCard.modelData.author !== undefined && instCard.modelData.author !== ""
+                                                text: qsTr("By %1").arg(instCard.modelData.author)
+                                                font: Tokens.font.label.small
+                                                color: Colours.palette.m3outline
+                                            }
+                                        }
+
+                                        // Spacer pushes actions to the far right edge
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
+
+                                        // Material 3 Switch Component & Delete Action (delete to the left of switch)
                                         RowLayout {
                                             spacing: Tokens.spacing.small
 
-                                            StyledText {
-                                                text: instCard.modelData.label ?? instCard.modelData.name
-                                                font: Tokens.font.title.small
-                                                color: Colours.palette.m3onSurface
+                                            IconButton {
+                                                icon: "delete"
+                                                type: IconButton.Text
+                                                font: Tokens.font.icon.small
+                                                enabled: !HyprpmManager.isBusy
+                                                onClicked: HyprpmManager.removePlugin(instCard.modelData.name)
                                             }
 
-                                            StyledRect {
-                                                implicitHeight: 20
-                                                implicitWidth: instBadgeText.implicitWidth + 12
-                                                radius: Tokens.rounding.full
-                                                color: instCard.modelData.isEnabled ? Colours.palette.m3primaryContainer : Colours.palette.m3surfaceContainerHigh
-
-                                                StyledText {
-                                                    id: instBadgeText
-                                                    anchors.centerIn: parent
-                                                    text: instCard.modelData.isEnabled ? qsTr("Enabled") : qsTr("Disabled")
-                                                    font: Tokens.font.label.small
-                                                    color: instCard.modelData.isEnabled ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
+                                            StyledSwitch {
+                                                checked: instCard.modelData.isEnabled
+                                                enabled: !HyprpmManager.isBusy
+                                                onToggled: {
+                                                    if (checked) {
+                                                        HyprpmManager.enablePlugin(instCard.modelData.name);
+                                                    } else {
+                                                        HyprpmManager.disablePlugin(instCard.modelData.name);
+                                                    }
                                                 }
                                             }
-                                        }
-
-                                        StyledText {
-                                            visible: instCard.modelData.author !== undefined && instCard.modelData.author !== ""
-                                            text: qsTr("By %1").arg(instCard.modelData.author)
-                                            font: Tokens.font.label.small
-                                            color: Colours.palette.m3outline
                                         }
                                     }
 
-                                    // Material 3 Switch Component & Delete Action (delete to the left of switch, aligned to right)
-                                    RowLayout {
-                                        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                                        spacing: Tokens.spacing.small
-
-                                        IconButton {
-                                            icon: "delete"
-                                            type: IconButton.Text
-                                            font: Tokens.font.icon.small
-                                            enabled: !HyprpmManager.isBusy
-                                            onClicked: HyprpmManager.removePlugin(instCard.modelData.name)
-                                        }
-
-                                        StyledSwitch {
-                                            checked: instCard.modelData.isEnabled
-                                            enabled: !HyprpmManager.isBusy
-                                            onToggled: {
-                                                if (checked) {
-                                                    HyprpmManager.enablePlugin(instCard.modelData.name);
-                                                } else {
-                                                    HyprpmManager.disablePlugin(instCard.modelData.name);
-                                                }
-                                            }
-                                        }
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: instCard.modelData.description ?? ""
+                                        font: Tokens.font.body.small
+                                        color: Colours.palette.m3onSurfaceVariant
+                                        wrapMode: Text.WordWrap
                                     }
                                 }
+                            }
+                        }
 
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: instCard.modelData.description ?? ""
-                                    font: Tokens.font.body.small
-                                    color: Colours.palette.m3onSurfaceVariant
-                                    wrapMode: Text.WordWrap
+                        // Section 2: Available Plugins (Store Catalog)
+                        SectionHeader {
+                            first: HyprpmManager.installedCount === 0 || storeMainHub.selectedFilter === 2
+                            visible: storeMainHub.selectedFilter === 0 || storeMainHub.selectedFilter === 2
+                            text: qsTr("Available Plugins Catalog (%1)").arg(HyprpmManager.availableCount)
+                        }
+
+                        Repeater {
+                            id: availRepeater
+                            model: {
+                                if (storeMainHub.selectedFilter === 1) return [];
+                                const q = storeMainHub.searchQuery.trim().toLowerCase();
+                                if (q === "") return HyprpmManager.availablePlugins;
+                                return HyprpmManager.availablePlugins.filter(p => {
+                                    const name = (p.name || "").toLowerCase();
+                                    const label = (p.label || "").toLowerCase();
+                                    const desc = (p.description || "").toLowerCase();
+                                    const author = (p.author || "").toLowerCase();
+                                    return name.includes(q) || label.includes(q) || desc.includes(q) || author.includes(q);
+                                });
+                            }
+
+                            ConnectedRect {
+                                id: availCard
+                                required property var modelData
+                                required property int index
+
+                                first: index === 0
+                                last: index === availRepeater.count - 1
+                                Layout.fillWidth: true
+                                implicitHeight: availCardContent.implicitHeight + Tokens.padding.large * 2
+
+                                ColumnLayout {
+                                    id: availCardContent
+                                    anchors.fill: parent
+                                    anchors.margins: Tokens.padding.largeIncreased
+                                    spacing: Tokens.spacing.small
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: Tokens.spacing.medium
+
+                                        MaterialIcon {
+                                            text: availCard.modelData.icon ?? "extension"
+                                            color: Colours.palette.m3onSurfaceVariant
+                                            fontStyle: Tokens.font.icon.medium
+                                        }
+
+                                        ColumnLayout {
+                                            spacing: 2
+
+                                            RowLayout {
+                                                spacing: Tokens.spacing.small
+
+                                                StyledText {
+                                                    text: availCard.modelData.label ?? availCard.modelData.name
+                                                    font: Tokens.font.title.small
+                                                    color: Colours.palette.m3onSurface
+                                                }
+
+                                                StyledRect {
+                                                    implicitHeight: 20
+                                                    implicitWidth: availBadgeText.implicitWidth + 12
+                                                    radius: Tokens.rounding.full
+                                                    color: Colours.palette.m3surfaceContainerLowest
+                                                    border.width: 1
+                                                    border.color: Colours.palette.m3outlineVariant
+
+                                                    StyledText {
+                                                        id: availBadgeText
+                                                        anchors.centerIn: parent
+                                                        text: qsTr("Available")
+                                                        font: Tokens.font.label.small
+                                                        color: Colours.palette.m3outline
+                                                    }
+                                                }
+                                            }
+
+                                            StyledText {
+                                                visible: availCard.modelData.author !== undefined && availCard.modelData.author !== ""
+                                                text: qsTr("By %1").arg(availCard.modelData.author)
+                                                font: Tokens.font.label.small
+                                                color: Colours.palette.m3outline
+                                            }
+                                        }
+
+                                        // Spacer pushes action button to the far right edge
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
+
+                                        TextButton {
+                                            type: TextButton.Filled
+                                            text: qsTr("Install")
+                                            enabled: !HyprpmManager.isBusy
+                                            onClicked: {
+                                                storeMainHub.showConsole = true;
+                                                HyprpmManager.installPlugin(availCard.modelData.repository ?? availCard.modelData.name);
+                                            }
+                                        }
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: availCard.modelData.description ?? ""
+                                        font: Tokens.font.body.small
+                                        color: Colours.palette.m3onSurfaceVariant
+                                        wrapMode: Text.WordWrap
+                                    }
                                 }
                             }
                         }
                     }
 
-                    // Section 2: Available Plugins (Store Catalog)
-                    SectionHeader {
-                        first: HyprpmManager.installedCount === 0 || storeMainHub.selectedFilter === 2
-                        visible: storeMainHub.selectedFilter === 0 || storeMainHub.selectedFilter === 2
-                        text: qsTr("Available Plugins Catalog (%1)").arg(HyprpmManager.availableCount)
-                    }
+                    SequentialAnimation {
+                        id: filterAnim
 
-                    Repeater {
-                        id: availRepeater
-                        model: {
-                            if (storeMainHub.selectedFilter === 1) return [];
-                            const q = storeMainHub.searchQuery.trim().toLowerCase();
-                            if (q === "") return HyprpmManager.availablePlugins;
-                            return HyprpmManager.availablePlugins.filter(p => {
-                                const name = (p.name || "").toLowerCase();
-                                const label = (p.label || "").toLowerCase();
-                                const desc = (p.description || "").toLowerCase();
-                                const author = (p.author || "").toLowerCase();
-                                return name.includes(q) || label.includes(q) || desc.includes(q) || author.includes(q);
-                            });
+                        Anim {
+                            target: listContainer
+                            property: "opacity"
+                            to: 0
+                            type: Anim.FastEffects
                         }
-
-                        ConnectedRect {
-                            id: availCard
-                            required property var modelData
-                            required property int index
-
-                            first: index === 0
-                            last: index === availRepeater.count - 1
-                            Layout.fillWidth: true
-                            implicitHeight: availCardContent.implicitHeight + Tokens.padding.large * 2
-
-                            ColumnLayout {
-                                id: availCardContent
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Tokens.padding.largeIncreased
-                                spacing: Tokens.spacing.small
-
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: Tokens.spacing.medium
-
-                                    MaterialIcon {
-                                        text: availCard.modelData.icon ?? "extension"
-                                        color: Colours.palette.m3onSurfaceVariant
-                                        fontStyle: Tokens.font.icon.medium
-                                    }
-
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 2
-
-                                        RowLayout {
-                                            spacing: Tokens.spacing.small
-
-                                            StyledText {
-                                                text: availCard.modelData.label ?? availCard.modelData.name
-                                                font: Tokens.font.title.small
-                                                color: Colours.palette.m3onSurface
-                                            }
-
-                                            StyledRect {
-                                                implicitHeight: 20
-                                                implicitWidth: availBadgeText.implicitWidth + 12
-                                                radius: Tokens.rounding.full
-                                                color: Colours.palette.m3surfaceContainerLowest
-                                                border.width: 1
-                                                border.color: Colours.palette.m3outlineVariant
-
-                                                StyledText {
-                                                    id: availBadgeText
-                                                    anchors.centerIn: parent
-                                                    text: qsTr("Available")
-                                                    font: Tokens.font.label.small
-                                                    color: Colours.palette.m3outline
-                                                }
-                                            }
-                                        }
-
-                                        StyledText {
-                                            visible: availCard.modelData.author !== undefined && availCard.modelData.author !== ""
-                                            text: qsTr("By %1").arg(availCard.modelData.author)
-                                            font: Tokens.font.label.small
-                                            color: Colours.palette.m3outline
-                                        }
-                                    }
-
-                                    TextButton {
-                                        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                                        type: TextButton.Filled
-                                        text: qsTr("Install")
-                                        enabled: !HyprpmManager.isBusy
-                                        onClicked: {
-                                            storeMainHub.showConsole = true;
-                                            HyprpmManager.installPlugin(availCard.modelData.repository ?? availCard.modelData.name);
-                                        }
-                                    }
-                                }
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: availCard.modelData.description ?? ""
-                                    font: Tokens.font.body.small
-                                    color: Colours.palette.m3onSurfaceVariant
-                                    wrapMode: Text.WordWrap
-                                }
+                        PropertyAction {
+                            target: listContainer
+                            property: "x"
+                            value: storeMainHub.animOffX
+                        }
+                        ParallelAnimation {
+                            Anim {
+                                target: listContainer
+                                property: "opacity"
+                                from: 0
+                                to: 1
+                                type: Anim.DefaultEffects
+                            }
+                            Anim {
+                                target: listContainer
+                                property: "x"
+                                from: storeMainHub.animOffX
+                                to: 0
+                                type: Anim.DefaultEffects
                             }
                         }
                     }
