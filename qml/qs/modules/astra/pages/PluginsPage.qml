@@ -33,20 +33,7 @@ StackPage {
 
                     SectionHeader {
                         first: true
-                        text: qsTr("Plugin Manager & Store")
-                    }
-
-                    NavRow {
-                        first: true
-                        last: true
-                        icon: "storefront"
-                        label: qsTr("Open Plugin Manager & Store")
-                        subtext: qsTr("Enable, disable, install, remove, and update plugins (%1 installed, %2 available)").arg(HyprpmManager.installedCount).arg(HyprpmManager.availableCount)
-                        onClicked: root.nState.openSubPage(3)
-                    }
-
-                    SectionHeader {
-                        text: qsTr("Active Plugins Configuration")
+                        text: qsTr("Active Plugins (%1)").arg(HyprpmManager.installedPlugins.filter(p => p.isEnabled === true).length)
                     }
 
                     Repeater {
@@ -81,10 +68,10 @@ StackPage {
                         }
                         first: true
                         last: true
-                        text: qsTr("No Enabled Plugins")
+                        text: qsTr("No Enabled Plugins Detected")
                         subtext: HyprpmManager.installedCount > 0
-                                 ? qsTr("You have %1 installed plugin(s) currently disabled. Open the Plugin Manager to enable them.").arg(HyprpmManager.installedCount)
-                                 : qsTr("Install and enable plugins from the Plugin Store to configure them here.")
+                                 ? qsTr("You have %1 installed plugin(s) that are currently disabled. Visit the Plugin Store & Manager in the sidebar to enable them.").arg(HyprpmManager.installedCount)
+                                 : qsTr("Install and enable plugins from the Plugin Store & Manager in the sidebar to configure them here.")
                     }
 
                     Item {
@@ -104,12 +91,6 @@ StackPage {
         Component {
             GenericPluginSubPage {
                 pluginData: root.selectedPluginData
-                nState: root.nState
-            }
-        },
-
-        Component {
-            PluginStoreSubPage {
                 nState: root.nState
             }
         }

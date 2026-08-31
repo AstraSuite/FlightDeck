@@ -93,11 +93,20 @@ QtObject {
             }
         },
 
-        // 9: Plugins & Extensions
+        // 9: Plugin Configuration
         Component {
             StackPage {
                 Component {
                     PluginsPage {}
+                }
+            }
+        },
+
+        // 10: Plugin Store & Manager
+        Component {
+            StackPage {
+                Component {
+                    PluginStorePage {}
                 }
             }
         },

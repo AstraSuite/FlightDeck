@@ -70,9 +70,15 @@ QtObject {
 
         // Extensions
         {
-            label: qsTr("Plugins & extensions"),
-            icon: "extension",
-            description: qsTr("Hyprland plugins, dynamic cursors, and physics"),
+            label: qsTr("Plugin configuration"),
+            icon: "tune",
+            description: qsTr("Configure active Hyprland plugins and features"),
+            category: "plugins"
+        },
+        {
+            label: qsTr("Plugin manager & store"),
+            icon: "storefront",
+            description: qsTr("Browse, install, enable/disable, and update plugins"),
             category: "plugins"
         },
 
