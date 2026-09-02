@@ -537,6 +537,20 @@ void CaelestiaVars::syncFromHyprland() {
     }
 }
 
+bool CaelestiaVars::isCaelestiaHandledKey(const QString& canonicalKey) const {
+    // Keys with Caelestia schema descriptors that carry both hyprKeyword and format
+    // are applied live via IPC (applyKeywordToHyprland) and persisted into
+    // hypr-vars.lua. They must not also be written to astra-flightdeck.lua.
+    for (auto it = m_schemaOptions.constBegin(); it != m_schemaOptions.constEnd(); ++it) {
+        const QVariantMap opt = it.value().toMap();
+        if (opt.value(QStringLiteral("hyprKeyword")).toString() == canonicalKey
+            && !opt.value(QStringLiteral("format")).toString().isEmpty()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void CaelestiaVars::applyKeywordToHyprland(const QString& key, const QVariant& value) {
     auto socket = Hyprland::HyprlandSocket::instance();
     if (!socket || !socket->isOnline()) return;
@@ -732,7 +746,7 @@ void CaelestiaVars::set(const QString& key, const QVariant& value) {
     syncAlias(QStringLiteral("activeWindowBorderColour"), QStringLiteral("activeWindowBorderColor"));
     syncAlias(QStringLiteral("inactiveWindowBorderColour"), QStringLiteral("inactiveWindowBorderColor"));
 
-    if (isNativeHyprOption(canonicalKey)) {
+    if (isNativeHyprOption(canonicalKey) && !isCaelestiaHandledKey(canonicalKey)) {
         FlightDeckWriter::instance()->setHyprOption(canonicalKey, value);
         FlightDeckWriter::instance()->save();
     }

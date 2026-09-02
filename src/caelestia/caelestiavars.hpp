@@ -85,6 +85,7 @@ private:
     void loadDefaults();
     void loadFromFile();
     void applyKeywordToHyprland(const QString& key, const QVariant& value);
+    bool isCaelestiaHandledKey(const QString& canonicalKey) const;
     QString formatLua() const;
 
     int m_revision = 0;
