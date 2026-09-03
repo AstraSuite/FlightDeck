@@ -102,16 +102,7 @@ QtObject {
             }
         },
 
-        // 10: Plugin Store & Manager
-        Component {
-            StackPage {
-                Component {
-                    PluginStorePage {}
-                }
-            }
-        },
-
-        // 9: Autostart
+        // 10: Autostart
         Component {
             StackPage {
                 Component {

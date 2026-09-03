@@ -138,7 +138,7 @@ PageBase {
             property bool matchXWayland: false
             property bool matchModal: false
             property bool matchFloating: false
-            property bool matchFullscreen: false
+            property int matchFullscreenMode: 0 // 0 = Any, 1 = Fullscreen only, 2 = Non-fullscreen only
             property bool matchPinned: false
 
             property bool isFloat: true
@@ -160,7 +160,7 @@ PageBase {
             property string targetOpacity: ""
             property string targetRounding: ""
 
-            acceptAllowed: matchClass.trim() !== "" || matchTitle.trim() !== "" || matchInitialClass.trim() !== "" || matchInitialTitle.trim() !== "" || matchWorkspace.trim() !== "" || matchTag.trim() !== "" || matchXWayland || matchModal || matchFloating || matchPinned
+            acceptAllowed: matchClass.trim() !== "" || matchTitle.trim() !== "" || matchInitialClass.trim() !== "" || matchInitialTitle.trim() !== "" || matchWorkspace.trim() !== "" || matchTag.trim() !== "" || matchXWayland || matchModal || matchFloating || matchFullscreenMode !== 0 || matchPinned
 
             function resetFields() {
                 matchClass = "";
@@ -172,7 +172,7 @@ PageBase {
                 matchXWayland = false;
                 matchModal = false;
                 matchFloating = false;
-                matchFullscreen = false;
+                matchFullscreenMode = 0;
                 matchPinned = false;
 
                 isFloat = true;
@@ -208,7 +208,8 @@ PageBase {
                 if (matchXWayland) ruleMap.match["xwayland"] = true;
                 if (matchModal) ruleMap.match["modal"] = true;
                 if (matchFloating) ruleMap.match["float"] = true;
-                if (matchFullscreen) ruleMap.match["fullscreen"] = true;
+                if (matchFullscreenMode === 1) ruleMap.match["fullscreen"] = true;
+                else if (matchFullscreenMode === 2) ruleMap.match["fullscreen"] = false;
                 if (matchPinned) ruleMap.match["pin"] = true;
 
                 if (isFloat) ruleMap["float"] = true;
@@ -340,11 +341,19 @@ PageBase {
                                 onToggled: addRuleBtn.matchFloating = checked
                             }
 
-                            ToggleRow {
-                                text: qsTr("Fullscreen Window Only")
-                                subtext: qsTr("Match windows that are currently fullscreen")
-                                checked: addRuleBtn.matchFullscreen
-                                onToggled: addRuleBtn.matchFullscreen = checked
+                            OptionRow {
+                                text: qsTr("Fullscreen State")
+                                subtext: qsTr("Match fullscreen, non-fullscreen, or any window")
+                                options: [
+                                    { value: 0, label: qsTr("Any window") },
+                                    { value: 1, label: qsTr("Fullscreen only") },
+                                    { value: 2, label: qsTr("Non-fullscreen only") }
+                                ]
+                                currentValue: {
+                                    var match = options.find(o => o.value === addRuleBtn.matchFullscreenMode);
+                                    return match ? match.label : qsTr("Any window");
+                                }
+                                onOptionSelected: (val, label) => addRuleBtn.matchFullscreenMode = val
                             }
 
                             ToggleRow {
@@ -598,8 +607,9 @@ PageBase {
                 property bool matchXWayland: false
                 property bool matchModal: false
                 property bool matchFloating: false
-                property bool matchFullscreen: false
+                property int matchFullscreenMode: 0 // 0 = Any, 1 = Fullscreen only, 2 = Non-fullscreen only
                 property bool matchPinned: false
+                property var rawBaseMatch: ({})
 
                 property bool isFloat: false
                 property bool isTile: false
@@ -620,12 +630,13 @@ PageBase {
                 property string targetOpacity: ""
                 property string targetRounding: ""
 
-                acceptAllowed: matchClass.trim() !== "" || matchTitle.trim() !== "" || matchInitialClass.trim() !== "" || matchInitialTitle.trim() !== "" || matchWorkspace.trim() !== "" || matchTag.trim() !== "" || matchXWayland || matchModal || matchFloating || matchPinned
+                acceptAllowed: matchClass.trim() !== "" || matchTitle.trim() !== "" || matchInitialClass.trim() !== "" || matchInitialTitle.trim() !== "" || matchWorkspace.trim() !== "" || matchTag.trim() !== "" || matchXWayland || matchModal || matchFloating || matchFullscreenMode !== 0 || matchPinned || (editRuleRow.isReadOnly && Object.keys(rawBaseMatch).length > 0)
 
                 onOpenChanged: {
                     if (open && editRuleRow.modelData) {
                         var r = editRuleRow.modelData;
                         var m = r.match || {};
+                        rawBaseMatch = Object.assign({}, m);
                         matchClass = m["class"] || "";
                         matchTitle = m["title"] || "";
                         matchInitialClass = m["initial_class"] || m["initialClass"] || "";
@@ -635,7 +646,13 @@ PageBase {
                         matchXWayland = !!m["xwayland"];
                         matchModal = !!m["modal"];
                         matchFloating = !!(m["float"] || m["floating"]);
-                        matchFullscreen = !!m["fullscreen"];
+                        if (m["fullscreen"] === true || m["fullscreen"] === "true") {
+                            matchFullscreenMode = 1;
+                        } else if (m["fullscreen"] === false || m["fullscreen"] === "false") {
+                            matchFullscreenMode = 2;
+                        } else {
+                            matchFullscreenMode = 0;
+                        }
                         matchPinned = !!(m["pin"] || m["pinned"]);
 
                         isFloat = !!r.float;
@@ -661,19 +678,21 @@ PageBase {
 
                 onAccepted: {
                     var ruleMap = {
-                        "match": {}
+                        "match": Object.assign({}, rawBaseMatch)
                     };
-                    if (matchClass.trim() !== "") ruleMap.match["class"] = matchClass.trim();
-                    if (matchTitle.trim() !== "") ruleMap.match["title"] = matchTitle.trim();
-                    if (matchInitialClass.trim() !== "") ruleMap.match["initial_class"] = matchInitialClass.trim();
-                    if (matchInitialTitle.trim() !== "") ruleMap.match["initial_title"] = matchInitialTitle.trim();
-                    if (matchWorkspace.trim() !== "") ruleMap.match["workspace"] = matchWorkspace.trim();
-                    if (matchTag.trim() !== "") ruleMap.match["tag"] = matchTag.trim();
-                    if (matchXWayland) ruleMap.match["xwayland"] = true;
-                    if (matchModal) ruleMap.match["modal"] = true;
-                    if (matchFloating) ruleMap.match["float"] = true;
-                    if (matchFullscreen) ruleMap.match["fullscreen"] = true;
-                    if (matchPinned) ruleMap.match["pin"] = true;
+                    if (matchClass.trim() !== "") ruleMap.match["class"] = matchClass.trim(); else delete ruleMap.match["class"];
+                    if (matchTitle.trim() !== "") ruleMap.match["title"] = matchTitle.trim(); else delete ruleMap.match["title"];
+                    if (matchInitialClass.trim() !== "") ruleMap.match["initial_class"] = matchInitialClass.trim(); else delete ruleMap.match["initial_class"];
+                    if (matchInitialTitle.trim() !== "") ruleMap.match["initial_title"] = matchInitialTitle.trim(); else delete ruleMap.match["initial_title"];
+                    if (matchWorkspace.trim() !== "") ruleMap.match["workspace"] = matchWorkspace.trim(); else delete ruleMap.match["workspace"];
+                    if (matchTag.trim() !== "") ruleMap.match["tag"] = matchTag.trim(); else delete ruleMap.match["tag"];
+                    if (matchXWayland) ruleMap.match["xwayland"] = true; else delete ruleMap.match["xwayland"];
+                    if (matchModal) ruleMap.match["modal"] = true; else delete ruleMap.match["modal"];
+                    if (matchFloating) ruleMap.match["float"] = true; else delete ruleMap.match["float"];
+                    if (matchFullscreenMode === 1) ruleMap.match["fullscreen"] = true;
+                    else if (matchFullscreenMode === 2) ruleMap.match["fullscreen"] = false;
+                    else delete ruleMap.match["fullscreen"];
+                    if (matchPinned) ruleMap.match["pin"] = true; else delete ruleMap.match["pin"];
 
                     if (isFloat) ruleMap["float"] = true;
                     if (isTile) ruleMap["tile"] = true;
@@ -824,6 +843,21 @@ PageBase {
                                     subtext: qsTr("Match currently floating windows")
                                     checked: editRuleRow.matchFloating
                                     onToggled: editRuleRow.matchFloating = checked
+                                }
+
+                                OptionRow {
+                                    text: qsTr("Fullscreen State")
+                                    subtext: qsTr("Match fullscreen, non-fullscreen, or any window")
+                                    options: [
+                                        { value: 0, label: qsTr("Any window") },
+                                        { value: 1, label: qsTr("Fullscreen only") },
+                                        { value: 2, label: qsTr("Non-fullscreen only") }
+                                    ]
+                                    currentValue: {
+                                        var match = options.find(o => o.value === editRuleRow.matchFullscreenMode);
+                                        return match ? match.label : qsTr("Any window");
+                                    }
+                                    onOptionSelected: (val, label) => editRuleRow.matchFullscreenMode = val
                                 }
 
                                 ToggleRow {

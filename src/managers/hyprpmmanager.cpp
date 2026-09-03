@@ -5,6 +5,13 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QStandardPaths>
+#include <QFileInfo>
+#include <QFile>
+#include <QTextStream>
+#include <QProcessEnvironment>
+#include <unistd.h>
+#include <sys/types.h>
 #include <algorithm>
 
 namespace FlightDeck::Managers {
@@ -67,6 +74,21 @@ int HyprpmManager::installedCount() const {
 
 int HyprpmManager::availableCount() const {
     return m_availablePlugins.size();
+}
+
+bool HyprpmManager::hasCorruptedPermissions() const {
+    const QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/hyprpm");
+    QFileInfo dirInfo(dataDir);
+    if (!dirInfo.exists()) return false;
+
+    if (dirInfo.ownerId() == 0 || !dirInfo.isWritable()) return true;
+
+    QFileInfo stateInfo(dataDir + QStringLiteral("/state.toml"));
+    if (stateInfo.exists() && (stateInfo.ownerId() == 0 || !stateInfo.isWritable())) {
+        return true;
+    }
+
+    return false;
 }
 
 static QString stripAnsiCodes(const QString& str) {
@@ -229,9 +251,10 @@ void HyprpmManager::runCommand(const QString& program, const QStringList& args, 
     emit busyChanged();
     emit statusChanged();
 
-    appendLog(QStringLiteral("=== Running: %1 %2 ===").arg(requiresElevation ? QStringLiteral("pkexec ") + program : program, args.join(QLatin1Char(' '))));
+    bool elevate = requiresElevation && program != QStringLiteral("hyprpm");
+    appendLog(QStringLiteral("=== Running: %1 %2 ===").arg(elevate ? QStringLiteral("pkexec ") + program : program, args.join(QLatin1Char(' '))));
 
-    if (requiresElevation) {
+    if (elevate) {
         QStringList pkexecArgs;
         pkexecArgs.append(program);
         pkexecArgs.append(args);
@@ -269,8 +292,76 @@ void HyprpmManager::removePlugin(const QString& pluginNameOrUrl) {
 }
 
 void HyprpmManager::updateAll(bool usePkexec) {
-    // hyprpm update compiles headers which invokes sudo, so pkexec ensures GUI polkit elevation
-    runCommand(QStringLiteral("hyprpm"), {QStringLiteral("update"), QStringLiteral("-n")}, QStringLiteral("Updating and compiling all plugins..."), usePkexec);
+    Q_UNUSED(usePkexec);
+    // hyprpm must never be run directly with pkexec. Instead, run unprivileged with SUDO_ASKPASS
+    // in the environment so hyprpm's internal sudo headers acquisition works without corrupting state permissions.
+    runCommand(QStringLiteral("hyprpm"), {QStringLiteral("update"), QStringLiteral("-n")}, QStringLiteral("Updating and compiling all plugins..."), false);
+}
+
+void HyprpmManager::updateInTerminal() {
+    QString terminal = qEnvironmentVariable("TERMINAL");
+    const QStringList candidates = {
+        QStringLiteral("foot"),
+        QStringLiteral("kitty"),
+        QStringLiteral("alacritty"),
+        QStringLiteral("ghostty"),
+        QStringLiteral("wezterm"),
+        QStringLiteral("gnome-terminal"),
+        QStringLiteral("konsole"),
+        QStringLiteral("xfce4-terminal"),
+        QStringLiteral("xterm")
+    };
+
+    QString chosenTerm;
+    if (!terminal.isEmpty() && !QStandardPaths::findExecutable(terminal).isEmpty()) {
+        chosenTerm = terminal;
+    } else {
+        for (const auto& c : candidates) {
+            QString exe = QStandardPaths::findExecutable(c);
+            if (!exe.isEmpty()) {
+                chosenTerm = exe;
+                break;
+            }
+        }
+    }
+
+    if (chosenTerm.isEmpty()) {
+        appendLog(QStringLiteral("⚠️ Error: No supported terminal emulator found to launch hyprpm update."));
+        return;
+    }
+
+    appendLog(QStringLiteral("=== Launching hyprpm update in terminal (%1) ===").arg(chosenTerm));
+    const QString script = QStringLiteral("hyprpm update; echo; read -n 1 -s -r -p 'Press any key to close...'");
+    QProcess::startDetached(chosenTerm, { QStringLiteral("-e"), QStringLiteral("sh"), QStringLiteral("-c"), script });
+}
+
+void HyprpmManager::repairPermissions() {
+    if (m_isBusy) return;
+
+    const QString dataDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/hyprpm");
+    uid_t uid = getuid();
+    gid_t gid = getgid();
+
+    appendLog(QStringLiteral("=== Attempting to repair permissions on %1 ===").arg(dataDir));
+
+    QProcess proc;
+    QStringList args;
+    args << QStringLiteral("chown") << QStringLiteral("-R")
+         << QStringLiteral("%1:%2").arg(uid).arg(gid)
+         << dataDir;
+
+    proc.start(QStringLiteral("pkexec"), args);
+    proc.waitForFinished(15000);
+
+    if (proc.exitCode() == 0) {
+        appendLog(QStringLiteral("✔ Permissions successfully repaired."));
+    } else {
+        const QString err = QString::fromUtf8(proc.readAllStandardError());
+        appendLog(QStringLiteral("✖ Failed to repair permissions: %1").arg(err));
+    }
+
+    emit permissionsChanged();
+    refresh();
 }
 
 void HyprpmManager::reloadPlugins() {
@@ -314,6 +405,7 @@ void HyprpmManager::onProcessFinished(int exitCode, QProcess::ExitStatus) {
     emit statusChanged();
 
     refresh();
+    emit permissionsChanged();
     emit operationFinished(success, msg);
 }
 

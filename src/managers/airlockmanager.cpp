@@ -216,8 +216,17 @@ bool AirlockManager::syncToAirlock() {
         emit syncFinished(true, m_lastMessage);
         return true;
     } else {
-        const QString err = QString::fromUtf8(proc.readAllStandardError());
-        m_lastMessage = err.isEmpty() ? QStringLiteral("Failed to authenticate or copy file via pkexec.") : err;
+        const int code = proc.exitCode();
+        const QString err = QString::fromUtf8(proc.readAllStandardError()).trimmed();
+        if (code == 126 || err.contains(QStringLiteral("dismissed"), Qt::CaseInsensitive)) {
+            m_lastMessage = QStringLiteral("Authentication was cancelled or dismissed.");
+        } else if (code == 127) {
+            m_lastMessage = QStringLiteral("Authorization failed: administrator authentication required.");
+        } else if (!err.isEmpty()) {
+            m_lastMessage = QStringLiteral("Failed to copy configuration: %1").arg(err);
+        } else {
+            m_lastMessage = QStringLiteral("Failed to authenticate or copy file via pkexec (exit code %1). Ensure a PolicyKit authentication agent is running.").arg(code);
+        }
         emit messageChanged();
         emit syncFinished(false, m_lastMessage);
         return false;

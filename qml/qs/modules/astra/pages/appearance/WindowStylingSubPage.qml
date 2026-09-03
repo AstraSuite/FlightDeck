@@ -29,27 +29,15 @@ PageBase {
 
         SliderRow {
             first: true
-            varKey: "activeWindowOpacity"
-            label: qsTr("Active Window Opacity")
-            subtext: qsTr("Opacity of currently focused active window")
-            value: CaelestiaVars.pendingVars.activeWindowOpacity ?? CaelestiaVars.currentVars.activeWindowOpacity ?? CaelestiaVars.getDefault("activeWindowOpacity", 0.95)
+            varKey: "windowOpacity"
+            label: qsTr("Window Opacity")
+            subtext: qsTr("Global window opacity for non-fullscreen windows")
+            value: CaelestiaVars.pendingVars.windowOpacity ?? CaelestiaVars.currentVars.windowOpacity ?? CaelestiaVars.getDefault("windowOpacity", 0.95)
             valueLabel: Math.round(value * 100) + "%"
             from: 0.1
             to: 1.0
             stepSize: 0.05
-            onMoved: v => CaelestiaVars.set("activeWindowOpacity", Math.round(v * 100) / 100)
-        }
-
-        SliderRow {
-            varKey: "inactiveWindowOpacity"
-            label: qsTr("Inactive Window Opacity")
-            subtext: qsTr("Opacity of background and unfocused windows")
-            value: CaelestiaVars.pendingVars.inactiveWindowOpacity ?? CaelestiaVars.currentVars.inactiveWindowOpacity ?? CaelestiaVars.getDefault("inactiveWindowOpacity", 0.95)
-            valueLabel: Math.round(value * 100) + "%"
-            from: 0.1
-            to: 1.0
-            stepSize: 0.05
-            onMoved: v => CaelestiaVars.set("inactiveWindowOpacity", Math.round(v * 100) / 100)
+            onMoved: v => CaelestiaVars.set("windowOpacity", Math.round(v * 100) / 100)
         }
 
         SliderRow {
@@ -63,6 +51,36 @@ PageBase {
             to: 1.0
             stepSize: 0.05
             onMoved: v => CaelestiaVars.set("fullscreenOpacity", Math.round(v * 100) / 100)
+        }
+
+        StyledRect {
+            Layout.fillWidth: true
+            implicitHeight: infoLayout.implicitHeight + Tokens.padding.medium * 2
+            radius: Tokens.rounding.medium
+            color: Colours.palette.m3surfaceContainerLow
+            border.width: 1
+            border.color: Colours.palette.m3outlineVariant
+
+            RowLayout {
+                id: infoLayout
+                anchors.fill: parent
+                anchors.margins: Tokens.padding.medium
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "info"
+                    color: Colours.palette.m3primary
+                    fontStyle: Tokens.font.icon.small
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: qsTr("Caelestia enforces Window Opacity through a global override rule for non-fullscreen windows. Per-application opacity can be customized in Window Rules.")
+                    font: Tokens.font.body.small
+                    color: Colours.palette.m3onSurfaceVariant
+                    wrapMode: Text.WordWrap
+                }
+            }
         }
 
         SectionHeader {

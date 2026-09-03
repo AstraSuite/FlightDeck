@@ -17,6 +17,7 @@
 #include <QJsonDocument>
 #include <QSet>
 #include <iostream>
+#include <unistd.h>
 
 #ifndef ASTRA_VERSION
 #define ASTRA_VERSION "1.0.0"
@@ -30,7 +31,7 @@ int CliHandler::run(int argc, char* argv[]) {
     parser.addHelpOption();
     parser.addVersionOption();
 
-    parser.addPositionalArgument(QStringLiteral("command"), QStringLiteral("Command to execute (get, set, reload, profile, doctor, bind)"));
+    parser.addPositionalArgument(QStringLiteral("command"), QStringLiteral("Command to execute (get, set, reload, profile, doctor, bind, plugin)"));
     parser.addPositionalArgument(QStringLiteral("args"), QStringLiteral("Arguments for command"), QStringLiteral("[args...]"));
 
     parser.addOption(QCommandLineOption(QStringList() << QStringLiteral("c") << QStringLiteral("conflicts"), QStringLiteral("Show conflicting bindings only")));
@@ -39,6 +40,20 @@ int CliHandler::run(int argc, char* argv[]) {
     QStringList args;
     for (int i = 0; i < argc; ++i) {
         args.append(QString::fromUtf8(argv[i]));
+    }
+
+    if (args.size() > 1 && args.at(1) == QStringLiteral("plugin") && (args.contains(QStringLiteral("--help")) || args.contains(QStringLiteral("-h")))) {
+        std::cout << "\033[1;36mFlightDeck Plugin Manager CLI\033[0m\n\n"
+                  << "Usage:\n"
+                  << "  flightdeck plugin [list]                    List installed plugins & available catalog\n"
+                  << "  flightdeck plugin install <url> [revision]  Install a plugin repository\n"
+                  << "  flightdeck plugin enable <name>             Enable an installed plugin\n"
+                  << "  flightdeck plugin disable <name>            Disable an installed plugin\n"
+                  << "  flightdeck plugin remove <name>             Uninstall a plugin\n"
+                  << "  flightdeck plugin update                    Compile and update all installed plugins\n"
+                  << "  flightdeck plugin reload                    Reload active plugins in Hyprland\n"
+                  << "  flightdeck plugin repair                    Fix root permission errors in ~/.local/share/hyprpm\n\n";
+        return 0;
     }
     parser.process(args);
 
@@ -440,36 +455,355 @@ int CliHandler::run(int argc, char* argv[]) {
         auto pm = Managers::HyprpmManager::instance();
         pm->refresh();
 
-        if (posArgs.size() < 2 || posArgs.at(1) == QStringLiteral("list")) {
-            std::cout << "\033[1;36m=== Hyprland Plugins & Store ===\033[0m\n\n";
-            std::cout << "\033[1;32mInstalled Plugins (" << pm->installedCount() << "):\033[0m\n";
-            for (const auto& pVal : pm->installedPlugins()) {
+        auto runInteractiveHyprpm = [](const QStringList& args) -> int {
+            QProcess proc;
+            proc.setProcessChannelMode(QProcess::ForwardedChannels);
+            proc.setInputChannelMode(QProcess::ForwardedInputChannel);
+            proc.start(QStringLiteral("hyprpm"), args);
+            proc.waitForFinished(-1);
+            return proc.exitCode();
+        };
+
+        auto findPlugin = [&](const QString& query) -> QVariantMap {
+            const QString qLower = query.trimmed().toLower();
+            const QString qNoHyphen = QString(qLower).remove(QLatin1Char('-')).remove(QLatin1Char('_'));
+            for (const auto& pVal : pm->allPlugins()) {
                 const QVariantMap p = pVal.toMap();
-                bool isEn = p.value(QStringLiteral("isEnabled")).toBool();
-                std::cout << "  • \033[1m" << p.value(QStringLiteral("name")).toString().toStdString() << "\033[0m: "
-                          << (isEn ? "\033[1;32mEnabled\033[0m" : "\033[1;33mDisabled\033[0m")
-                          << " - " << p.value(QStringLiteral("description")).toString().toStdString() << "\n";
+                const QString name = p.value(QStringLiteral("name")).toString().toLower();
+                const QString id = p.value(QStringLiteral("id")).toString().toLower();
+                const QString nameNoHyphen = QString(name).remove(QLatin1Char('-')).remove(QLatin1Char('_'));
+                if (name == qLower || id == qLower || nameNoHyphen == qNoHyphen) {
+                    return p;
+                }
             }
-            std::cout << "\n\033[1;34mAvailable Store Catalog (" << pm->availableCount() << "):\033[0m\n";
+            return QVariantMap();
+        };
+
+        auto printPluginList = [&]() {
+            std::cout << "\033[1;36m=== FlightDeck Plugin Store ===\033[0m\n\n";
+            std::cout << "\033[1;32mInstalled Plugins (" << pm->installedCount() << "):\033[0m\n";
+            if (pm->installedCount() == 0) {
+                std::cout << "  (No plugins currently installed)\n";
+            } else {
+                for (const auto& pVal : pm->installedPlugins()) {
+                    const QVariantMap p = pVal.toMap();
+                    bool isEn = p.value(QStringLiteral("isEnabled")).toBool();
+                    std::cout << "  • \033[1m" << p.value(QStringLiteral("name")).toString().toStdString() << "\033[0m: "
+                              << (isEn ? "\033[1;32mEnabled\033[0m" : "\033[1;33mDisabled\033[0m")
+                              << " - " << p.value(QStringLiteral("description")).toString().toStdString() << "\n";
+                }
+            }
+            std::cout << "\n\033[1;34mAvailable in Store Catalog (" << pm->availableCount() << "):\033[0m\n";
             for (const auto& pVal : pm->availablePlugins()) {
                 const QVariantMap p = pVal.toMap();
                 std::cout << "  • \033[1m" << p.value(QStringLiteral("name")).toString().toStdString() << "\033[0m ("
                           << p.value(QStringLiteral("author")).toString().toStdString() << "): "
                           << p.value(QStringLiteral("description")).toString().toStdString() << "\n";
             }
+            std::cout << "\n\033[2mTip: Run 'flightdeck plugin install <name>' or 'flightdeck plugin store' for interactive TUI.\033[0m\n";
+        };
+
+        auto runStoreTui = [&]() -> int {
+            while (true) {
+                pm->refresh();
+                const QVariantList all = pm->allPlugins();
+
+                std::cout << "\n\033[1;36m==============================================\033[0m\n";
+                std::cout << "\033[1;36m           FlightDeck Plugin Store            \033[0m\n";
+                std::cout << "\033[1;36m==============================================\033[0m\n\n";
+
+                for (int i = 0; i < all.size(); ++i) {
+                    const QVariantMap p = all.at(i).toMap();
+                    const QString name = p.value(QStringLiteral("name")).toString();
+                    const bool isInst = p.value(QStringLiteral("isInstalled")).toBool();
+                    const bool isEn = p.value(QStringLiteral("isEnabled")).toBool();
+
+                    std::string statusBadge;
+                    if (!isInst) {
+                        statusBadge = "\033[0;34m[Available]\033[0m";
+                    } else if (isEn) {
+                        statusBadge = "\033[1;32m[Enabled]\033[0m  ";
+                    } else {
+                        statusBadge = "\033[1;33m[Disabled]\033[0m ";
+                    }
+
+                    printf("  \033[1;37m[%2d]\033[0m %s \033[1m%-24s\033[0m %s\n",
+                           i + 1,
+                           statusBadge.c_str(),
+                           name.toStdString().c_str(),
+                           p.value(QStringLiteral("description")).toString().left(48).toStdString().c_str());
+                }
+
+                std::cout << "\n\033[1mOptions:\033[0m Enter \033[1m[1-" << all.size() << "]\033[0m or plugin name to manage\n";
+                std::cout << "         \033[1m[u]\033[0mpdate all | \033[1m[r]\033[0meload | \033[1m[s]\033[0mearch | \033[1m[q]\033[0muit\n";
+                std::cout << "\033[1;36mSelect > \033[0m";
+                std::cout.flush();
+
+                std::string input;
+                if (!std::getline(std::cin, input)) break;
+                QString qInput = QString::fromStdString(input).trimmed();
+                if (qInput.isEmpty()) continue;
+
+                if (qInput == QStringLiteral("q") || qInput == QStringLiteral("quit") || qInput == QStringLiteral("exit")) {
+                    break;
+                }
+
+                if (qInput == QStringLiteral("u") || qInput == QStringLiteral("update")) {
+                    std::cout << "\n\033[1mUpdating all Hyprland plugins...\033[0m\n";
+                    runInteractiveHyprpm({ QStringLiteral("update") });
+                    continue;
+                }
+
+                if (qInput == QStringLiteral("r") || qInput == QStringLiteral("reload")) {
+                    std::cout << "\n\033[1mReloading plugins in Hyprland...\033[0m\n";
+                    runInteractiveHyprpm({ QStringLiteral("reload"), QStringLiteral("-n") });
+                    continue;
+                }
+
+                if (qInput == QStringLiteral("s") || qInput == QStringLiteral("search")) {
+                    std::cout << "\nEnter search keyword: ";
+                    std::cout.flush();
+                    std::string sQuery;
+                    if (std::getline(std::cin, sQuery)) {
+                        QString sq = QString::fromStdString(sQuery).trimmed().toLower();
+                        std::cout << "\n\033[1;36mMatching Plugins:\033[0m\n";
+                        for (int i = 0; i < all.size(); ++i) {
+                            const QVariantMap p = all.at(i).toMap();
+                            QString pName = p.value(QStringLiteral("name")).toString();
+                            QString pDesc = p.value(QStringLiteral("description")).toString();
+                            if (pName.toLower().contains(sq) || pDesc.toLower().contains(sq)) {
+                                std::cout << "  • [" << (i + 1) << "] " << pName.toStdString() << " - " << pDesc.toStdString() << "\n";
+                            }
+                        }
+                    }
+                    std::cout << "\nPress Enter to return to store menu...";
+                    std::string dummy;
+                    std::getline(std::cin, dummy);
+                    continue;
+                }
+
+                // Resolve selected plugin by number or name
+                QVariantMap selected;
+                bool isNum = false;
+                int idx = qInput.toInt(&isNum);
+                if (isNum && idx >= 1 && idx <= all.size()) {
+                    selected = all.at(idx - 1).toMap();
+                } else {
+                    selected = findPlugin(qInput);
+                }
+
+                if (selected.isEmpty()) {
+                    std::cout << "\033[1;31mPlugin \"" << qInput.toStdString() << "\" not found.\033[0m\n";
+                    continue;
+                }
+
+                // Show detailed card and actions
+                const QString name = selected.value(QStringLiteral("name")).toString();
+                const QString label = selected.value(QStringLiteral("label")).toString();
+                const QString repo = selected.value(QStringLiteral("repository")).toString();
+                const QString desc = selected.value(QStringLiteral("description")).toString();
+                const QString author = selected.value(QStringLiteral("author")).toString();
+                const bool isInstalled = selected.value(QStringLiteral("isInstalled")).toBool();
+                const bool isEnabled = selected.value(QStringLiteral("isEnabled")).toBool();
+
+                std::cout << "\n\033[1;35m--------------------------------------------------\033[0m\n";
+                std::cout << "  \033[1m" << (label.isEmpty() ? name.toStdString() : label.toStdString()) << "\033[0m (" << name.toStdString() << ")\n";
+                std::cout << "  Status:      " << (isInstalled ? (isEnabled ? "\033[1;32mInstalled (Enabled)\033[0m" : "\033[1;33mInstalled (Disabled)\033[0m") : "\033[1;34mAvailable in Store (Not installed)\033[0m") << "\n";
+                if (!author.isEmpty()) std::cout << "  Author:      " << author.toStdString() << "\n";
+                if (!repo.isEmpty())   std::cout << "  Repository:  " << repo.toStdString() << "\n";
+                std::cout << "  Description: " << desc.toStdString() << "\n";
+                std::cout << "\033[1;35m--------------------------------------------------\033[0m\n";
+
+                std::cout << "Actions:\n";
+                if (!isInstalled) {
+                    std::cout << "  \033[1m[i]\033[0m Install and enable\n";
+                } else {
+                    if (isEnabled) {
+                        std::cout << "  \033[1m[t]\033[0m Disable plugin\n";
+                    } else {
+                        std::cout << "  \033[1m[t]\033[0m Enable plugin\n";
+                    }
+                    std::cout << "  \033[1m[u]\033[0m Uninstall / remove\n";
+                }
+                std::cout << "  \033[1m[b]\033[0m Back to store\n";
+                std::cout << "\033[1;36mAction > \033[0m";
+                std::cout.flush();
+
+                std::string action;
+                if (!std::getline(std::cin, action)) break;
+                QString qAction = QString::fromStdString(action).trimmed().toLower();
+
+                if (qAction == QStringLiteral("i") && !isInstalled) {
+                    std::cout << "\n\033[1mAdding repository " << repo.toStdString() << "...\033[0m\n";
+                    int r = runInteractiveHyprpm({ QStringLiteral("add"), repo });
+                    if (r == 0) {
+                        std::cout << "\033[1mEnabling " << name.toStdString() << "...\033[0m\n";
+                        runInteractiveHyprpm({ QStringLiteral("enable"), name, QStringLiteral("-n") });
+                        std::cout << "\033[1;32m✔ " << name.toStdString() << " installed and enabled successfully!\033[0m\n";
+                    }
+                } else if (qAction == QStringLiteral("t") && isInstalled) {
+                    if (isEnabled) {
+                        std::cout << "\n\033[1mDisabling " << name.toStdString() << "...\033[0m\n";
+                        runInteractiveHyprpm({ QStringLiteral("disable"), name, QStringLiteral("-n") });
+                    } else {
+                        std::cout << "\n\033[1mEnabling " << name.toStdString() << "...\033[0m\n";
+                        runInteractiveHyprpm({ QStringLiteral("enable"), name, QStringLiteral("-n") });
+                    }
+                } else if (qAction == QStringLiteral("u") && isInstalled) {
+                    std::cout << "\n\033[1mUninstalling " << name.toStdString() << "...\033[0m\n";
+                    runInteractiveHyprpm({ QStringLiteral("remove"), name });
+                }
+            }
             return 0;
+        };
+
+        if (posArgs.size() < 2) {
+            // If in an interactive terminal, open the full interactive store TUI
+            if (isatty(STDIN_FILENO)) {
+                return runStoreTui();
+            } else {
+                printPluginList();
+                return 0;
+            }
         }
 
         const QString sub = posArgs.at(1);
-        if (sub == QStringLiteral("install") || sub == QStringLiteral("add")) {
+        if (sub == QStringLiteral("store") || sub == QStringLiteral("tui") || sub == QStringLiteral("ui") || sub == QStringLiteral("browse")) {
+            return runStoreTui();
+        }
+
+        if (sub == QStringLiteral("list") || sub == QStringLiteral("ls")) {
+            printPluginList();
+            return 0;
+        }
+
+        if (sub == QStringLiteral("help") || sub == QStringLiteral("--help") || sub == QStringLiteral("-h")) {
+            std::cout << "\033[1;36mFlightDeck Plugin Store & Manager CLI\033[0m\n\n"
+                      << "Usage:\n"
+                      << "  flightdeck plugin                           Open interactive Plugin Store TUI\n"
+                      << "  flightdeck plugin list                      List installed plugins & store catalog\n"
+                      << "  flightdeck plugin search <query>            Search plugins by name, keyword, or author\n"
+                      << "  flightdeck plugin install <name | url>      Install & enable plugin (by store name or git url)\n"
+                      << "  flightdeck plugin toggle <name>             Toggle plugin enabled/disabled state\n"
+                      << "  flightdeck plugin enable <name>             Enable an installed plugin\n"
+                      << "  flightdeck plugin disable <name>            Disable an installed plugin\n"
+                      << "  flightdeck plugin remove <name>             Uninstall a plugin\n"
+                      << "  flightdeck plugin update                    Compile and update all installed plugins\n"
+                      << "  flightdeck plugin reload                    Reload active plugins in Hyprland\n"
+                      << "  flightdeck plugin repair                    Fix root permission errors in ~/.local/share/hyprpm\n\n";
+            return 0;
+        }
+
+        if (sub == QStringLiteral("search") || sub == QStringLiteral("find")) {
             if (posArgs.size() < 3) {
-                std::cerr << "Usage: flightdeck plugin install <repository_url> [git_revision]\n";
+                std::cerr << "Usage: flightdeck plugin search <keyword>\n";
                 return 1;
             }
-            QString repo = posArgs.at(2);
-            QString rev = posArgs.size() > 3 ? posArgs.at(3) : QString();
-            pm->installPlugin(repo, rev);
+            QString query = posArgs.at(2).toLower();
+            std::cout << "\033[1;36mSearch results for \"" << query.toStdString() << "\":\033[0m\n\n";
+            int matches = 0;
+            for (const auto& pVal : pm->allPlugins()) {
+                const QVariantMap p = pVal.toMap();
+                const QString name = p.value(QStringLiteral("name")).toString();
+                const QString label = p.value(QStringLiteral("label")).toString();
+                const QString desc = p.value(QStringLiteral("description")).toString();
+                const QString author = p.value(QStringLiteral("author")).toString();
+                if (name.toLower().contains(query) || label.toLower().contains(query) ||
+                    desc.toLower().contains(query) || author.toLower().contains(query)) {
+                    matches++;
+                    bool isInst = p.value(QStringLiteral("isInstalled")).toBool();
+                    bool isEn = p.value(QStringLiteral("isEnabled")).toBool();
+                    std::string statusTag = !isInst ? "\033[1;34m[Store: Available]\033[0m" : (isEn ? "\033[1;32m[Installed: Enabled]\033[0m" : "\033[1;33m[Installed: Disabled]\033[0m");
+                    std::cout << "  • \033[1m" << name.toStdString() << "\033[0m " << statusTag << "\n"
+                              << "    " << desc.toStdString() << "\n\n";
+                }
+            }
+            if (matches == 0) {
+                std::cout << "  No plugins found matching \"" << query.toStdString() << "\".\n";
+            }
             return 0;
+        }
+
+        if (sub == QStringLiteral("install") || sub == QStringLiteral("add")) {
+            if (posArgs.size() < 3) {
+                std::cerr << "Usage: flightdeck plugin install <plugin_name | repository_url> [git_revision]\n";
+                return 1;
+            }
+            QString target = posArgs.at(2);
+            QString rev = posArgs.size() > 3 ? posArgs.at(3) : QString();
+
+            QString repoUrl = target;
+            QString pluginName = target;
+
+            // Resolve target against store catalog
+            QVariantMap catalogPlugin = findPlugin(target);
+            if (!catalogPlugin.isEmpty()) {
+                repoUrl = catalogPlugin.value(QStringLiteral("repository")).toString();
+                pluginName = catalogPlugin.value(QStringLiteral("name")).toString();
+                std::cout << "\033[1;36mFound \"" << pluginName.toStdString() << "\" in store catalog:\033[0m " << repoUrl.toStdString() << "\n";
+            } else if (!target.startsWith(QStringLiteral("http")) && !target.contains(QLatin1Char('/'))) {
+                std::cerr << "\033[1;31mPlugin \"" << target.toStdString() << "\" not found in store catalog.\033[0m\n"
+                          << "Run 'flightdeck plugin search <keyword>' or provide a full git repository URL.\n";
+                return 1;
+            }
+
+            std::cout << "\033[1mInstalling plugin repository:\033[0m " << repoUrl.toStdString() << "\n";
+            QStringList addArgs = { QStringLiteral("add"), repoUrl };
+            if (!rev.isEmpty()) addArgs.append(rev);
+            int res = runInteractiveHyprpm(addArgs);
+            if (res != 0) {
+                std::cerr << "\033[1;31m✖ Failed to add plugin repository (exit code " << res << ").\033[0m\n";
+                return res;
+            }
+
+            std::cout << "\n\033[1mEnabling plugin:\033[0m " << pluginName.toStdString() << "\n";
+            res = runInteractiveHyprpm({ QStringLiteral("enable"), pluginName, QStringLiteral("-n") });
+            if (res == 0) {
+                std::cout << "\n\033[1;32m✔ Plugin \"" << pluginName.toStdString() << "\" installed and enabled successfully!\033[0m\n";
+            }
+            return res;
+        }
+
+        if (sub == QStringLiteral("toggle")) {
+            if (posArgs.size() < 3) {
+                std::cerr << "Usage: flightdeck plugin toggle <plugin_name>\n";
+                return 1;
+            }
+            QString target = posArgs.at(2);
+            QVariantMap plugin = findPlugin(target);
+            QString name = !plugin.isEmpty() ? plugin.value(QStringLiteral("name")).toString() : target;
+            bool isInstalled = !plugin.isEmpty() && plugin.value(QStringLiteral("isInstalled")).toBool();
+            bool isEnabled = !plugin.isEmpty() && plugin.value(QStringLiteral("isEnabled")).toBool();
+
+            if (!isInstalled && !plugin.isEmpty()) {
+                std::cout << "Plugin \"" << name.toStdString() << "\" is not installed yet.\n";
+                std::cout << "Would you like to install it from the store? [Y/n]: ";
+                std::cout.flush();
+                std::string reply;
+                std::getline(std::cin, reply);
+                if (reply.empty() || reply[0] == 'y' || reply[0] == 'Y') {
+                    QString repoUrl = plugin.value(QStringLiteral("repository")).toString();
+                    int res = runInteractiveHyprpm({ QStringLiteral("add"), repoUrl });
+                    if (res == 0) {
+                        runInteractiveHyprpm({ QStringLiteral("enable"), name, QStringLiteral("-n") });
+                        std::cout << "\033[1;32m✔ Successfully installed and enabled " << name.toStdString() << "!\033[0m\n";
+                    }
+                    return res;
+                }
+                return 0;
+            }
+
+            if (isEnabled) {
+                std::cout << "Disabling " << name.toStdString() << "...\n";
+                int res = runInteractiveHyprpm({ QStringLiteral("disable"), name, QStringLiteral("-n") });
+                if (res == 0) std::cout << "\033[1;33m✔ " << name.toStdString() << " is now disabled.\033[0m\n";
+                return res;
+            } else {
+                std::cout << "Enabling " << name.toStdString() << "...\n";
+                int res = runInteractiveHyprpm({ QStringLiteral("enable"), name, QStringLiteral("-n") });
+                if (res == 0) std::cout << "\033[1;32m✔ " << name.toStdString() << " is now enabled.\033[0m\n";
+                return res;
+            }
         }
 
         if (sub == QStringLiteral("enable")) {
@@ -477,8 +811,10 @@ int CliHandler::run(int argc, char* argv[]) {
                 std::cerr << "Usage: flightdeck plugin enable <plugin_name>\n";
                 return 1;
             }
-            pm->enablePlugin(posArgs.at(2));
-            return 0;
+            QString target = posArgs.at(2);
+            QVariantMap plugin = findPlugin(target);
+            QString name = !plugin.isEmpty() ? plugin.value(QStringLiteral("name")).toString() : target;
+            return runInteractiveHyprpm({ QStringLiteral("enable"), name, QStringLiteral("-n") });
         }
 
         if (sub == QStringLiteral("disable")) {
@@ -486,8 +822,10 @@ int CliHandler::run(int argc, char* argv[]) {
                 std::cerr << "Usage: flightdeck plugin disable <plugin_name>\n";
                 return 1;
             }
-            pm->disablePlugin(posArgs.at(2));
-            return 0;
+            QString target = posArgs.at(2);
+            QVariantMap plugin = findPlugin(target);
+            QString name = !plugin.isEmpty() ? plugin.value(QStringLiteral("name")).toString() : target;
+            return runInteractiveHyprpm({ QStringLiteral("disable"), name, QStringLiteral("-n") });
         }
 
         if (sub == QStringLiteral("remove") || sub == QStringLiteral("uninstall")) {
@@ -495,22 +833,41 @@ int CliHandler::run(int argc, char* argv[]) {
                 std::cerr << "Usage: flightdeck plugin remove <plugin_name>\n";
                 return 1;
             }
-            pm->removePlugin(posArgs.at(2));
-            return 0;
+            QString target = posArgs.at(2);
+            QVariantMap plugin = findPlugin(target);
+            QString name = !plugin.isEmpty() ? plugin.value(QStringLiteral("name")).toString() : target;
+            std::cout << "Removing plugin " << name.toStdString() << "...\n";
+            return runInteractiveHyprpm({ QStringLiteral("remove"), name });
         }
 
         if (sub == QStringLiteral("update")) {
-            bool usePkexec = !posArgs.contains(QStringLiteral("--no-pkexec"));
-            pm->updateAll(usePkexec);
-            return 0;
+            return runInteractiveHyprpm({ QStringLiteral("update") });
+        }
+
+        if (sub == QStringLiteral("repair") || sub == QStringLiteral("repair-permissions")) {
+            std::cout << "Fixing permissions on ~/.local/share/hyprpm via sudo...\n";
+            QProcess proc;
+            proc.setProcessChannelMode(QProcess::ForwardedChannels);
+            proc.setInputChannelMode(QProcess::ForwardedInputChannel);
+            QString path = QDir::homePath() + QStringLiteral("/.local/share/hyprpm");
+            proc.start(QStringLiteral("sudo"), {
+                QStringLiteral("chown"),
+                QStringLiteral("-R"),
+                QStringLiteral("%1:%2").arg(getuid()).arg(getgid()),
+                path
+            });
+            proc.waitForFinished(-1);
+            if (proc.exitCode() == 0) {
+                std::cout << "\033[1;32m✔ Permissions successfully restored.\033[0m\n";
+            }
+            return proc.exitCode();
         }
 
         if (sub == QStringLiteral("reload")) {
-            pm->reloadPlugins();
-            return 0;
+            return runInteractiveHyprpm({ QStringLiteral("reload"), QStringLiteral("-n") });
         }
 
-        std::cerr << "Unknown plugin action: " << sub.toStdString() << "\n";
+        std::cerr << "Unknown plugin action: " << sub.toStdString() << "\nRun 'flightdeck plugin --help' for available commands.\n";
         return 1;
     }
 

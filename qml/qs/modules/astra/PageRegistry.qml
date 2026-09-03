@@ -75,12 +75,6 @@ QtObject {
             description: qsTr("Configure active Hyprland plugins and features"),
             category: "plugins"
         },
-        {
-            label: qsTr("Plugin manager & store"),
-            icon: "storefront",
-            description: qsTr("Browse, install, enable/disable, and update plugins"),
-            category: "plugins"
-        },
 
         // Startup
         {

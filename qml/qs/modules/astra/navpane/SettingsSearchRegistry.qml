@@ -77,23 +77,12 @@ QtObject {
             pageIdx: 0,
             subPageIdx: 1,
             category: "Appearance",
-            title: "Active Window Opacity",
+            title: "Window Opacity",
             breadcrumb: "Appearance › Window styling & layout",
-            subtext: "Transparency level of active focused window",
+            subtext: "Global transparency level for non-fullscreen windows",
             icon: "opacity",
             type: "slider",
-            varKey: "activeWindowOpacity"
-        },
-        {
-            pageIdx: 0,
-            subPageIdx: 1,
-            category: "Appearance",
-            title: "Inactive Window Opacity",
-            breadcrumb: "Appearance › Window styling & layout",
-            subtext: "Transparency level of background unfocused windows",
-            icon: "opacity",
-            type: "slider",
-            varKey: "inactiveWindowOpacity"
+            varKey: "windowOpacity"
         },
         {
             pageIdx: 0,

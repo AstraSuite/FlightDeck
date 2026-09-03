@@ -68,8 +68,47 @@ StackPage {
                         last: true
                         text: qsTr("No Enabled Plugins Detected")
                         subtext: HyprpmManager.installedCount > 0
-                                 ? qsTr("You have %1 installed plugin(s) that are currently disabled. Visit the Plugin Store & Manager in the sidebar to enable them.").arg(HyprpmManager.installedCount)
-                                 : qsTr("Install and enable plugins from the Plugin Store & Manager in the sidebar to configure them here.")
+                                 ? qsTr("You have %1 installed plugin(s) that are currently disabled. Run 'flightdeck plugin enable <name>' in your terminal to enable them.").arg(HyprpmManager.installedCount)
+                                 : qsTr("Install and enable plugins using 'flightdeck plugin' in your terminal to configure them here.")
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: cliInfoCol.implicitHeight + Tokens.padding.medium * 2
+                        radius: Tokens.rounding.medium
+                        color: Colours.palette.m3surfaceContainerLow
+                        border.width: 1
+                        border.color: Colours.palette.m3outlineVariant
+
+                        ColumnLayout {
+                            id: cliInfoCol
+                            anchors.fill: parent
+                            anchors.margins: Tokens.padding.medium
+                            spacing: Tokens.spacing.extraSmall
+
+                            RowLayout {
+                                spacing: Tokens.spacing.small
+                                MaterialIcon {
+                                    text: "terminal"
+                                    color: Colours.palette.m3primary
+                                    fontStyle: Tokens.font.icon.small
+                                }
+                                StyledText {
+                                    text: qsTr("Plugin Management CLI")
+                                    font: Tokens.font.title.small
+                                    color: Colours.palette.m3onSurface
+                                }
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: qsTr("Manage plugins directly in your terminal using FlightDeck CLI:\n  • flightdeck plugin                (List catalog and status)\n  • flightdeck plugin install <repo> (Install from Git repo)\n  • flightdeck plugin enable <name>  (Enable plugin)\n  • flightdeck plugin update         (Compile and update)\n  • flightdeck plugin repair         (Fix cache permissions)")
+                                font.family: "Monospace"
+                                font.pixelSize: 11
+                                color: Colours.palette.m3onSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+                        }
                     }
 
                     Item {

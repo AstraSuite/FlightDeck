@@ -28,6 +28,7 @@ class HyprpmManager : public QObject {
     Q_PROPERTY(QVariantList availablePlugins READ availablePlugins NOTIFY pluginsChanged)
     Q_PROPERTY(int installedCount READ installedCount NOTIFY pluginsChanged)
     Q_PROPERTY(int availableCount READ availableCount NOTIFY pluginsChanged)
+    Q_PROPERTY(bool hasCorruptedPermissions READ hasCorruptedPermissions NOTIFY permissionsChanged)
 
 public:
     static HyprpmManager* instance();
@@ -44,13 +45,16 @@ public:
     QVariantList availablePlugins() const;
     int installedCount() const;
     int availableCount() const;
+    bool hasCorruptedPermissions() const;
 
     Q_INVOKABLE void refresh();
     Q_INVOKABLE void installPlugin(const QString& repoUrl, const QString& gitRev = QString());
     Q_INVOKABLE void enablePlugin(const QString& pluginName);
     Q_INVOKABLE void disablePlugin(const QString& pluginName);
     Q_INVOKABLE void removePlugin(const QString& pluginNameOrUrl);
-    Q_INVOKABLE void updateAll(bool usePkexec = true);
+    Q_INVOKABLE void updateAll(bool usePkexec = false);
+    Q_INVOKABLE void updateInTerminal();
+    Q_INVOKABLE void repairPermissions();
     Q_INVOKABLE void reloadPlugins();
     Q_INVOKABLE void clearLogs();
     Q_INVOKABLE void cancelCurrentOperation();
@@ -63,6 +67,7 @@ signals:
     void statusChanged();
     void logOutputChanged();
     void pluginsChanged();
+    void permissionsChanged();
     void logLineReceived(const QString& line);
     void operationFinished(bool success, const QString& message);
 

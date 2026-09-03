@@ -10,7 +10,6 @@ WindowRulesPage 1.0 WindowRulesPage.qml
 LayerRulesPage 1.0 LayerRulesPage.qml
 WorkspaceRulesPage 1.0 WorkspaceRulesPage.qml
 PluginsPage 1.0 PluginsPage.qml
-PluginStorePage 1.0 PluginStorePage.qml
 AutostartPage 1.0 AutostartPage.qml
 ProfilesPage 1.0 ProfilesPage.qml
 FlightDeckSettingsPage 1.0 FlightDeckSettingsPage.qml
