@@ -57,12 +57,15 @@ int main(int argc, char* argv[]) {
     assert(!checkCustom.isEmpty());
     assert(checkCustom[QStringLiteral("customCount")].toInt() >= 1);
     assert(checkCustom[QStringLiteral("hasCustomConflict")].toBool() == true);
+    assert(checkCustom[QStringLiteral("isOverride")].toBool() == true);
+    assert(checkCustom[QStringLiteral("isOverridingSystem")].toBool() == false);
 
     // Test checkChord on existing single default system bind
     QVariantMap checkSystem = validator->checkChord(QStringLiteral("SUPER + W"));
     assert(!checkSystem.isEmpty());
     assert(checkSystem[QStringLiteral("systemCount")].toInt() >= 1);
-    assert(checkSystem[QStringLiteral("isOverride")].toBool() == true);
+    assert(checkSystem[QStringLiteral("isOverride")].toBool() == false);
+    assert(checkSystem[QStringLiteral("isOverridingSystem")].toBool() == true);
 
     // Test 4: TargetInspector singleton instantiation & initial states
     auto inspector = TargetInspector::instance();

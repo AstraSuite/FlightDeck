@@ -292,7 +292,8 @@ QVariantMap KeybindValidator::checkChord(const QString& chord, int ignoreCustomI
 
     bool isTrueConflict = (customCount >= 2) || (systemCount >= 2 && customCount == 0);
     bool hasCustomConflict = (customCount >= 1);
-    bool isOverride = (customCount >= 1 && systemCount >= 1) || (customCount == 0 && systemCount > 0);
+    bool isOverride = (customCount >= 1 && systemCount >= 1);
+    bool isOverridingSystem = (customCount == 0 && systemCount > 0);
 
     return QVariantMap{
         { QStringLiteral("chord"), normalized },
@@ -302,6 +303,7 @@ QVariantMap KeybindValidator::checkChord(const QString& chord, int ignoreCustomI
         { QStringLiteral("isTrueConflict"), isTrueConflict },
         { QStringLiteral("hasCustomConflict"), hasCustomConflict },
         { QStringLiteral("isOverride"), isOverride },
+        { QStringLiteral("isOverridingSystem"), isOverridingSystem },
         { QStringLiteral("customOverride"), firstCustom },
         { QStringLiteral("systemShadowed"), firstSystem },
         { QStringLiteral("sources"), filteredSources }
