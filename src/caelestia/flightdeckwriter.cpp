@@ -17,6 +17,7 @@ namespace FlightDeck::Caelestia {
 
 static QString escapeLuaString(const QString& str);
 static QString unescapeLuaString(const QString& str);
+static QString formatLuaBindFlags(const QVariantMap& flags);
 
 FlightDeckWriter* FlightDeckWriter::instance() {
     static FlightDeckWriter inst;
@@ -378,6 +379,63 @@ void FlightDeckWriter::applyWorkspaceRuleOverIPC(const QVariantMap& rule) {
     socket->evalLua(ruleStr);
 }
 
+static QString formatCustomBindLua(const QVariantMap& bind) {
+    const QString key = bind.value(QStringLiteral("key")).toString().trimmed();
+    const QString dsp = bind.value(QStringLiteral("dispatcher")).toString().trimmed();
+    const QString args = bind.value(QStringLiteral("args")).toString().trimmed();
+    const QVariantMap flags = bind.value(QStringLiteral("flags")).toMap();
+    const QString flagsStr = formatLuaBindFlags(flags);
+
+    QString lua;
+    if (dsp == QStringLiteral("exec") || dsp == QStringLiteral("exec_cmd")) {
+        lua = QStringLiteral("hl.bind(\"%1\", hl.dsp.exec_cmd(\"%2\")%3)").arg(escapeLuaString(key), escapeLuaString(args), flagsStr);
+    } else if (dsp == QStringLiteral("global")) {
+        lua = QStringLiteral("hl.bind(\"%1\", hl.dsp.global(\"%2\")%3)").arg(escapeLuaString(key), escapeLuaString(args), flagsStr);
+    } else if (args.isEmpty()) {
+        lua = QStringLiteral("hl.bind(\"%1\", hl.dsp.%2()%3)").arg(escapeLuaString(key), dsp, flagsStr);
+    } else {
+        lua = QStringLiteral("hl.bind(\"%1\", hl.dsp.%2(\"%3\")%4)").arg(escapeLuaString(key), dsp, escapeLuaString(args), flagsStr);
+    }
+    return lua;
+}
+
+void FlightDeckWriter::applyCustomBindOverIPC(const QVariantMap& bind) {
+    auto socket = Hyprland::HyprlandSocket::instance();
+    if (!socket || !socket->isOnline()) return;
+
+    const QString key = bind.value(QStringLiteral("key")).toString().trimmed();
+    if (key.isEmpty()) return;
+
+    if (socket->isLuaMode()) {
+        if (bind.value(QStringLiteral("unbindFirst"), true).toBool()) {
+            socket->evalLua(QStringLiteral("hl.unbind(\"%1\")").arg(escapeLuaString(key)));
+        }
+        socket->evalLua(formatCustomBindLua(bind));
+    } else {
+        if (bind.value(QStringLiteral("unbindFirst"), true).toBool()) {
+            socket->send(QStringLiteral("keyword unbind %1").arg(key));
+        }
+        const QString dsp = bind.value(QStringLiteral("dispatcher")).toString().trimmed();
+        const QString args = bind.value(QStringLiteral("args")).toString().trimmed();
+        QString argPart = args.isEmpty() ? QString() : QStringLiteral(", %1").arg(args);
+        socket->send(QStringLiteral("keyword bind %1, %2%3").arg(key, dsp, argPart));
+    }
+}
+
+void FlightDeckWriter::unbindCustomBindOverIPC(const QString& key) {
+    auto socket = Hyprland::HyprlandSocket::instance();
+    if (!socket || !socket->isOnline()) return;
+
+    const QString trimmedKey = key.trimmed();
+    if (trimmedKey.isEmpty()) return;
+
+    if (socket->isLuaMode()) {
+        socket->evalLua(QStringLiteral("hl.unbind(\"%1\")").arg(escapeLuaString(trimmedKey)));
+    } else {
+        socket->send(QStringLiteral("keyword unbind %1").arg(trimmedKey));
+    }
+}
+
 void FlightDeckWriter::addWorkspaceRule(const QVariantMap& rule) {
     QVariantMap r = rule;
     r[QStringLiteral("isReadOnly")] = false;
@@ -556,20 +614,28 @@ void FlightDeckWriter::updateAutostart(int index, const QString& cmd, bool onRel
 }
 
 void FlightDeckWriter::addCustomBind(const QString& key, const QString& dispatcher, const QString& args, bool isUnbindFirst) {
+    addCustomBind(key, dispatcher, args, isUnbindFirst, QVariantMap());
+}
+
+void FlightDeckWriter::addCustomBind(const QString& key, const QString& dispatcher, const QString& args, bool isUnbindFirst, const QVariantMap& flags) {
     QVariantMap bindMap{
         { QStringLiteral("key"), key },
         { QStringLiteral("dispatcher"), dispatcher },
         { QStringLiteral("args"), args },
-        { QStringLiteral("unbindFirst"), isUnbindFirst }
+        { QStringLiteral("unbindFirst"), isUnbindFirst },
+        { QStringLiteral("flags"), flags }
     };
     m_customBinds.append(bindMap);
     m_isDirty = true;
+    applyCustomBindOverIPC(bindMap);
     emit customBindsChanged();
     emit dirtyChanged();
 }
 
 void FlightDeckWriter::removeCustomBind(int index) {
     if (index >= 0 && index < m_customBinds.size()) {
+        const QString key = m_customBinds[index].toMap().value(QStringLiteral("key")).toString();
+        unbindCustomBindOverIPC(key);
         m_customBinds.removeAt(index);
         m_isDirty = true;
         emit customBindsChanged();
@@ -579,8 +645,14 @@ void FlightDeckWriter::removeCustomBind(int index) {
 
 void FlightDeckWriter::updateCustomBind(int index, const QVariantMap& bindMap) {
     if (index >= 0 && index < m_customBinds.size()) {
+        const QString oldKey = m_customBinds[index].toMap().value(QStringLiteral("key")).toString();
+        const QString newKey = bindMap.value(QStringLiteral("key")).toString();
+        if (!oldKey.isEmpty() && oldKey != newKey) {
+            unbindCustomBindOverIPC(oldKey);
+        }
         m_customBinds[index] = bindMap;
         m_isDirty = true;
+        applyCustomBindOverIPC(bindMap);
         emit customBindsChanged();
         emit dirtyChanged();
     }
@@ -779,21 +851,48 @@ static QVariantList parseWorkspaceRulesFromContent(const QString& content) {
 
 static QVariantList parseCustomBindsFromContent(const QString& content) {
     QVariantList list;
-    static const QRegularExpression bindRe(QStringLiteral(R"RAW(hl\.bind\s*\(\s*["']([^"']+)["']\s*,\s*(?:hl\.dsp\.)?([a-zA-Z0-9_]+)\s*\(\s*(?:["']((?:\\.|[^"\\])*)["'])?\s*\))RAW"));
+    static const QRegularExpression bindRe(QStringLiteral(R"RAW(hl\.bind\s*\(\s*["']([^"']+)["']\s*,\s*(?:hl\.dsp\.)?([a-zA-Z0-9_]+)\s*(?:\(\s*(?:["']((?:\\.|[^"\\])*)["'])?\s*\))?\s*(?:,\s*\{([^}]*)\})?\s*\))RAW"));
     auto it = bindRe.globalMatch(content);
     while (it.hasNext()) {
         auto m = it.next();
         QString key = unescapeLuaString(m.captured(1).trimmed());
         QString dsp = m.captured(2).trimmed();
         QString args = unescapeLuaString(m.captured(3).trimmed());
+        QString flagsRaw = m.captured(4).trimmed();
+
         if (dsp == QStringLiteral("exec_cmd")) {
             dsp = QStringLiteral("exec");
         }
+
+        QVariantMap flags;
+        if (!flagsRaw.isEmpty()) {
+            static const QRegularExpression flagPairRe(QStringLiteral(R"RAW(([a-zA-Z0-9_]+)\s*=\s*(true|false|"[^"]*"|'[^']*'|\d+))RAW"));
+            auto fit = flagPairRe.globalMatch(flagsRaw);
+            while (fit.hasNext()) {
+                auto fm = fit.next();
+                QString fKey = fm.captured(1).trimmed();
+                QString fVal = fm.captured(2).trimmed();
+                if (fVal == QStringLiteral("true")) {
+                    flags[fKey] = true;
+                } else if (fVal == QStringLiteral("false")) {
+                    flags[fKey] = false;
+                } else if (fVal.startsWith(QLatin1Char('"')) || fVal.startsWith(QLatin1Char('\''))) {
+                    flags[fKey] = unescapeLuaString(fVal.mid(1, fVal.size() - 2));
+                } else {
+                    bool ok = false;
+                    int num = fVal.toInt(&ok);
+                    if (ok) flags[fKey] = num;
+                    else flags[fKey] = fVal;
+                }
+            }
+        }
+
         QVariantMap b{
             { QStringLiteral("key"), key },
             { QStringLiteral("dispatcher"), dsp },
             { QStringLiteral("args"), args },
-            { QStringLiteral("unbindFirst"), true }
+            { QStringLiteral("unbindFirst"), true },
+            { QStringLiteral("flags"), flags }
         };
         list.append(b);
     }
@@ -1239,11 +1338,17 @@ void FlightDeckWriter::loadFromFile() {
                     QString argStr = dspArgs.isEmpty() ? QString() : dspArgs[0].toString();
                     if (dsp == QLatin1String("exec_cmd")) dsp = QStringLiteral("exec");
 
+                    QVariantMap flagsMap;
+                    if (args.size() >= 3 && args[2].isObject()) {
+                        flagsMap = args[2].toObject().toVariantMap();
+                    }
+
                     QVariantMap b{
                         { QStringLiteral("key"), key },
                         { QStringLiteral("dispatcher"), dsp },
                         { QStringLiteral("args"), argStr },
                         { QStringLiteral("unbindFirst"), true },
+                        { QStringLiteral("flags"), flagsMap },
                         { QStringLiteral("isReadOnly"), !isManaged },
                         { QStringLiteral("source"), isManaged ? QStringLiteral("flightdeck") : QStringLiteral("system") }
                     };
@@ -1365,6 +1470,54 @@ void FlightDeckWriter::loadFromFile() {
     emit pluginsChanged();
     emit hyprOptionsChanged();
     emit dirtyChanged();
+}
+
+static QString formatLuaBindFlags(const QVariantMap& flags) {
+    if (flags.isEmpty()) return QString();
+
+    QStringList parts;
+    QStringList keys = flags.keys();
+    keys.sort();
+
+    for (const QString& key : keys) {
+        const QVariant val = flags.value(key);
+        if (key == QStringLiteral("description")) {
+            const QString desc = val.toString().trimmed();
+            if (!desc.isEmpty()) {
+                parts.append(QStringLiteral("description = \"%1\"").arg(escapeLuaString(desc)));
+            }
+        } else if (key == QStringLiteral("device")) {
+            if (val.typeId() == QMetaType::QVariantMap) {
+                const QVariantMap devMap = val.toMap();
+                QStringList devParts;
+                if (devMap.contains(QStringLiteral("inclusive"))) {
+                    devParts.append(QStringLiteral("inclusive = %1").arg(devMap.value(QStringLiteral("inclusive")).toBool() ? QStringLiteral("true") : QStringLiteral("false")));
+                }
+                if (devMap.contains(QStringLiteral("list"))) {
+                    const QStringList devList = devMap.value(QStringLiteral("list")).toStringList();
+                    QStringList escapedList;
+                    for (const auto& d : devList) {
+                        escapedList.append(QStringLiteral("\"%1\"").arg(escapeLuaString(d)));
+                    }
+                    devParts.append(QStringLiteral("list = { %1 }").arg(escapedList.join(QStringLiteral(", "))));
+                }
+                parts.append(QStringLiteral("device = { %1 }").arg(devParts.join(QStringLiteral(", "))));
+            } else if (!val.toString().isEmpty()) {
+                parts.append(QStringLiteral("device = \"%1\"").arg(escapeLuaString(val.toString())));
+            }
+        } else if (val.typeId() == QMetaType::Bool) {
+            if (val.toBool()) {
+                parts.append(QStringLiteral("%1 = true").arg(key));
+            }
+        } else if (val.typeId() == QMetaType::Int || val.typeId() == QMetaType::LongLong) {
+            parts.append(QStringLiteral("%1 = %2").arg(key).arg(val.toLongLong()));
+        } else if (!val.toString().isEmpty()) {
+            parts.append(QStringLiteral("%1 = \"%2\"").arg(key, escapeLuaString(val.toString())));
+        }
+    }
+
+    if (parts.isEmpty()) return QString();
+    return QStringLiteral(", { %1 }").arg(parts.join(QStringLiteral(", ")));
 }
 
 QString FlightDeckWriter::formatLua() const {
@@ -1516,17 +1669,20 @@ QString FlightDeckWriter::formatLua() const {
             const QString key = bind.value(QStringLiteral("key")).toString();
             const QString dsp = bind.value(QStringLiteral("dispatcher")).toString();
             const QString args = bind.value(QStringLiteral("args")).toString();
+            const QVariantMap flags = bind.value(QStringLiteral("flags")).toMap();
+            const QString flagsStr = formatLuaBindFlags(flags);
+
             if (bind.value(QStringLiteral("unbindFirst")).toBool()) {
                 out += QStringLiteral("hl.unbind(\"%1\")\n").arg(escapeLuaString(key));
             }
             if (dsp == QStringLiteral("exec") || dsp == QStringLiteral("exec_cmd")) {
-                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.exec_cmd(\"%2\"))\n").arg(escapeLuaString(key), escapeLuaString(args));
+                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.exec_cmd(\"%2\")%3)\n").arg(escapeLuaString(key), escapeLuaString(args), flagsStr);
             } else if (dsp == QStringLiteral("global")) {
-                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.global(\"%2\"))\n").arg(escapeLuaString(key), escapeLuaString(args));
+                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.global(\"%2\")%3)\n").arg(escapeLuaString(key), escapeLuaString(args), flagsStr);
             } else if (args.isEmpty()) {
-                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.%2())\n").arg(escapeLuaString(key), dsp);
+                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.%2()%3)\n").arg(escapeLuaString(key), dsp, flagsStr);
             } else {
-                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.%2(\"%3\"))\n").arg(escapeLuaString(key), dsp, escapeLuaString(args));
+                out += QStringLiteral("hl.bind(\"%1\", hl.dsp.%2(\"%3\")%4)\n").arg(escapeLuaString(key), dsp, escapeLuaString(args), flagsStr);
             }
         }
         out += QStringLiteral("\n");
@@ -1608,6 +1764,14 @@ bool FlightDeckWriter::save() {
         if (!r.value(QStringLiteral("isReadOnly")).toBool()) {
             applyLayerRuleOverIPC(r);
         }
+    }
+    for (const auto& item : m_customBinds) {
+        applyCustomBindOverIPC(item.toMap());
+    }
+
+    auto socket = Hyprland::HyprlandSocket::instance();
+    if (socket && socket->isOnline()) {
+        socket->reload();
     }
 
     m_isDirty = false;

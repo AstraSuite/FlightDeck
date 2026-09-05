@@ -25,3 +25,4 @@ AppPickerPopup 1.0 AppPickerPopup.qml
 ClientPickerPopup 1.0 ClientPickerPopup.qml
 ColorPickerDialogRow 1.0 ColorPickerDialogRow.qml
 NavRow 1.0 NavRow.qml
+KeybindFlagsEditor 1.0 KeybindFlagsEditor.qml

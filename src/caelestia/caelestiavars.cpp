@@ -616,6 +616,9 @@ void CaelestiaVars::applyKeywordToHyprland(const QString& key, const QVariant& v
     } else if (schema->hasOption(canonicalKey)) {
         // Pure Caelestia variable (e.g. keyboard binds, cursor theme) - no native
         // Hyprland option. Only persist into hypr-vars.lua, never astra-flightdeck.lua.
+        if (canonicalKey.startsWith(QStringLiteral("bind")) || canonicalKey.startsWith(QStringLiteral("submap"))) {
+            socket->reload();
+        }
     } else {
         socket->keyword(key, value);
     }
@@ -1020,6 +1023,11 @@ bool CaelestiaVars::save() {
         m_savedVars[it.key()] = it.value();
     }
     m_pendingVars.clear();
+
+    auto socket = FlightDeck::Hyprland::HyprlandSocket::instance();
+    if (socket && socket->isOnline()) {
+        socket->reload();
+    }
 
     emit varsChanged();
     emit pendingChanged();

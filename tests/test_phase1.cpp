@@ -99,6 +99,75 @@ int main(int argc, char* argv[]) {
     assert(hasGraphics);
     assert(hasKeybinds);
 
+    // Test 6: Keybind Flags Serialization
+    writer->setCustomBinds(QVariantList{
+        QVariantMap{
+            { QStringLiteral("key"), QStringLiteral("XF86AudioRaiseVolume") },
+            { QStringLiteral("dispatcher"), QStringLiteral("exec") },
+            { QStringLiteral("args"), QStringLiteral("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+") },
+            { QStringLiteral("flags"), QVariantMap{
+                { QStringLiteral("repeating"), true },
+                { QStringLiteral("locked"), true }
+            } }
+        },
+        QVariantMap{
+            { QStringLiteral("key"), QStringLiteral("SUPER + Q") },
+            { QStringLiteral("dispatcher"), QStringLiteral("exec") },
+            { QStringLiteral("args"), QStringLiteral("kitty") },
+            { QStringLiteral("flags"), QVariantMap{
+                { QStringLiteral("description"), QStringLiteral("Open my favourite terminal") }
+            } }
+        },
+        QVariantMap{
+            { QStringLiteral("key"), QStringLiteral("SUPER + SUPER_L") },
+            { QStringLiteral("dispatcher"), QStringLiteral("exec") },
+            { QStringLiteral("args"), QStringLiteral("pkill wofi || wofi") },
+            { QStringLiteral("flags"), QVariantMap{
+                { QStringLiteral("release"), true }
+            } }
+        }
+    });
+
+    QString lua = writer->formatLua();
+    assert(lua.contains("hl.bind(\"XF86AudioRaiseVolume\", hl.dsp.exec_cmd(\"wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+\"), { locked = true, repeating = true })"));
+    assert(lua.contains("hl.bind(\"SUPER + Q\", hl.dsp.exec_cmd(\"kitty\"), { description = \"Open my favourite terminal\" })"));
+    assert(lua.contains("hl.bind(\"SUPER + SUPER_L\", hl.dsp.exec_cmd(\"pkill wofi || wofi\"), { release = true })"));
+
+    // Test 7: Validator handles disparate trigger types on same chord without collision
+    writer->setCustomBinds(QVariantList{
+        QVariantMap{
+            { QStringLiteral("key"), QStringLiteral("SUPER + XF86AudioNext") },
+            { QStringLiteral("dispatcher"), QStringLiteral("exec") },
+            { QStringLiteral("args"), QStringLiteral("playerctl next") },
+            { QStringLiteral("flags"), QVariantMap{ { QStringLiteral("long_press"), true } } }
+        },
+        QVariantMap{
+            { QStringLiteral("key"), QStringLiteral("SUPER + XF86AudioNext") },
+            { QStringLiteral("dispatcher"), QStringLiteral("exec") },
+            { QStringLiteral("args"), QStringLiteral("playerctl position +5") }
+        }
+    });
+    validator->refresh();
+    assert(!validator->hasTrueConflict(QStringLiteral("SUPER+XF86AUDIONEXT")));
+
+    // Test 8: Validator detects true conflicts when triggers match
+    writer->setCustomBinds(QVariantList{
+        QVariantMap{
+            { QStringLiteral("key"), QStringLiteral("SUPER + XF86AudioNext") },
+            { QStringLiteral("dispatcher"), QStringLiteral("exec") },
+            { QStringLiteral("args"), QStringLiteral("playerctl next") },
+            { QStringLiteral("flags"), QVariantMap{ { QStringLiteral("long_press"), true } } }
+        },
+        QVariantMap{
+            { QStringLiteral("key"), QStringLiteral("SUPER + XF86AudioNext") },
+            { QStringLiteral("dispatcher"), QStringLiteral("exec") },
+            { QStringLiteral("args"), QStringLiteral("playerctl position +5") },
+            { QStringLiteral("flags"), QVariantMap{ { QStringLiteral("long_press"), true } } }
+        }
+    });
+    validator->refresh();
+    assert(validator->hasTrueConflict(QStringLiteral("SUPER+XF86AUDIONEXT")));
+
     qDebug() << "=== ALL PHASE 1 UNIT TESTS PASSED SUCCESSFULLY! ===";
     return 0;
 }

@@ -58,7 +58,8 @@ PageBase {
         const out = [];
         for (let i = 0; i < FlightDeckWriter.customBinds.length; i++) {
             const b = FlightDeckWriter.customBinds[i];
-            const value = (b.dispatcher || "exec") + " " + (b.args || "");
+            const desc = (b.flags && b.flags.description) ? b.flags.description : "";
+            const value = (b.dispatcher || "exec") + " " + (b.args || "") + " " + desc;
             if (root.keybindMatches(b.key, b.key, value)) out.push(b);
         }
         return out;
@@ -109,12 +110,14 @@ PageBase {
             label: qsTr("Add Keybind")
             header: qsTr("Add Custom Keybind")
             acceptLabel: qsTr("Save Keybind")
+            customOpenHeight: 600
 
             property string shortcutKey: ""
             property string selectedCategory: "Launch Application"
             property string selectedAction: "Run command"
             property string paramInput: ""
             property bool recording: false
+            property var activeEditor: null
 
             acceptAllowed: shortcutKey.trim() !== ""
 
@@ -122,6 +125,8 @@ PageBase {
                 if (!open) {
                     recording = false;
                     HyprlandState.stopCapture();
+                } else if (activeEditor) {
+                    activeEditor.reset();
                 }
             }
 
@@ -141,16 +146,31 @@ PageBase {
                         dsp = selectedAction;
                     }
 
-                    FlightDeckWriter.addCustomBind(shortcutKey.trim(), dsp, finalArgs, true);
+                    let flags = activeEditor ? activeEditor.getFlagsMap() : ({});
+                    FlightDeckWriter.addCustomBind(shortcutKey.trim(), dsp, finalArgs, true, flags);
                     FlightDeckWriter.save();
                     shortcutKey = "";
                     paramInput = "";
+                    if (activeEditor) activeEditor.reset();
                 }
             }
 
             content: Component {
-                ColumnLayout {
-                    spacing: Tokens.spacing.medium
+                Flickable {
+                    id: addFlick
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    contentHeight: addBindCol.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                    }
+
+                    ColumnLayout {
+                        id: addBindCol
+                        width: addFlick.width
+                        spacing: Tokens.spacing.medium
 
                     StyledText {
                         text: qsTr("Key Combination")
@@ -364,6 +384,14 @@ PageBase {
                         }
                     }
 
+                    KeybindFlagsEditor {
+                        id: addFlagsEditor
+                        Component.onCompleted: {
+                            addBindBtn.activeEditor = this;
+                            reset();
+                        }
+                    }
+
                     Item {
                         id: addKeyListener
                         focus: addBindBtn.recording
@@ -434,6 +462,7 @@ PageBase {
                 }
             }
         }
+        }
 
         // Each Custom Bind is its own DialogRowButton
         Repeater {
@@ -448,8 +477,14 @@ PageBase {
                 first: root.searchText.trim() !== "" && editBindRow.index === 0
                 last: index === root.filteredCustomBinds.length - 1
                 icon: "keyboard"
+                customOpenHeight: 600
 
-                label: editBindRow.modelData.key || qsTr("Keybind")
+                label: {
+                    if (editBindRow.modelData.flags && editBindRow.modelData.flags.description) {
+                        return editBindRow.modelData.key + " - " + editBindRow.modelData.flags.description;
+                    }
+                    return editBindRow.modelData.key || qsTr("Keybind");
+                }
                 subtext: (editBindRow.modelData.dispatcher || "exec") + (editBindRow.modelData.args ? ": " + editBindRow.modelData.args : "")
 
                 header: qsTr("Edit Keybind")
@@ -457,6 +492,7 @@ PageBase {
 
                 property string shortcutKey: editBindRow.modelData.key || ""
                 property string paramInput: editBindRow.modelData.args || ""
+                property var activeEditor: null
                 property string selectedCategory: {
                     let dsp = editBindRow.modelData.dispatcher || "exec";
                     if (dsp === "exec" || dsp === "exec_cmd") return "Launch Application";
@@ -484,6 +520,9 @@ PageBase {
                         recording = false;
                         shortcutKey = editBindRow.modelData.key || "";
                         paramInput = editBindRow.modelData.args || "";
+                        if (activeEditor) {
+                            activeEditor.setFromFlagsMap(editBindRow.modelData.flags);
+                        }
                     } else {
                         recording = false;
                         HyprlandState.stopCapture();
@@ -506,11 +545,13 @@ PageBase {
                             dsp = selectedAction;
                         }
 
+                        let flags = activeEditor ? activeEditor.getFlagsMap() : (editBindRow.modelData.flags || ({}));
                         FlightDeckWriter.updateCustomBind(editBindRow.index, {
                             "key": shortcutKey.trim(),
                             "dispatcher": dsp,
                             "args": finalArgs,
-                            "unbindFirst": true
+                            "unbindFirst": true,
+                            "flags": flags
                         });
                         FlightDeckWriter.save();
                     }
@@ -518,7 +559,45 @@ PageBase {
 
                 trailingActions: Component {
                     RowLayout {
-                        spacing: 0
+                        spacing: Tokens.spacing.extraSmall
+
+                        Repeater {
+                            model: {
+                                let list = [];
+                                let f = editBindRow.modelData.flags || {};
+                                if (f.locked) list.push({ name: qsTr("Locked"), icon: "lock" });
+                                if (f.repeating) list.push({ name: qsTr("Repeat"), icon: "repeat" });
+                                if (f.release) list.push({ name: qsTr("Release"), icon: "arrow_upward" });
+                                if (f.long_press) list.push({ name: qsTr("Long Press"), icon: "hourglass_top" });
+                                if (f.non_consuming) list.push({ name: qsTr("Pass"), icon: "redo" });
+                                if (f.transparent) list.push({ name: qsTr("Transparent"), icon: "layers_clear" });
+                                if (f.ignore_mods) list.push({ name: qsTr("No Mods"), icon: "remove_circle_outline" });
+                                return list;
+                            }
+                            delegate: StyledRect {
+                                required property var modelData
+                                implicitHeight: 22
+                                implicitWidth: chipRow.implicitWidth + 12
+                                radius: Tokens.rounding.extraSmall
+                                color: Colours.palette.m3surfaceContainerHigh
+
+                                RowLayout {
+                                    id: chipRow
+                                    anchors.centerIn: parent
+                                    spacing: 3
+                                    MaterialIcon {
+                                        text: modelData.icon
+                                        fontStyle: Tokens.font.icon.extraSmall
+                                        color: Colours.palette.m3primary
+                                    }
+                                    StyledText {
+                                        text: modelData.name
+                                        font: Tokens.font.label.small
+                                        color: Colours.palette.m3onSurfaceVariant
+                                    }
+                                }
+                            }
+                        }
 
                         IconButton {
                             icon: "delete"
@@ -533,9 +612,21 @@ PageBase {
                 }
 
                 content: Component {
-                    ColumnLayout {
-                        id: editBindCol
-                        spacing: Tokens.spacing.medium
+                    Flickable {
+                        id: editFlick
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        contentHeight: editBindCol.implicitHeight
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        ScrollBar.vertical: ScrollBar {
+                            policy: ScrollBar.AsNeeded
+                        }
+
+                        ColumnLayout {
+                            id: editBindCol
+                            width: editFlick.width
+                            spacing: Tokens.spacing.medium
 
                         StyledText {
                             text: qsTr("Key Combination")
@@ -749,6 +840,14 @@ PageBase {
                             }
                         }
 
+                        KeybindFlagsEditor {
+                            id: editFlagsEditor
+                            Component.onCompleted: {
+                                editBindRow.activeEditor = this;
+                                setFromFlagsMap(editBindRow.modelData.flags);
+                            }
+                        }
+
                         Item {
                             id: editKeyListener
                             focus: editBindRow.recording
@@ -819,6 +918,7 @@ PageBase {
                     }
                 }
             }
+        }
         }
 
         Repeater {

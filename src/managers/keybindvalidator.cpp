@@ -145,6 +145,15 @@ QString KeybindValidator::normalizeChord(const QVariant& keyVal, const QString& 
     return sortedMods.join(QLatin1Char('+'));
 }
 
+static QString triggerTypeForEntry(const QVariantMap& entry) {
+    const QVariantMap flags = entry.value(QStringLiteral("flags")).toMap();
+    if (flags.value(QStringLiteral("release")).toBool()) return QStringLiteral("release");
+    if (flags.value(QStringLiteral("long_press")).toBool()) return QStringLiteral("long_press");
+    if (flags.value(QStringLiteral("click")).toBool()) return QStringLiteral("click");
+    if (flags.value(QStringLiteral("drag")).toBool()) return QStringLiteral("drag");
+    return QStringLiteral("press");
+}
+
 void KeybindValidator::analyzeConflicts() {
     m_conflicts.clear();
     m_trueConflicts.clear();
@@ -195,17 +204,24 @@ void KeybindValidator::analyzeConflicts() {
         const QString rawKey = b.value(QStringLiteral("key")).toString();
         const QString dsp = b.value(QStringLiteral("dispatcher")).toString();
         const QString args = b.value(QStringLiteral("args")).toString();
+        const QVariantMap flags = b.value(QStringLiteral("flags")).toMap();
 
         QString chord = normalizeChord(rawKey);
         if (!chord.isEmpty()) {
+            QString label = flags.value(QStringLiteral("description")).toString().trimmed();
+            if (label.isEmpty()) {
+                label = QStringLiteral("Custom: ") + dsp + (args.isEmpty() ? QString() : QStringLiteral(" ") + args);
+            }
+
             QVariantMap entry{
                 { QStringLiteral("type"), QStringLiteral("custom") },
                 { QStringLiteral("index"), i },
                 { QStringLiteral("key"), rawKey },
-                { QStringLiteral("label"), QStringLiteral("Custom: ") + dsp + (args.isEmpty() ? QString() : QStringLiteral(" ") + args) },
+                { QStringLiteral("label"), label },
                 { QStringLiteral("dispatcher"), dsp },
                 { QStringLiteral("args"), args },
-                { QStringLiteral("chord"), chord }
+                { QStringLiteral("chord"), chord },
+                { QStringLiteral("flags"), flags }
             };
             m_chordMap[chord].append(entry);
         }
@@ -219,20 +235,27 @@ void KeybindValidator::analyzeConflicts() {
             int systemCount = 0;
             QVariantMap firstCustom;
             QVariantMap firstSystem;
+            QSet<QString> customTriggers;
+            bool hasDuplicateCustomTrigger = false;
 
             for (const auto& sVal : sources) {
                 QVariantMap s = sVal.toMap();
                 if (s.value(QStringLiteral("type")).toString() == QStringLiteral("custom")) {
                     customCount++;
                     if (firstCustom.isEmpty()) firstCustom = s;
+                    QString trig = triggerTypeForEntry(s);
+                    if (customTriggers.contains(trig)) {
+                        hasDuplicateCustomTrigger = true;
+                    }
+                    customTriggers.insert(trig);
                 } else {
                     systemCount++;
                     if (firstSystem.isEmpty()) firstSystem = s;
                 }
             }
 
-            bool isTrueConflict = (customCount >= 2) || (systemCount >= 2 && customCount == 0);
-            bool isOverride = (customCount == 1 && systemCount >= 1);
+            bool isTrueConflict = hasDuplicateCustomTrigger || (systemCount >= 2 && customCount == 0);
+            bool isOverride = (customCount == 1 && systemCount >= 1 && !hasDuplicateCustomTrigger);
 
             QVariantMap conflictObj{
                 { QStringLiteral("chord"), it.key() },
@@ -290,9 +313,22 @@ QVariantMap KeybindValidator::checkChord(const QString& chord, int ignoreCustomI
         return QVariantMap();
     }
 
-    bool isTrueConflict = (customCount >= 2) || (systemCount >= 2 && customCount == 0);
+    QSet<QString> customTriggers;
+    bool hasDuplicateCustomTrigger = false;
+    for (const auto& sVal : filteredSources) {
+        const QVariantMap s = sVal.toMap();
+        if (s.value(QStringLiteral("type")).toString() == QStringLiteral("custom")) {
+            QString trig = triggerTypeForEntry(s);
+            if (customTriggers.contains(trig)) {
+                hasDuplicateCustomTrigger = true;
+            }
+            customTriggers.insert(trig);
+        }
+    }
+
+    bool isTrueConflict = hasDuplicateCustomTrigger || (systemCount >= 2 && customCount == 0);
     bool hasCustomConflict = (customCount >= 1);
-    bool isOverride = (customCount >= 1 && systemCount >= 1);
+    bool isOverride = (customCount >= 1 && systemCount >= 1 && !hasDuplicateCustomTrigger);
     bool isOverridingSystem = (customCount == 0 && systemCount > 0);
 
     return QVariantMap{

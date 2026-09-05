@@ -22,8 +22,8 @@ Popup {
     readonly property bool hasCustomConflict: chordInfo && chordInfo.customCount > 0
     readonly property bool isOverridingSystem: chordInfo && chordInfo.customCount === 0 && chordInfo.systemCount > 0
 
-    width: Math.min(480, parent.width - 40)
-    height: Math.min(520, parent.height - 40)
+    width: Math.min(520, parent.width - 40)
+    height: Math.min(680, parent.height - 40)
     anchors.centerIn: parent
 
     modal: true
@@ -40,6 +40,7 @@ Popup {
     onClosed: {
         root.recording = false;
         HyprlandState.stopCapture();
+        flagsEditor.reset();
     }
 
     contentItem: ColumnLayout {
@@ -64,7 +65,21 @@ Popup {
             }
         }
 
-        // Key Combo Field
+        Flickable {
+            id: formFlick
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            contentHeight: formCol.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+            ColumnLayout {
+                id: formCol
+                width: formFlick.width
+                spacing: Tokens.spacing.medium
+
+                // Key Combo Field
         StyledText {
             text: qsTr("Key Combination")
             font: Tokens.font.body.small
@@ -225,7 +240,11 @@ Popup {
             onTextEdited: root.args = text
         }
 
-        Item { Layout.fillHeight: true }
+        KeybindFlagsEditor {
+            id: flagsEditor
+        }
+    }
+}
 
         // Action Buttons
         RowLayout {
@@ -245,7 +264,8 @@ Popup {
                 text: qsTr("Add Shortcut")
                 onClicked: {
                     if (root.bindKey.trim() === "") return;
-                    FlightDeckWriter.addCustomBind(root.bindKey.trim(), root.dispatcher, root.args.trim(), true);
+                    let flags = flagsEditor.getFlagsMap();
+                    FlightDeckWriter.addCustomBind(root.bindKey.trim(), root.dispatcher, root.args.trim(), true, flags);
                     FlightDeckWriter.save();
                     root.close();
                 }

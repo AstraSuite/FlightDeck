@@ -82,6 +82,7 @@ public:
     Q_INVOKABLE void removeAutostart(int index);
     Q_INVOKABLE void updateAutostart(int index, const QString& cmd, bool onReload = false);
 
+    Q_INVOKABLE void addCustomBind(const QString& key, const QString& dispatcher, const QString& args, bool isUnbindFirst, const QVariantMap& flags);
     Q_INVOKABLE void addCustomBind(const QString& key, const QString& dispatcher, const QString& args, bool isUnbindFirst = true);
     Q_INVOKABLE void removeCustomBind(int index);
     Q_INVOKABLE void updateCustomBind(int index, const QVariantMap& bindMap);
@@ -102,6 +103,8 @@ public:
     Q_INVOKABLE void applyWindowRuleOverIPC(const QVariantMap& rule);
     Q_INVOKABLE void applyLayerRuleOverIPC(const QVariantMap& rule);
     Q_INVOKABLE void applyWorkspaceRuleOverIPC(const QVariantMap& rule);
+    Q_INVOKABLE void applyCustomBindOverIPC(const QVariantMap& bind);
+    Q_INVOKABLE void unbindCustomBindOverIPC(const QString& key);
 
     static QString flightDeckFilePath();
     static QString astraHelmFilePath();
