@@ -22,6 +22,8 @@ class FlightDeckWriter : public QObject {
     Q_PROPERTY(QVariantList autostartEntries READ autostartEntries WRITE setAutostartEntries NOTIFY autostartChanged)
     Q_PROPERTY(QVariantMap pluginConfigs READ pluginConfigs WRITE setPluginConfigs NOTIFY pluginsChanged)
     Q_PROPERTY(QVariantMap hyprOptions READ hyprOptions WRITE setHyprOptions NOTIFY hyprOptionsChanged)
+    Q_PROPERTY(QVariantList bezierCurves READ bezierCurves WRITE setBezierCurves NOTIFY bezierCurvesChanged)
+    Q_PROPERTY(QVariantList animationTargets READ animationTargets WRITE setAnimationTargets NOTIFY animationTargetsChanged)
 
 public:
     static FlightDeckWriter* instance();
@@ -60,11 +62,22 @@ public:
     QVariantMap hyprOptions() const;
     void setHyprOptions(const QVariantMap& options);
 
+    QVariantList bezierCurves() const;
+    void setBezierCurves(const QVariantList& curves);
+
+    QVariantList animationTargets() const;
+    void setAnimationTargets(const QVariantList& targets);
+
     // QML-invokable mutations
     Q_INVOKABLE void setHyprOption(const QString& key, const QVariant& value);
     Q_INVOKABLE QVariant getHyprOption(const QString& key, const QVariant& fallback = QVariant()) const;
     Q_INVOKABLE bool hasHyprOption(const QString& key) const;
     Q_INVOKABLE void removeHyprOption(const QString& key);
+
+    Q_INVOKABLE void addBezierCurve(const QString& name, qreal x1, qreal y1, qreal x2, qreal y2);
+    Q_INVOKABLE void removeBezierCurve(const QString& name);
+    Q_INVOKABLE void setAnimationTarget(const QString& target, bool enabled, qreal speed, const QString& curve, const QString& style = QString());
+    Q_INVOKABLE void setAnimationTargetEnabled(const QString& target, bool enabled);
 
     Q_INVOKABLE void addWindowRule(const QVariantMap& rule);
     Q_INVOKABLE void removeWindowRule(int index);
@@ -120,6 +133,8 @@ signals:
     void autostartChanged();
     void pluginsChanged();
     void hyprOptionsChanged();
+    void bezierCurvesChanged();
+    void animationTargetsChanged();
     void saveSucceeded();
     void saveFailed(const QString& error);
 
@@ -136,6 +151,8 @@ private:
     QVariantList m_autostartEntries;
     QVariantMap m_pluginConfigs;
     QVariantMap m_hyprOptions;
+    QVariantList m_bezierCurves;
+    QVariantList m_animationTargets;
 };
 
 using AstraHelmWriter = FlightDeckWriter;

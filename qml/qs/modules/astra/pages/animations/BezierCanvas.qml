@@ -33,7 +33,7 @@ Item {
     }
 
     function fromScreenY(sy) {
-        return Math.max(-0.5, Math.min(1.5, (root.height - root.pad - sy) / root.plotH));
+        return Math.max(0.0, Math.min(1.0, (root.height - root.pad - sy) / root.plotH));
     }
 
     onX1Changed: canvas.requestPaint()
@@ -114,8 +114,6 @@ Item {
     // Handle 1 (P1)
     Rectangle {
         id: handle1
-        x: root.toScreenX(root.x1) - width / 2
-        y: root.toScreenY(root.y1) - height / 2
         width: 18
         height: 18
         radius: 9
@@ -124,18 +122,34 @@ Item {
         border.color: Colours.palette.m3onPrimary
         z: 10
 
-        MouseArea {
-            anchors.fill: parent
-            anchors.margins: -8
-            cursorShape: Qt.PointingHandCursor
-            drag.target: parent
-            drag.axis: Drag.XAndYAxis
+        x: root.toScreenX(root.x1) - width / 2
+        y: root.toScreenY(root.y1) - height / 2
 
-            onPositionChanged: {
-                if (drag.active) {
-                    root.x1 = Math.round(root.fromScreenX(handle1.x + handle1.width / 2) * 100) / 100;
-                    root.y1 = Math.round(root.fromScreenY(handle1.y + handle1.height / 2) * 100) / 100;
-                    root.pointsChanged(root.x1, root.y1, root.x2, root.y2);
+        MouseArea {
+            id: ma1
+            anchors.fill: parent
+            anchors.margins: -10
+            cursorShape: Qt.PointingHandCursor
+            preventStealing: true
+
+            property real pressCursorOffsetCanvasX: 0
+            property real pressCursorOffsetCanvasY: 0
+
+            onPressed: mouse => {
+                root.forceActiveFocus();
+                var pressPos = ma1.mapToItem(root, mouse.x, mouse.y);
+                pressCursorOffsetCanvasX = pressPos.x - root.toScreenX(root.x1);
+                pressCursorOffsetCanvasY = pressPos.y - root.toScreenY(root.y1);
+            }
+
+            onPositionChanged: mouse => {
+                if (pressed) {
+                    var curPos = ma1.mapToItem(root, mouse.x, mouse.y);
+                    var targetCanvasX = curPos.x - pressCursorOffsetCanvasX;
+                    var targetCanvasY = curPos.y - pressCursorOffsetCanvasY;
+                    var nx = Math.round(root.fromScreenX(targetCanvasX) * 100) / 100;
+                    var ny = Math.round(root.fromScreenY(targetCanvasY) * 100) / 100;
+                    root.pointsChanged(nx, ny, root.x2, root.y2);
                 }
             }
         }
@@ -144,8 +158,6 @@ Item {
     // Handle 2 (P2)
     Rectangle {
         id: handle2
-        x: root.toScreenX(root.x2) - width / 2
-        y: root.toScreenY(root.y2) - height / 2
         width: 18
         height: 18
         radius: 9
@@ -154,18 +166,34 @@ Item {
         border.color: Colours.palette.m3onTertiary
         z: 10
 
-        MouseArea {
-            anchors.fill: parent
-            anchors.margins: -8
-            cursorShape: Qt.PointingHandCursor
-            drag.target: parent
-            drag.axis: Drag.XAndYAxis
+        x: root.toScreenX(root.x2) - width / 2
+        y: root.toScreenY(root.y2) - height / 2
 
-            onPositionChanged: {
-                if (drag.active) {
-                    root.x2 = Math.round(root.fromScreenX(handle2.x + handle2.width / 2) * 100) / 100;
-                    root.y2 = Math.round(root.fromScreenY(handle2.y + handle2.height / 2) * 100) / 100;
-                    root.pointsChanged(root.x1, root.y1, root.x2, root.y2);
+        MouseArea {
+            id: ma2
+            anchors.fill: parent
+            anchors.margins: -10
+            cursorShape: Qt.PointingHandCursor
+            preventStealing: true
+
+            property real pressCursorOffsetCanvasX: 0
+            property real pressCursorOffsetCanvasY: 0
+
+            onPressed: mouse => {
+                root.forceActiveFocus();
+                var pressPos = ma2.mapToItem(root, mouse.x, mouse.y);
+                pressCursorOffsetCanvasX = pressPos.x - root.toScreenX(root.x2);
+                pressCursorOffsetCanvasY = pressPos.y - root.toScreenY(root.y2);
+            }
+
+            onPositionChanged: mouse => {
+                if (pressed) {
+                    var curPos = ma2.mapToItem(root, mouse.x, mouse.y);
+                    var targetCanvasX = curPos.x - pressCursorOffsetCanvasX;
+                    var targetCanvasY = curPos.y - pressCursorOffsetCanvasY;
+                    var nx = Math.round(root.fromScreenX(targetCanvasX) * 100) / 100;
+                    var ny = Math.round(root.fromScreenY(targetCanvasY) * 100) / 100;
+                    root.pointsChanged(root.x1, root.y1, nx, ny);
                 }
             }
         }

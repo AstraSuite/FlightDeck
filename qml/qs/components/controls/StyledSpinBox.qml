@@ -18,7 +18,7 @@ Item {
 
     signal valueModified()
 
-    function increase(): void {
+    function increase() {
         let newValue = Math.min(root.to, root.value + root.stepSize);
         const decimals = root.stepSize < 1 ? Math.max(1, Math.ceil(-Math.log10(root.stepSize))) : 0;
         newValue = Math.round(newValue * Math.pow(10, decimals)) / Math.pow(10, decimals);
@@ -28,7 +28,7 @@ Item {
         }
     }
 
-    function decrease(): void {
+    function decrease() {
         let newValue = Math.max(root.from, root.value - root.stepSize);
         const decimals = root.stepSize < 1 ? Math.max(1, Math.ceil(-Math.log10(root.stepSize))) : 0;
         newValue = Math.round(newValue * Math.pow(10, decimals)) / Math.pow(10, decimals);
@@ -79,12 +79,23 @@ Item {
             verticalAlignment: TextInput.AlignVCenter
             font: Tokens.font.body.medium
             color: Colours.palette.m3onSurface
-            inputMethodHints: Qt.ImhDigitsOnly
+            inputMethodHints: root.stepSize < 1 ? Qt.ImhFormattedNumbersOnly : Qt.ImhDigitsOnly
             selectByMouse: true
 
             text: root.value.toString()
 
-            validator: IntValidator {
+            validator: root.stepSize < 1 ? doubleValidator : intValidator
+
+            DoubleValidator {
+                id: doubleValidator
+                bottom: root.from
+                top: root.to
+                decimals: 3
+                notation: DoubleValidator.StandardNotation
+            }
+
+            IntValidator {
+                id: intValidator
                 bottom: Math.round(root.from)
                 top: Math.round(root.to)
             }
@@ -101,7 +112,7 @@ Item {
             }
 
             onEditingFinished: {
-                let parsed = parseInt(text);
+                let parsed = root.stepSize < 1 ? parseFloat(text) : parseInt(text);
                 if (isNaN(parsed)) parsed = root.from;
                 parsed = Math.max(root.from, Math.min(root.to, parsed));
                 if (root.value !== parsed) {
@@ -113,7 +124,7 @@ Item {
 
             onActiveFocusChanged: {
                 if (!activeFocus) {
-                    let parsed = parseInt(text);
+                    let parsed = root.stepSize < 1 ? parseFloat(text) : parseInt(text);
                     if (isNaN(parsed)) parsed = root.from;
                     parsed = Math.max(root.from, Math.min(root.to, parsed));
                     if (root.value !== parsed) {
@@ -128,7 +139,7 @@ Item {
 
             Connections {
                 target: root
-                function onValueChanged(): void {
+                function onValueChanged() {
                     if (!inputField.activeFocus) {
                         inputField.text = root.value.toString();
                     }

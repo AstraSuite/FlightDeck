@@ -229,6 +229,142 @@ void FlightDeckWriter::removeHyprOption(const QString& key) {
     }
 }
 
+QVariantList FlightDeckWriter::bezierCurves() const {
+    return m_bezierCurves;
+}
+
+void FlightDeckWriter::setBezierCurves(const QVariantList& curves) {
+    if (m_bezierCurves != curves) {
+        m_bezierCurves = curves;
+        m_isDirty = true;
+        emit bezierCurvesChanged();
+        emit dirtyChanged();
+    }
+}
+
+QVariantList FlightDeckWriter::animationTargets() const {
+    return m_animationTargets;
+}
+
+void FlightDeckWriter::setAnimationTargets(const QVariantList& targets) {
+    if (m_animationTargets != targets) {
+        m_animationTargets = targets;
+        m_isDirty = true;
+        emit animationTargetsChanged();
+        emit dirtyChanged();
+    }
+}
+
+void FlightDeckWriter::addBezierCurve(const QString& name, qreal x1, qreal y1, qreal x2, qreal y2) {
+    if (name.trimmed().isEmpty()) return;
+
+    for (int i = 0; i < m_bezierCurves.size(); ++i) {
+        QVariantMap map = m_bezierCurves[i].toMap();
+        if (map.value(QStringLiteral("name")).toString() == name) {
+            map[QStringLiteral("x1")] = x1;
+            map[QStringLiteral("y1")] = y1;
+            map[QStringLiteral("x2")] = x2;
+            map[QStringLiteral("y2")] = y2;
+            map[QStringLiteral("isReadOnly")] = false;
+            map[QStringLiteral("source")] = QStringLiteral("flightdeck");
+            m_bezierCurves[i] = map;
+            m_isDirty = true;
+            emit bezierCurvesChanged();
+            emit dirtyChanged();
+            return;
+        }
+    }
+
+    m_bezierCurves.append(QVariantMap{
+        { QStringLiteral("name"), name },
+        { QStringLiteral("x1"), x1 },
+        { QStringLiteral("y1"), y1 },
+        { QStringLiteral("x2"), x2 },
+        { QStringLiteral("y2"), y2 },
+        { QStringLiteral("isReadOnly"), false },
+        { QStringLiteral("source"), QStringLiteral("flightdeck") }
+    });
+
+    m_isDirty = true;
+    emit bezierCurvesChanged();
+    emit dirtyChanged();
+}
+
+void FlightDeckWriter::removeBezierCurve(const QString& name) {
+    for (int i = 0; i < m_bezierCurves.size(); ++i) {
+        if (m_bezierCurves[i].toMap().value(QStringLiteral("name")).toString() == name) {
+            m_bezierCurves.removeAt(i);
+            m_isDirty = true;
+            emit bezierCurvesChanged();
+            emit dirtyChanged();
+            return;
+        }
+    }
+}
+
+void FlightDeckWriter::setAnimationTarget(const QString& target, bool enabled, qreal speed, const QString& curve, const QString& style) {
+    if (target.trimmed().isEmpty()) return;
+
+    for (int i = 0; i < m_animationTargets.size(); ++i) {
+        QVariantMap map = m_animationTargets[i].toMap();
+        QString t = map.value(QStringLiteral("target")).toString();
+        if (t.isEmpty()) t = map.value(QStringLiteral("name")).toString();
+        if (t == target) {
+            map[QStringLiteral("target")] = target;
+            map[QStringLiteral("name")] = target;
+            map[QStringLiteral("enabled")] = enabled;
+            map[QStringLiteral("speed")] = speed;
+            map[QStringLiteral("duration")] = speed;
+            map[QStringLiteral("curve")] = curve;
+            map[QStringLiteral("bezier")] = curve;
+            map[QStringLiteral("style")] = style;
+            map[QStringLiteral("isReadOnly")] = false;
+            map[QStringLiteral("source")] = QStringLiteral("flightdeck");
+            m_animationTargets[i] = map;
+            m_isDirty = true;
+            emit animationTargetsChanged();
+            emit dirtyChanged();
+            return;
+        }
+    }
+
+    m_animationTargets.append(QVariantMap{
+        { QStringLiteral("target"), target },
+        { QStringLiteral("name"), target },
+        { QStringLiteral("enabled"), enabled },
+        { QStringLiteral("speed"), speed },
+        { QStringLiteral("duration"), speed },
+        { QStringLiteral("curve"), curve },
+        { QStringLiteral("bezier"), curve },
+        { QStringLiteral("style"), style },
+        { QStringLiteral("isReadOnly"), false },
+        { QStringLiteral("source"), QStringLiteral("flightdeck") }
+    });
+
+    m_isDirty = true;
+    emit animationTargetsChanged();
+    emit dirtyChanged();
+}
+
+void FlightDeckWriter::setAnimationTargetEnabled(const QString& target, bool enabled) {
+    for (int i = 0; i < m_animationTargets.size(); ++i) {
+        QVariantMap map = m_animationTargets[i].toMap();
+        QString t = map.value(QStringLiteral("target")).toString();
+        if (t.isEmpty()) t = map.value(QStringLiteral("name")).toString();
+        if (t == target) {
+            map[QStringLiteral("enabled")] = enabled;
+            map[QStringLiteral("isReadOnly")] = false;
+            map[QStringLiteral("source")] = QStringLiteral("flightdeck");
+            m_animationTargets[i] = map;
+            m_isDirty = true;
+            emit animationTargetsChanged();
+            emit dirtyChanged();
+            return;
+        }
+    }
+}
+
+
 static QString formatWindowRuleLua(const QVariantMap& rule) {
     QString windowRulesStr = QStringLiteral("hl.window_rule({\n");
     if (rule.contains(QStringLiteral("match"))) {
@@ -1227,6 +1363,8 @@ void FlightDeckWriter::loadFromFile() {
     m_autostartCommands.clear();
     m_autostartEntries.clear();
     m_hyprOptions.clear();
+    m_bezierCurves.clear();
+    m_animationTargets.clear();
 
     const QString managedFilePath = flightDeckFilePath();
     const QString canonicalManagedPath = QFileInfo(managedFilePath).canonicalFilePath();
@@ -1359,6 +1497,75 @@ void FlightDeckWriter::loadFromFile() {
                     if (isManaged && args[0].isObject()) {
                         extractOptionsFromJsonTree(args[0].toObject(), QString(), m_hyprOptions);
                     }
+                } else if (call == QLatin1String("curve") && args.size() >= 2) {
+                    QString name = args[0].toString();
+                    QJsonObject curveObj = args[1].toObject();
+                    QJsonArray pointsArr = curveObj.value(QStringLiteral("points")).toArray();
+                    qreal x1 = 0.25, y1 = 0.1, x2 = 0.25, y2 = 1.0;
+                    if (pointsArr.size() >= 2) {
+                        QJsonArray p1 = pointsArr[0].toArray();
+                        QJsonArray p2 = pointsArr[1].toArray();
+                        if (p1.size() >= 2) { x1 = p1[0].toDouble(); y1 = p1[1].toDouble(); }
+                        if (p2.size() >= 2) { x2 = p2[0].toDouble(); y2 = p2[1].toDouble(); }
+                    }
+                    QVariantMap curveMap{
+                        { QStringLiteral("name"), name },
+                        { QStringLiteral("x1"), x1 },
+                        { QStringLiteral("y1"), y1 },
+                        { QStringLiteral("x2"), x2 },
+                        { QStringLiteral("y2"), y2 },
+                        { QStringLiteral("isReadOnly"), !isManaged },
+                        { QStringLiteral("source"), isManaged ? QStringLiteral("flightdeck") : QStringLiteral("system") },
+                        { QStringLiteral("sourcePath"), sourcePath }
+                    };
+                    bool exists = false;
+                    for (int i = 0; i < m_bezierCurves.size(); ++i) {
+                        if (m_bezierCurves[i].toMap().value(QStringLiteral("name")).toString() == name) {
+                            m_bezierCurves[i] = curveMap;
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        m_bezierCurves.append(curveMap);
+                    }
+                } else if (call == QLatin1String("animation") && !args.isEmpty()) {
+                    QJsonObject animObj = args[0].toObject();
+                    QString leaf = animObj.value(QStringLiteral("leaf")).toString();
+                    if (leaf.isEmpty()) leaf = animObj.value(QStringLiteral("name")).toString();
+                    bool enabled = animObj.value(QStringLiteral("enabled")).toBool(true);
+                    qreal speed = animObj.contains(QStringLiteral("speed")) ? animObj.value(QStringLiteral("speed")).toDouble(5.0) : animObj.value(QStringLiteral("duration")).toDouble(5.0);
+                    QString bezier = animObj.value(QStringLiteral("bezier")).toString();
+                    if (bezier.isEmpty()) bezier = animObj.value(QStringLiteral("curve")).toString();
+                    QString style = animObj.value(QStringLiteral("style")).toString();
+
+                    QVariantMap animMap{
+                        { QStringLiteral("target"), leaf },
+                        { QStringLiteral("name"), leaf },
+                        { QStringLiteral("enabled"), enabled },
+                        { QStringLiteral("speed"), speed },
+                        { QStringLiteral("duration"), speed },
+                        { QStringLiteral("curve"), bezier },
+                        { QStringLiteral("bezier"), bezier },
+                        { QStringLiteral("style"), style },
+                        { QStringLiteral("isReadOnly"), !isManaged },
+                        { QStringLiteral("source"), isManaged ? QStringLiteral("flightdeck") : QStringLiteral("system") },
+                        { QStringLiteral("sourcePath"), sourcePath }
+                    };
+                    bool exists = false;
+                    for (int i = 0; i < m_animationTargets.size(); ++i) {
+                        QVariantMap existing = m_animationTargets[i].toMap();
+                        QString t = existing.value(QStringLiteral("target")).toString();
+                        if (t.isEmpty()) t = existing.value(QStringLiteral("name")).toString();
+                        if (t == leaf) {
+                            m_animationTargets[i] = animMap;
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        m_animationTargets.append(animMap);
+                    }
                 }
             }
 
@@ -1457,6 +1664,59 @@ void FlightDeckWriter::loadFromFile() {
             for (const auto& b : parseCustomBindsFromContent(content)) {
                 m_customBinds.append(b);
             }
+
+            QRegularExpression curveRe(QStringLiteral(R"(hl\.curve\(\s*["']([^"']+)["']\s*,\s*\{[^}]*points\s*=\s*\{\s*\{\s*([0-9\.\-]+)\s*,\s*([0-9\.\-]+)\s*\}\s*,\s*\{\s*([0-9\.\-]+)\s*,\s*([0-9\.\-]+)\s*\}\s*\}\s*\}\s*\))"));
+            QRegularExpressionMatchIterator curveIt = curveRe.globalMatch(content);
+            while (curveIt.hasNext()) {
+                QRegularExpressionMatch m = curveIt.next();
+                m_bezierCurves.append(QVariantMap{
+                    { QStringLiteral("name"), m.captured(1) },
+                    { QStringLiteral("x1"), m.captured(2).toDouble() },
+                    { QStringLiteral("y1"), m.captured(3).toDouble() },
+                    { QStringLiteral("x2"), m.captured(4).toDouble() },
+                    { QStringLiteral("y2"), m.captured(5).toDouble() },
+                    { QStringLiteral("isReadOnly"), false },
+                    { QStringLiteral("source"), QStringLiteral("flightdeck") }
+                });
+            }
+
+            QRegularExpression animRe(QStringLiteral(R"(hl\.animation\(\s*\{([^}]+)\}\s*\))"));
+            QRegularExpressionMatchIterator animIt = animRe.globalMatch(content);
+            while (animIt.hasNext()) {
+                QString body = animIt.next().captured(1);
+                QVariantMap anim;
+                anim[QStringLiteral("isReadOnly")] = false;
+                anim[QStringLiteral("source")] = QStringLiteral("flightdeck");
+                QRegularExpression kvRe(QStringLiteral(R"(([a-zA-Z0-9_]+)\s*=\s*([^,\n]+))"));
+                QRegularExpressionMatchIterator kvIt = kvRe.globalMatch(body);
+                while (kvIt.hasNext()) {
+                    QRegularExpressionMatch kv = kvIt.next();
+                    QString k = kv.captured(1).trimmed();
+                    QString v = kv.captured(2).trimmed();
+                    if (v.startsWith(QLatin1Char('"')) && v.endsWith(QLatin1Char('"'))) {
+                        anim[k] = unescapeLuaString(v.mid(1, v.length() - 2));
+                    } else if (v == QStringLiteral("true")) {
+                        anim[k] = true;
+                    } else if (v == QStringLiteral("false")) {
+                        anim[k] = false;
+                    } else {
+                        anim[k] = v.toDouble();
+                    }
+                }
+                QString leaf = anim.value(QStringLiteral("leaf")).toString();
+                if (leaf.isEmpty()) leaf = anim.value(QStringLiteral("name")).toString();
+                if (!leaf.isEmpty()) {
+                    anim[QStringLiteral("target")] = leaf;
+                    anim[QStringLiteral("name")] = leaf;
+                    if (!anim.contains(QStringLiteral("duration")) && anim.contains(QStringLiteral("speed"))) {
+                        anim[QStringLiteral("duration")] = anim.value(QStringLiteral("speed"));
+                    }
+                    if (!anim.contains(QStringLiteral("curve")) && anim.contains(QStringLiteral("bezier"))) {
+                        anim[QStringLiteral("curve")] = anim.value(QStringLiteral("bezier"));
+                    }
+                    m_animationTargets.append(anim);
+                }
+            }
         }
     }
 
@@ -1469,6 +1729,8 @@ void FlightDeckWriter::loadFromFile() {
     emit autostartChanged();
     emit pluginsChanged();
     emit hyprOptionsChanged();
+    emit bezierCurvesChanged();
+    emit animationTargetsChanged();
     emit dirtyChanged();
 }
 
@@ -1725,6 +1987,67 @@ QString FlightDeckWriter::formatLua() const {
         }
     }
 
+    // Bezier Curves (only serialize user-defined curves)
+    if (!m_bezierCurves.isEmpty()) {
+        QString curvesStr;
+        for (const auto& item : m_bezierCurves) {
+            const QVariantMap curve = item.toMap();
+            if (curve.value(QStringLiteral("isReadOnly")).toBool()) {
+                continue;
+            }
+            const QString name = curve.value(QStringLiteral("name")).toString();
+            if (name.isEmpty()) continue;
+            qreal x1 = curve.value(QStringLiteral("x1")).toDouble();
+            qreal y1 = curve.value(QStringLiteral("y1")).toDouble();
+            qreal x2 = curve.value(QStringLiteral("x2")).toDouble();
+            qreal y2 = curve.value(QStringLiteral("y2")).toDouble();
+
+            curvesStr += QStringLiteral("hl.curve(\"%1\", { type = \"bezier\", points = { { %2, %3 }, { %4, %5 } } })\n")
+                .arg(escapeLuaString(name))
+                .arg(x1, 0, 'f', 2)
+                .arg(y1, 0, 'f', 2)
+                .arg(x2, 0, 'f', 2)
+                .arg(y2, 0, 'f', 2);
+        }
+        if (!curvesStr.isEmpty()) {
+            out += QStringLiteral("-- Bezier Curves\n") + curvesStr + QStringLiteral("\n");
+        }
+    }
+
+    // Animation Targets (only serialize user-defined animations)
+    if (!m_animationTargets.isEmpty()) {
+        QString animStr;
+        for (const auto& item : m_animationTargets) {
+            const QVariantMap anim = item.toMap();
+            if (anim.value(QStringLiteral("isReadOnly")).toBool()) {
+                continue;
+            }
+            QString leaf = anim.value(QStringLiteral("target")).toString();
+            if (leaf.isEmpty()) leaf = anim.value(QStringLiteral("name")).toString();
+            if (leaf.isEmpty()) continue;
+
+            bool enabled = anim.value(QStringLiteral("enabled")).toBool();
+            qreal speed = anim.contains(QStringLiteral("speed")) ? anim.value(QStringLiteral("speed")).toDouble() : anim.value(QStringLiteral("duration")).toDouble();
+            QString bezier = anim.contains(QStringLiteral("bezier")) ? anim.value(QStringLiteral("bezier")).toString() : anim.value(QStringLiteral("curve")).toString();
+            QString style = anim.value(QStringLiteral("style")).toString();
+
+            animStr += QStringLiteral("hl.animation({\n");
+            animStr += QStringLiteral("    leaf = \"%1\",\n").arg(escapeLuaString(leaf));
+            animStr += QStringLiteral("    enabled = %1,\n").arg(enabled ? QStringLiteral("true") : QStringLiteral("false"));
+            animStr += QStringLiteral("    speed = %1,\n").arg(speed);
+            if (!bezier.isEmpty()) {
+                animStr += QStringLiteral("    bezier = \"%1\",\n").arg(escapeLuaString(bezier));
+            }
+            if (!style.isEmpty()) {
+                animStr += QStringLiteral("    style = \"%1\",\n").arg(escapeLuaString(style));
+            }
+            animStr += QStringLiteral("})\n");
+        }
+        if (!animStr.isEmpty()) {
+            out += QStringLiteral("-- Animation Targets\n") + animStr + QStringLiteral("\n");
+        }
+    }
+
     return out;
 }
 
@@ -1767,6 +2090,37 @@ bool FlightDeckWriter::save() {
     }
     for (const auto& item : m_customBinds) {
         applyCustomBindOverIPC(item.toMap());
+    }
+
+    for (const auto& item : m_bezierCurves) {
+        const QVariantMap curve = item.toMap();
+        if (!curve.value(QStringLiteral("isReadOnly")).toBool()) {
+            const QString name = curve.value(QStringLiteral("name")).toString();
+            if (name.isEmpty()) continue;
+            qreal x1 = curve.value(QStringLiteral("x1")).toDouble();
+            qreal y1 = curve.value(QStringLiteral("y1")).toDouble();
+            qreal x2 = curve.value(QStringLiteral("x2")).toDouble();
+            qreal y2 = curve.value(QStringLiteral("y2")).toDouble();
+            const QString bezierCmd = QStringLiteral("%1, %2, %3, %4, %5").arg(name).arg(x1, 0, 'f', 3).arg(y1, 0, 'f', 3).arg(x2, 0, 'f', 3).arg(y2, 0, 'f', 3);
+            Hyprland::HyprlandSocket::instance()->keyword(QStringLiteral("bezier"), bezierCmd);
+        }
+    }
+    for (const auto& item : m_animationTargets) {
+        const QVariantMap anim = item.toMap();
+        if (!anim.value(QStringLiteral("isReadOnly")).toBool()) {
+            QString leaf = anim.value(QStringLiteral("target")).toString();
+            if (leaf.isEmpty()) leaf = anim.value(QStringLiteral("name")).toString();
+            if (leaf.isEmpty()) continue;
+            bool enabled = anim.value(QStringLiteral("enabled")).toBool();
+            qreal speed = anim.contains(QStringLiteral("speed")) ? anim.value(QStringLiteral("speed")).toDouble() : anim.value(QStringLiteral("duration")).toDouble();
+            QString bezier = anim.contains(QStringLiteral("bezier")) ? anim.value(QStringLiteral("bezier")).toString() : anim.value(QStringLiteral("curve")).toString();
+            QString style = anim.value(QStringLiteral("style")).toString();
+            QString animCmd = QStringLiteral("%1, %2, %3, %4").arg(leaf).arg(enabled ? 1 : 0).arg(speed).arg(bezier.isEmpty() ? QStringLiteral("default") : bezier);
+            if (!style.isEmpty()) {
+                animCmd += QStringLiteral(", %1").arg(style);
+            }
+            Hyprland::HyprlandSocket::instance()->keyword(QStringLiteral("animation"), animCmd);
+        }
     }
 
     auto socket = Hyprland::HyprlandSocket::instance();

@@ -91,6 +91,7 @@ ConnectedRect {
         }
 
         StyledSpinBox {
+            id: spinBox
             from: root.from
             to: root.to
             stepSize: root.stepSize
@@ -98,6 +99,19 @@ ConnectedRect {
             suffix: root.suffix
             cLayer: 2
             onValueModified: root.moved(value)
+
+            Binding {
+                target: spinBox
+                property: "value"
+                value: root.value
+            }
+
+            Connections {
+                target: root
+                function onValueChanged() {
+                    spinBox.value = root.value;
+                }
+            }
         }
     }
 }

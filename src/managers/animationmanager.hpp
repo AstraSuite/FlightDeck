@@ -35,8 +35,11 @@ public:
     Q_INVOKABLE void addBezierCurve(const QString& name, qreal x1, qreal y1, qreal x2, qreal y2);
     Q_INVOKABLE void removeBezierCurve(const QString& name);
     Q_INVOKABLE void setTargetEnabled(const QString& target, bool enabled);
+    Q_INVOKABLE void updateTarget(const QString& target, bool enabled, qreal speed, const QString& curve, const QString& style = QString());
     Q_INVOKABLE void applyPreset(const QString& presetName);
     Q_INVOKABLE void scanPresets();
+    Q_INVOKABLE void refresh();
+    Q_INVOKABLE bool save();
 
 signals:
     void presetChanged();

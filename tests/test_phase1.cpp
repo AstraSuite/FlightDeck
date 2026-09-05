@@ -168,6 +168,23 @@ int main(int argc, char* argv[]) {
     validator->refresh();
     assert(validator->hasTrueConflict(QStringLiteral("SUPER+XF86AUDIONEXT")));
 
+    // Test 9: Animation & Bezier Curve persistence in FlightDeckWriter
+    writer->addBezierCurve(QStringLiteral("test_curve"), 0.2, 0.0, 0.0, 1.0);
+    writer->setAnimationTarget(QStringLiteral("windows"), true, 6.0, QStringLiteral("test_curve"), QStringLiteral("slide"));
+    QString animLua = writer->formatLua();
+    assert(animLua.contains("hl.curve(\"test_curve\", { type = \"bezier\", points = { { 0.20, 0.00 }, { 0.00, 1.00 } } })"));
+    assert(animLua.contains("hl.animation({\n    leaf = \"windows\",\n    enabled = true,\n    speed = 6,\n    bezier = \"test_curve\",\n    style = \"slide\",\n})"));
+
+    // Toggle enabled off
+    writer->setAnimationTargetEnabled(QStringLiteral("windows"), false);
+    animLua = writer->formatLua();
+    assert(animLua.contains("enabled = false"));
+
+    // Remove bezier curve
+    writer->removeBezierCurve(QStringLiteral("test_curve"));
+    animLua = writer->formatLua();
+    assert(!animLua.contains("hl.curve(\"test_curve\""));
+
     qDebug() << "=== ALL PHASE 1 UNIT TESTS PASSED SUCCESSFULLY! ===";
     return 0;
 }
