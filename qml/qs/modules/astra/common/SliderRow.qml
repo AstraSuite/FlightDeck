@@ -21,12 +21,12 @@ ConnectedRect {
     Connections {
         target: CaelestiaVars
         function onVarsChanged() {
-            if (root.varKey !== "") {
+            if (root.varKey !== "" && !slider.dragging) {
                 root.value = CaelestiaVars.get(root.varKey, CaelestiaVars.getDefault(root.varKey, root.from));
             }
         }
         function onPendingChanged() {
-            if (root.varKey !== "") {
+            if (root.varKey !== "" && !slider.dragging) {
                 root.value = CaelestiaVars.get(root.varKey, CaelestiaVars.getDefault(root.varKey, root.from));
             }
         }
@@ -51,6 +51,19 @@ ConnectedRect {
     signal moved(value: real)
     signal interaction(value: real)
     signal released(value: real)
+
+    function quantize(val) {
+        var clamped = Math.max(root.from, Math.min(root.to, val));
+        if (root.stepSize <= 0) return clamped;
+        var steps = Math.round((clamped - root.from) / root.stepSize);
+        var stepped = root.from + steps * root.stepSize;
+        var stepStr = root.stepSize.toString();
+        var decimals = 0;
+        if (stepStr.indexOf('.') !== -1) {
+            decimals = stepStr.split('.')[1].length;
+        }
+        return parseFloat(stepped.toFixed(Math.min(decimals + 2, 6)));
+    }
 
     onMoved: (v) => {
         if (root.varKey !== "") {
@@ -130,13 +143,17 @@ ConnectedRect {
                 implicitHeight: Tokens.padding.medium * 2
 
                 onWheel: (event) => {
-                    if (event.angleDelta.y > 0)
-                        root.moved(Math.min(root.to, root.value + root.stepSize));
-                    else if (event.angleDelta.y < 0)
-                        root.moved(Math.max(root.from, root.value - root.stepSize));
+                    var delta = event.angleDelta.y > 0 ? root.stepSize : -root.stepSize;
+                    var newVal = root.quantize(root.value + delta);
+                    if (newVal !== root.value) {
+                        root.value = newVal;
+                        root.moved(newVal);
+                        root.released(newVal);
+                    }
                 }
 
                 StyledSlider {
+                    id: slider
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
@@ -147,11 +164,15 @@ ConnectedRect {
                     enabled: root.enabled
                     onInteraction: v => {
                         var realVal = root.from + v * (root.to - root.from);
-                        root.moved(realVal);
+                        realVal = root.quantize(realVal);
+                        root.value = realVal;
                         root.interaction(realVal);
                     }
                     onReleased: v => {
                         var realVal = root.from + v * (root.to - root.from);
+                        realVal = root.quantize(realVal);
+                        root.value = realVal;
+                        root.moved(realVal);
                         root.released(realVal);
                     }
                 }

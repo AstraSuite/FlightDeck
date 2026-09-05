@@ -114,5 +114,8 @@ T.Slider {
             root.released(finalPos);
             dragMovement = 0;
         }
+        onCanceled: {
+            dragMovement = 0;
+        }
     }
 }

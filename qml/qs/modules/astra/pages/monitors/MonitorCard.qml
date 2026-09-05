@@ -19,6 +19,11 @@ ColumnLayout {
     property bool maxLumLocked: true
 
     readonly property var mon: root.cardModelData || ({})
+    onMonChanged: {
+        scaleSlider.value = root.mon.scale || 1.0;
+        if (sdrBrightnessSlider) sdrBrightnessSlider.value = root.mon.sdrbrightness ?? root.mon.sdrBrightness ?? 1.0;
+        if (sdrSaturationSlider) sdrSaturationSlider.value = root.mon.sdrsaturation ?? root.mon.sdrSaturation ?? 1.0;
+    }
     readonly property int index: root.cardIndex
     readonly property string connectorName: mon.name || mon.output || ""
     readonly property string displayName: {
@@ -294,16 +299,17 @@ ColumnLayout {
 
     // 4. Scale Slider
     SliderRow {
+        id: scaleSlider
         label: qsTr("Display Scale")
         subtext: qsTr("UI scaling: %1x (%2%)")
-            .arg(Number(root.mon.scale || 1.0).toFixed(2))
-            .arg(Math.round((root.mon.scale || 1.0) * 100))
+            .arg(Number(value).toFixed(2))
+            .arg(Math.round(value * 100))
         value: root.mon.scale || 1.0
-        valueLabel: Number(root.mon.scale || 1.0).toFixed(2) + "x"
+        valueLabel: Number(value).toFixed(2) + "x"
         from: 0.5
         to: 3.0
         stepSize: 0.05
-        onInteraction: v => {
+        onReleased: v => {
             var rounded = Math.round(v * 20) / 20;
             root.updateMon("scale", rounded);
         }
@@ -554,6 +560,7 @@ ColumnLayout {
                 }
 
                 SliderRow {
+                    id: sdrBrightnessSlider
                     label: qsTr("SDR Brightness Multiplier")
                     subtext: qsTr("SDR brightness boost when operating in HDR mode")
                     value: root.mon.sdrbrightness ?? root.mon.sdrBrightness ?? 1.0
@@ -561,10 +568,11 @@ ColumnLayout {
                     from: 0.1
                     to: 2.0
                     stepSize: 0.05
-                    onInteraction: v => root.updateMon("sdrbrightness", v)
+                    onReleased: v => root.updateMon("sdrbrightness", v)
                 }
 
                 SliderRow {
+                    id: sdrSaturationSlider
                     label: qsTr("SDR Saturation Multiplier")
                     subtext: qsTr("SDR color saturation adjust in HDR mode")
                     value: root.mon.sdrsaturation ?? root.mon.sdrSaturation ?? 1.0
@@ -572,7 +580,7 @@ ColumnLayout {
                     from: 0.1
                     to: 2.0
                     stepSize: 0.05
-                    onInteraction: v => root.updateMon("sdrsaturation", v)
+                    onReleased: v => root.updateMon("sdrsaturation", v)
                 }
 
                 StepperRow {
