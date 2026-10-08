@@ -22,13 +22,17 @@ int main(int argc, char* argv[]) {
         "  │ Plugin dynamic-cursors\n"
         "  └─ enabled: true\n"
         "\n"
+        "→ Repository seam (by misaid):\n"
+        "  │ Plugin seam\n"
+        "  └─ enabled: false\n"
+        "\n"
         "→ Repository https://github.com/outfoxxed/hy3:\n"
         "  │ Plugin hy3\n"
         "  └─ enabled: true\n"
     );
 
     QList<PluginRepoInfo> parsed = HyprpmManager::parseHyprpmList(sampleList);
-    assert(parsed.size() == 3);
+    assert(parsed.size() == 4);
 
     assert(parsed[0].name == "hyprglass");
     assert(parsed[0].author == "hyprnux");
@@ -38,11 +42,15 @@ int main(int argc, char* argv[]) {
     assert(parsed[1].name == "dynamic-cursors");
     assert(parsed[1].author == "virtcode");
     assert(parsed[1].enabled == true);
-    assert(parsed[1].installed == true);
 
-    assert(parsed[2].name == "hy3");
-    assert(parsed[2].enabled == true);
-    assert(parsed[2].installed == true);
+    assert(parsed[2].name == "seam");
+    assert(parsed[2].author == "misaid");
+    assert(parsed[2].enabled == false);
+
+    assert(parsed[3].name == "hy3");
+    // hy3 comes from URL, author might be empty
+    assert(parsed[3].enabled == true);
+    assert(parsed[3].installed == true);
 
     std::cout << "Test 1: parseHyprpmList passed!\n";
 
@@ -61,16 +69,22 @@ int main(int argc, char* argv[]) {
 
     // Test 3: Check dynamic-cursors or hyprglass presence in catalog
     bool foundDynamicCursors = false;
+    bool foundSeam = false;
     for (const auto& pVal : all) {
         QVariantMap p = pVal.toMap();
         if (p["name"].toString() == "dynamic-cursors" || p["id"].toString() == "hypr-dynamic-cursors") {
             foundDynamicCursors = true;
             assert(!p["label"].toString().isEmpty());
             assert(!p["description"].toString().isEmpty());
-            break;
+        }
+        if (p["name"].toString() == "seam" || p["id"].toString() == "hypr-seam") {
+            foundSeam = true;
+            assert(!p["label"].toString().isEmpty());
+            assert(!p["description"].toString().isEmpty());
         }
     }
     assert(foundDynamicCursors);
+    assert(foundSeam);
     std::cout << "Test 3: Catalog integrity passed!\n";
 
     std::cout << "=== ALL HYPRPM MANAGER UNIT TESTS PASSED SUCCESSFULLY! ===\n";

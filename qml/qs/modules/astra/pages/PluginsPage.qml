@@ -52,7 +52,8 @@ StackPage {
                             subtext: modelData.description ?? ""
                             icon: modelData.icon ?? "tune"
                             onClicked: {
-                                if (modelData.id === "hypr-dynamic-cursors" || modelData.name === "dynamic-cursors") {
+                                if (modelData.id === "hypr-dynamic-cursors" || modelData.name === "dynamic-cursors" ||
+                                    modelData.id === "hypr-seam" || modelData.name === "seam") {
                                     root.nState.openSubPage(1);
                                 } else {
                                     root.selectedPluginData = modelData;

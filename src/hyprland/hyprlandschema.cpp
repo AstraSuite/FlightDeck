@@ -319,10 +319,15 @@ void HyprlandSchema::loadSchema() {
     // Direct known fallback plugin files (including embedded QRC paths)
     QStringList directPluginFiles = {
         QStringLiteral(":/schema/plugins/hypr-dynamic-cursors.json"),
+        QStringLiteral(":/schema/plugins/hypr-seam.json"),
         QStringLiteral("/usr/share/flightdeck/schema/plugins/hypr-dynamic-cursors.json"),
+        QStringLiteral("/usr/share/flightdeck/schema/plugins/hypr-seam.json"),
         QStringLiteral("/usr/local/share/flightdeck/schema/plugins/hypr-dynamic-cursors.json"),
+        QStringLiteral("/usr/local/share/flightdeck/schema/plugins/hypr-seam.json"),
         appDir + QStringLiteral("/../data/schema/plugins/hypr-dynamic-cursors.json"),
-        appDir + QStringLiteral("/data/schema/plugins/hypr-dynamic-cursors.json")
+        appDir + QStringLiteral("/../data/schema/plugins/hypr-seam.json"),
+        appDir + QStringLiteral("/data/schema/plugins/hypr-dynamic-cursors.json"),
+        appDir + QStringLiteral("/data/schema/plugins/hypr-seam.json")
     };
     for (const auto& directFile : directPluginFiles) {
         QFile file(directFile);

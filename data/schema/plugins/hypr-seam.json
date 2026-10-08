@@ -1,0 +1,183 @@
+{
+  "id": "hypr-seam",
+  "name": "seam",
+  "namespace": "plugin:seam",
+  "luaNamespace": "seam",
+  "label": "Hypr Seam",
+  "icon": "layout",
+  "description": "Per-corner window rounding with a book-seam adjacency flag. Flattens corners when windows touch neighbors.",
+  "repository": "https://github.com/misaid/hypr-seam",
+  "sections": [
+    {
+      "id": "general",
+      "label": "General Settings",
+      "options": [
+        {
+          "key": "plugin:seam:enabled",
+          "luaKey": "enabled",
+          "label": "Enable Seam",
+          "description": "Global master switch to enable/disable seam behavior.",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "plugin:seam:force_round_risky_surfaces",
+          "luaKey": "force_round_risky_surfaces",
+          "label": "Force Round Risky Surfaces",
+          "description": "Also round subsurfaces that reach a window corner (needed for Firefox/Zen where page content is a full-window subsurface).",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "plugin:seam:round_borders",
+          "luaKey": "round_borders",
+          "label": "Round Borders",
+          "description": "Round the native border to match each window's live corner radii.",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "key": "plugin:seam:round_shadows",
+          "luaKey": "round_shadows",
+          "label": "Round Shadows",
+          "description": "Round the native drop shadow to match each window's live corner radii.",
+          "type": "bool",
+          "default": false
+        }
+      ]
+    },
+    {
+      "id": "rounding",
+      "label": "Base Corner Rounding",
+      "options": [
+        {
+          "key": "plugin:seam:rounding",
+          "luaKey": "rounding",
+          "label": "Base Corner Radius",
+          "description": "Base corner radius in pixels used when per-corner values are unset (-1).",
+          "type": "int",
+          "min": 0,
+          "max": 64,
+          "step": 1,
+          "default": 22
+        },
+        {
+          "key": "plugin:seam:rounding_topleft",
+          "luaKey": "rounding_topleft",
+          "label": "Top Left Radius",
+          "description": "Top-left corner radius. Set to -1 to fall back to base radius.",
+          "type": "int",
+          "min": -1,
+          "max": 64,
+          "step": 1,
+          "default": -1
+        },
+        {
+          "key": "plugin:seam:rounding_topright",
+          "luaKey": "rounding_topright",
+          "label": "Top Right Radius",
+          "description": "Top-right corner radius. Set to -1 to fall back to base radius.",
+          "type": "int",
+          "min": -1,
+          "max": 64,
+          "step": 1,
+          "default": -1
+        },
+        {
+          "key": "plugin:seam:rounding_bottomleft",
+          "luaKey": "rounding_bottomleft",
+          "label": "Bottom Left Radius",
+          "description": "Bottom-left corner radius. Set to -1 to fall back to base radius.",
+          "type": "int",
+          "min": -1,
+          "max": 64,
+          "step": 1,
+          "default": -1
+        },
+        {
+          "key": "plugin:seam:rounding_bottomright",
+          "luaKey": "rounding_bottomright",
+          "label": "Bottom Right Radius",
+          "description": "Bottom-right corner radius. Set to -1 to fall back to base radius.",
+          "type": "int",
+          "min": -1,
+          "max": 64,
+          "step": 1,
+          "default": -1
+        },
+        {
+          "key": "plugin:seam:rounding_power",
+          "luaKey": "rounding_power",
+          "label": "Rounding Power (Squircle)",
+          "description": "Squircle exponent passed to Hyprland's rounded-rect shader. Higher values make corners more rounded/squircle-like.",
+          "type": "float",
+          "min": 0.1,
+          "max": 10.0,
+          "step": 0.1,
+          "default": 2.0
+        }
+      ]
+    },
+    {
+      "id": "seam",
+      "label": "Seam Behavior",
+      "options": [
+        {
+          "key": "plugin:seam:seam_radius",
+          "luaKey": "seam_radius",
+          "label": "Seam Radius",
+          "description": "Radius in pixels applied to corners that are touching a neighbor (flattened).",
+          "type": "int",
+          "min": 0,
+          "max": 16,
+          "step": 1,
+          "default": 2
+        },
+        {
+          "key": "plugin:seam:tolerance",
+          "luaKey": "tolerance",
+          "label": "Touch Tolerance",
+          "description": "Maximum pixel gap to consider two window edges as touching. Set to -1 to derive automatically from gaps_in (max(gaps_in)*3 + 6, min 8.0).",
+          "type": "int",
+          "min": -1,
+          "max": 100,
+          "step": 1,
+          "default": -1
+        }
+      ]
+    },
+    {
+      "id": "animation",
+      "label": "Animation",
+      "options": [
+        {
+          "key": "plugin:seam:animate",
+          "luaKey": "animate",
+          "label": "Animate Transitions",
+          "description": "Ease corner radius changes between states.",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "key": "plugin:seam:animation_speed",
+          "luaKey": "animation_speed",
+          "label": "Animation Speed (ms)",
+          "description": "Transition duration in milliseconds for corner radius animations.",
+          "type": "float",
+          "min": 0.0,
+          "max": 2000.0,
+          "step": 50.0,
+          "default": 300.0
+        },
+        {
+          "key": "plugin:seam:animation_curve",
+          "luaKey": "animation_curve",
+          "label": "Animation Curve",
+          "description": "Bezier curve name used for corner radius animations (e.g., default, easeOutCubic, linear).",
+          "type": "string",
+          "default": "default"
+        }
+      ]
+    }
+  ]
+}

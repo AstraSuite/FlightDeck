@@ -104,7 +104,7 @@ QList<PluginRepoInfo> HyprpmManager::parseHyprpmList(const QString& text) {
     PluginRepoInfo currentRepo;
     bool inRepo = false;
 
-    // Matches: "Repository HyprGlass (by hyprnux):" or "Repository dynamic-cursors (by virtcode):" or "Repository https://github.com/...:"
+    // Matches: "Repository HyprGlass (by hyprnux):" or "Repository dynamic-cursors (by virtcode):" or "Repository seam (by misaid):" or "Repository https://github.com/...:"
     static const QRegularExpression repoRegex(QStringLiteral(R"(Repository\s+([^\s(:]+)(?:\s+\(by\s+([^)]+)\))?)"));
     static const QRegularExpression pluginRegex(QStringLiteral(R"(Plugin\s+([^\s]+))"));
     static const QRegularExpression enabledRegex(QStringLiteral(R"(enabled:\s*(true|false))"), QRegularExpression::CaseInsensitiveOption);
@@ -183,7 +183,8 @@ void HyprpmManager::refresh() {
             if (inst.name.compare(pId, Qt::CaseInsensitive) == 0 ||
                 inst.name.compare(pName, Qt::CaseInsensitive) == 0 ||
                 (!pRepo.isEmpty() && inst.repoUrl.contains(pName, Qt::CaseInsensitive)) ||
-                (pId == QStringLiteral("hypr-dynamic-cursors") && inst.name.compare(QStringLiteral("dynamic-cursors"), Qt::CaseInsensitive) == 0)) {
+                (pId == QStringLiteral("hypr-dynamic-cursors") && inst.name.compare(QStringLiteral("dynamic-cursors"), Qt::CaseInsensitive) == 0) ||
+                (pId == QStringLiteral("hypr-seam") && inst.name.compare(QStringLiteral("seam"), Qt::CaseInsensitive) == 0)) {
                 isInstalled = true;
                 isEnabled = inst.enabled;
                 processedInstalled.insert(inst.name.toLower());
