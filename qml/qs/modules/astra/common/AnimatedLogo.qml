@@ -3,17 +3,25 @@ import QtQuick.Shapes
 import qs.components
 import qs.services
 
+// The FlightDeck logo (assets/icons/flightdeck.svg) drawn in the theme's colours: an
+// instrument panel with a gauge. On load the panel pops in, the dial sweeps on and the
+// needle swings up from rest; clicking revs the needle and lets it settle back.
 Item {
     id: root
 
-    readonly property real designWidth: 1000
-    readonly property real designHeight: 750
-    readonly property real designSize: 1000
+    readonly property real designSize: 512
     property bool skipIntroAnimation: false
 
-    property real outerProgress: 1.0
-    property real glyphProgress: 1.0
-    property real cogRotation: 0.0
+    property real panelProgress: 1.0
+    property real dialProgress: 1.0
+    // Needle angle in degrees, clockwise from pointing right: 180 points left (rest) and
+    // 310 is the logo's reading. Counting up from 180 keeps the swing over the top.
+    readonly property real needleReading: 310
+    property real needleAngle: needleReading
+
+    readonly property real gaugeX: 256
+    readonly property real gaugeY: 300
+    readonly property real baseScale: Math.min(width / designSize, height / designSize)
 
     implicitWidth: 120
     implicitHeight: 120
@@ -23,86 +31,63 @@ Item {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: {
-            if (!introAnim.running && !clickSpinAnim.running) {
-                clickSpinAnim.restart();
-            }
+            if (!introAnim.running && !revAnim.running)
+                revAnim.restart();
         }
     }
 
+    // Click: rev the needle into the red, then let it fall back with a wobble
     SequentialAnimation {
-        id: clickSpinAnim
-        running: false
+        id: revAnim
 
         ParallelAnimation {
             NumberAnimation {
                 target: root
-                property: "cogRotation"
-                from: 0
-                to: 360
-                duration: 700
-                easing.type: Easing.InOutCubic
+                property: "needleAngle"
+                to: 352
+                duration: 260
+                easing.type: Easing.OutCubic
             }
 
-            SequentialAnimation {
-                NumberAnimation {
-                    target: logo
-                    property: "scale"
-                    from: Math.min(root.width / root.designWidth, root.height / root.designHeight)
-                    to: Math.min(root.width / root.designWidth, root.height / root.designHeight) * 1.12
-                    duration: 300
-                    easing.type: Easing.OutCubic
-                }
-
-                NumberAnimation {
-                    target: logo
-                    property: "scale"
-                    from: Math.min(root.width / root.designWidth, root.height / root.designHeight) * 1.12
-                    to: Math.min(root.width / root.designWidth, root.height / root.designHeight)
-                    duration: 400
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 1.2
-                }
-            }
-
-            SequentialAnimation {
-                NumberAnimation {
-                    target: root
-                    property: "glyphProgress"
-                    from: 1.0
-                    to: 0.6
-                    duration: 250
-                    easing.type: Easing.InOutQuad
-                }
-
-                NumberAnimation {
-                    target: root
-                    property: "glyphProgress"
-                    from: 0.6
-                    to: 1.0
-                    duration: 450
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 1.6
-                }
+            NumberAnimation {
+                target: logo
+                property: "scale"
+                to: root.baseScale * 1.08
+                duration: 260
+                easing.type: Easing.OutCubic
             }
         }
 
-        ScriptAction {
-            script: root.cogRotation = 0
+        ParallelAnimation {
+            NumberAnimation {
+                target: root
+                property: "needleAngle"
+                to: root.needleReading
+                duration: 900
+                easing.type: Easing.OutElastic
+                easing.amplitude: 1.0
+                easing.period: 0.4
+            }
+
+            NumberAnimation {
+                target: logo
+                property: "scale"
+                to: root.baseScale
+                duration: 450
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.3
+            }
         }
     }
 
     Item {
         id: logo
 
-        implicitWidth: root.designWidth
-        implicitHeight: root.designHeight
-
+        width: root.designSize
+        height: root.designSize
         anchors.centerIn: parent
-        scale: Math.min(root.width / root.designWidth, root.height / root.designHeight)
+        scale: root.baseScale
         transformOrigin: Item.Center
-
-        rotation: 0.0
-        opacity: 1.0
 
         SequentialAnimation {
             id: introAnim
@@ -110,10 +95,9 @@ Item {
 
             ScriptAction {
                 script: {
-                    root.outerProgress = 0.0;
-                    root.glyphProgress = 0.0;
-                    root.cogRotation = 0.0;
-                    logo.rotation = -45.0;
+                    root.panelProgress = 0.0;
+                    root.dialProgress = 0.0;
+                    root.needleAngle = 180;
                     logo.opacity = 0.0;
                 }
             }
@@ -124,119 +108,135 @@ Item {
                     property: "opacity"
                     from: 0.0
                     to: 1.0
-                    duration: 600
+                    duration: 400
                     easing.type: Easing.InOutQuad
                 }
 
                 NumberAnimation {
-                    target: logo
-                    property: "rotation"
-                    from: -45
-                    to: 0
-                    duration: 900
-                    easing.type: Easing.OutCubic
+                    target: root
+                    property: "panelProgress"
+                    from: 0.0
+                    to: 1.0
+                    duration: 700
+                    easing.type: Easing.OutBack
+                    easing.overshoot: 1.2
                 }
 
                 SequentialAnimation {
-                    PauseAnimation { duration: 100 }
+                    PauseAnimation { duration: 250 }
                     NumberAnimation {
-                        target: logo
-                        property: "scale"
-                        from: Math.min(root.width / root.designWidth, root.height / root.designHeight) * 0.7
-                        to: Math.min(root.width / root.designWidth, root.height / root.designHeight)
-                        duration: 800
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 1.15
+                        target: root
+                        property: "dialProgress"
+                        from: 0.0
+                        to: 1.0
+                        duration: 550
+                        easing.type: Easing.InOutCubic
                     }
                 }
 
-                NumberAnimation {
-                    target: root
-                    property: "outerProgress"
-                    from: 0.0
-                    to: 1.0
-                    duration: 900
-                    easing.type: Easing.OutCubic
-                }
-
                 SequentialAnimation {
-                    PauseAnimation { duration: 300 }
+                    PauseAnimation { duration: 500 }
                     NumberAnimation {
                         target: root
-                        property: "glyphProgress"
-                        from: 0.0
-                        to: 1.0
-                        duration: 650
+                        property: "needleAngle"
+                        from: 180
+                        to: root.needleReading
+                        duration: 900
                         easing.type: Easing.OutBack
-                        easing.overshoot: 1.4
+                        easing.overshoot: 1.6
                     }
                 }
             }
         }
 
+        // Instrument panel: outer frame and inner face
         Shape {
-            id: shieldShape
-            width: root.designWidth
-            height: root.designHeight
-            z: 1
+            anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
+            opacity: Math.min(1.0, root.panelProgress * 1.8)
 
-            opacity: Math.min(1.0, root.outerProgress * 1.8)
-
-            transform: [
-                Scale {
-                    origin.x: 500
-                    origin.y: 375
-                    xScale: 0.6 + 0.4 * root.outerProgress
-                    yScale: 0.6 + 0.4 * root.outerProgress
-                }
-            ]
+            transform: Scale {
+                origin.x: 256
+                origin.y: 258
+                xScale: 0.7 + 0.3 * root.panelProgress
+                yScale: 0.7 + 0.3 * root.panelProgress
+            }
 
             ShapePath {
                 fillColor: Colours.palette.m3primary
-                strokeColor: Colours.palette.m3onSurface
-                strokeWidth: 50
-                capStyle: ShapePath.RoundCap
-                joinStyle: ShapePath.RoundJoin
+                strokeColor: "transparent"
 
                 PathSvg {
-                    path: "M500 25C634.878 25 816.792 83.1182 918.125 119.957C947.7 130.709 963.957 162.588 955.495 194.167L826.153 676.825C818.538 705.241 792.787 725 763.368 725H231.77C202.154 725 176.282 704.981 168.85 676.313L43.7754 193.904C35.6199 162.449 51.875 130.873 81.2607 120.181C182.457 83.3592 364.841 25 500 25Z"
+                    path: "M88 120Q256 84 424 120Q464 128 456 170L420 388Q412 432 368 432H144Q100 432 92 388L56 170Q48 128 88 120Z"
+                }
+            }
+
+            ShapePath {
+                fillColor: Colours.palette.m3primaryContainer
+                strokeColor: "transparent"
+
+                PathSvg {
+                    path: "M112 160Q256 132 400 160Q424 166 420 190L392 368Q386 396 358 396H154Q126 396 120 368L92 190Q88 166 112 160Z"
                 }
             }
         }
 
+        // Dial: the arc sweeps on from the left
         Shape {
-            id: gearGlyph
-            width: root.designWidth
-            height: root.designHeight
-            z: 2
+            anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
-
-            opacity: Math.min(1.0, root.glyphProgress * 1.8)
-
-            transform: [
-                Rotation {
-                    origin.x: 501.244
-                    origin.y: 376
-                    angle: (1.0 - root.glyphProgress) * -120 + root.cogRotation
-                },
-                Scale {
-                    origin.x: 501.244
-                    origin.y: 376
-                    xScale: 0.5 + 0.5 * root.glyphProgress
-                    yScale: 0.5 + 0.5 * root.glyphProgress
-                }
-            ]
+            visible: root.dialProgress > 0
 
             ShapePath {
-                fillColor: Colours.palette.m3tertiary
+                fillColor: "transparent"
+                strokeColor: Colours.palette.m3tertiary
+                strokeWidth: 20
+                capStyle: ShapePath.RoundCap
+
+                PathAngleArc {
+                    centerX: root.gaugeX
+                    centerY: root.gaugeY
+                    radiusX: 100
+                    radiusY: 100
+                    startAngle: 180
+                    sweepAngle: 180 * root.dialProgress
+                }
+            }
+        }
+
+        // Needle and pivot
+        Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            opacity: Math.min(1.0, root.dialProgress * 2.0)
+
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: Colours.palette.m3onPrimaryContainer
+                strokeWidth: 20
+                capStyle: ShapePath.RoundCap
+                startX: root.gaugeX
+                startY: root.gaugeY
+
+                PathLine {
+                    x: root.gaugeX + 80 * Math.cos(root.needleAngle * Math.PI / 180)
+                    y: root.gaugeY + 80 * Math.sin(root.needleAngle * Math.PI / 180)
+                }
+            }
+
+            ShapePath {
+                fillColor: Colours.palette.m3onPrimaryContainer
                 strokeColor: "transparent"
 
-                PathSvg {
-                    path: "M431.592 625L421.642 545.32C416.252 543.245 411.173 540.755 406.405 537.85C401.638 534.945 396.973 531.833 392.413 528.513L318.408 559.638L250 441.363L314.055 392.808C313.64 389.903 313.433 387.101 313.433 384.404V367.596C313.433 364.899 313.64 362.098 314.055 359.193L250 310.638L318.408 192.363L392.413 223.488C396.973 220.168 401.741 217.055 406.716 214.15C411.692 211.245 416.667 208.755 421.642 206.68L431.592 127H568.408L578.358 206.68C583.748 208.755 588.827 211.245 593.595 214.15C598.362 217.055 603.027 220.168 607.587 223.488L681.592 192.363L750 310.638L685.945 359.193C686.36 362.098 686.567 364.899 686.567 367.596V384.404C686.567 387.101 686.153 389.903 685.323 392.808L749.378 441.363L680.97 559.638L607.587 528.513C603.027 531.833 598.259 534.945 593.284 537.85C588.308 540.755 583.333 543.245 578.358 545.32L568.408 625H431.592ZM475.124 575.2H524.254L532.96 509.215C545.813 505.895 557.732 501.019 568.719 494.586C579.706 488.154 589.76 480.373 598.881 471.243L660.448 496.765L684.701 454.435L631.219 413.973C633.292 408.163 634.743 402.041 635.572 395.609C636.401 389.176 636.816 382.64 636.816 376C636.816 369.36 636.401 362.824 635.572 356.391C634.743 349.959 633.292 343.838 631.219 338.028L684.701 297.565L660.448 255.235L598.881 281.38C589.76 271.835 579.706 263.846 568.719 257.414C557.732 250.981 545.813 246.105 532.96 242.785L524.876 176.8H475.746L467.04 242.785C454.187 246.105 442.268 250.981 431.281 257.414C420.294 263.846 410.24 271.628 401.119 280.758L339.552 255.235L315.299 297.565L368.781 337.405C366.708 343.63 365.257 349.855 364.428 356.08C363.599 362.305 363.184 368.945 363.184 376C363.184 382.64 363.599 389.073 364.428 395.298C365.257 401.523 366.708 407.748 368.781 413.973L315.299 454.435L339.552 496.765L401.119 470.62C410.24 480.165 420.294 488.154 431.281 494.586C442.268 501.019 454.187 505.895 467.04 509.215L475.124 575.2ZM501.244 463.15C525.29 463.15 545.813 454.643 562.811 437.628C579.809 420.613 588.308 400.07 588.308 376C588.308 351.93 579.809 331.388 562.811 314.373C545.813 297.358 525.29 288.85 501.244 288.85C476.783 288.85 456.157 297.358 439.366 314.373C422.575 331.388 414.179 351.93 414.179 376C414.179 400.07 422.575 420.613 439.366 437.628C456.157 454.643 476.783 463.15 501.244 463.15Z"
+                PathAngleArc {
+                    centerX: root.gaugeX
+                    centerY: root.gaugeY
+                    radiusX: 22
+                    radiusY: 22
+                    startAngle: 0
+                    sweepAngle: 360
                 }
             }
         }
     }
 }
-
