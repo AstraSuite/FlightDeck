@@ -2,7 +2,6 @@ pragma Singleton
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Caelestia
 import FlightDeck.Config
 import FlightDeck.Theme
 
