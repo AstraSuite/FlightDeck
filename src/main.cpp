@@ -121,6 +121,11 @@ int main(int argc, char* argv[]) {
         QFontDatabase::addApplicationFont(QStringLiteral("assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf"));
     }
 
+    const QString iconFontPath = QStringLiteral(":/assets/fonts/MaterialSymbolsRounded.ttf");
+    if (QFontDatabase::addApplicationFont(iconFontPath) == -1) {
+        QFontDatabase::addApplicationFont(QStringLiteral("assets/fonts/MaterialSymbolsRounded.ttf"));
+    }
+
     // Register Singletons and Types
     const char* themeUris[] = { "FlightDeck.Theme", "Helm.Theme", "Foundry.Theme" };
     for (const char* uri : themeUris) {
