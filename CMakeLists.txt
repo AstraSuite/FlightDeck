@@ -95,11 +95,17 @@ target_link_libraries(flightdeck PRIVATE
 )
 
 # Embed assets resources
+set(RESOURCE_FILES
+    assets/icons/flightdeck.svg
+    assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
+)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/fonts/MaterialSymbolsRounded.ttf")
+    list(APPEND RESOURCE_FILES assets/fonts/MaterialSymbolsRounded.ttf)
+endif()
+
 qt_add_resources(flightdeck "resources"
     PREFIX "/"
-    FILES
-        assets/icons/flightdeck.svg
-        assets/fonts/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
+    FILES ${RESOURCE_FILES}
 )
 
 # Embed schema resources
