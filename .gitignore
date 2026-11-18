@@ -4,3 +4,4 @@ dist/
 *.qsb
 *.user
 .DS_Store
+flake.lock
